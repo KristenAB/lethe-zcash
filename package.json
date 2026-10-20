@@ -1,0 +1,12 @@
+{
+  "name": "zec-unlinkable-swaps",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@10.29.2",
+  "scripts": {
+    "build:rust": "cd packages/wallet-core && cargo build --release && cd ../scan && cargo build --release",
+    "test:rust": "cd packages/wallet-core && cargo test --release",
+    "build": "pnpm build:rust && pnpm -r --if-present build",
+    "test": "pnpm build && pnpm test:rust && pnpm -r --workspace-concurrency=1 --if-present test"
+  }
+}

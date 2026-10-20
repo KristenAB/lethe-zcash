@@ -1,0 +1,5 @@
+packages:
+  - "packages/cli"
+  - "packages/mcp"
+  - "packages/examples"
+  - "packages/dashboard"

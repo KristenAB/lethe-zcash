@@ -1,0 +1,11 @@
+{
+  "_note": "Published incoming viewing key of the zec-shielded-x402 demo merchant (demo-only testnet wallet) and its payment, for scan tests.",
+  "x402": {
+    "uivk": "uivktest1ma9hgu9cmmmkv5f5npk7aktj8tradzqyxzwerez5trhku0xxgx7vsh0azzurz44pfdhmyrzxnur3n282f5t0glhje7kay4fw79njmg64g2wupcznmpfpy0gh6wngu0qw07ry404hnh6rq9vuj264gcjfxucylma4c8cuygxezqx2xwph5x66nckx4095pgvjzuq5rudsmr9dztnyv9f2w74unppttta6cu7fr3tx494zqstn2hv",
+    "txid": "030c3cbf78ce8460553bba4e82c0ba813f039bd3ecf4d7f2e81c59837dc28351",
+    "memo": "x402z-f19a63da20cbc0749ea800b3",
+    "amountZat": 100000,
+    "height": 4521112,
+    "pool": "Ironwood"
+  }
+}
