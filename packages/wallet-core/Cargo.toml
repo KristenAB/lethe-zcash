@@ -1,0 +1,27 @@
+[package]
+name = "zswap-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.97"
+description = "One-time refund addresses for cross-chain swaps from a Zcash wallet: each swap's refundTo gets its own incoming viewing key (zakura-one-time-ivk), so refunds do not link swaps"
+repository = "https://github.com/nickthelegend/zec-unlinkable-swaps"
+
+[lib]
+name = "zswap_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "zswap-keys"
+path = "src/main.rs"
+
+[dependencies]
+zakura-one-time-ivk = "=0.0.1-rc1"
+orchard = { package = "zakura-orchard", version = "=4.0.0-rc2", default-features = false, features = ["backend-halo2", "wallet", "zip32-addresses", "std"] }
+zip32 = "0.2"
+zcash_address = "0.13"
+zcash_protocol = "0.10"
+rand = "0.9"
+sha2 = "0.10"
+hex = "0.4"
+serde_json = "1"
