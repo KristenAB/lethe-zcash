@@ -1,0 +1,222 @@
+{
+  "ranAt": "2026-10-20T16:56:41.553Z",
+  "note": "Demo seed (in .demo, never printed). Mainnet appears only as refundTo in dry quotes (no deposit address, no funds). Testnet refunds are stand-ins: 1Click has no testnet, so a demo provider wallet pays the one-time testnet addresses. Incoming viewing keys published on purpose.",
+  "oneTimeIvk": {
+    "crate": "zakura-one-time-ivk",
+    "version": "0.0.1-rc1",
+    "caution": "draft convention; must not be used to issue live addresses before review"
+  },
+  "account": {
+    "testnetAddress": "utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua",
+    "uivk": "uivktest1ued7d5wxr9lfzmpl7rz6l0xnrt66tc8un33u0r6r8xfa6a8fmg0p4ngk7feelkjwscm3a2kf2mdas5s0dufn7l8038kc6da9fqwmzptm4h0e007p6hqug0ue40cn7tsrwgys626v90"
+  },
+  "quotes": [
+    {
+      "index": 0,
+      "what": "0.1 ZEC → NEAR",
+      "refundTo": "u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr",
+      "testnetAddress": "utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa",
+      "amountOut": "24.421148626121563979648046",
+      "refundFee": "32000",
+      "confidentiality": "public",
+      "correlationId": "6954ec9e-411c-40f5-8cbe-a5d4f751837b",
+      "timestamp": "2026-10-20T16:50:03.320Z",
+      "signature": "ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "10000000",
+        "refundTo": "u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-20T17:50:02.839Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "what": "0.05 ZEC → USDC (NEAR)",
+      "refundTo": "u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q",
+      "testnetAddress": "utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv",
+      "amountOut": "60.452032",
+      "refundFee": "32000",
+      "confidentiality": "public",
+      "correlationId": "5a4e7906-e354-406c-a526-1da65c175272",
+      "timestamp": "2026-10-20T16:50:06.579Z",
+      "signature": "ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+        "amount": "5000000",
+        "refundTo": "u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-20T17:50:06.418Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "what": "0.2 ZEC → NEAR",
+      "refundTo": "u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx",
+      "testnetAddress": "utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc",
+      "amountOut": "48.877605913228493507623616",
+      "refundFee": "32000",
+      "confidentiality": "public",
+      "correlationId": "7efc1f15-be28-431d-a023-dd4737108a2f",
+      "timestamp": "2026-10-20T16:50:09.916Z",
+      "signature": "ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "20000000",
+        "refundTo": "u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-20T17:50:09.756Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    }
+  ],
+  "refundKeys": [
+    {
+      "index": 0,
+      "uivk": "uivktest1ugpaplyxv4ahuxlhrmj5caeg4l5swz5geqp8rkrxzrsxj6e3k732uuzsxt4npdacc2hvx32vs3c5ulfek76phjpmsaksp6ucux607hcgtn3wwjtp2sxnu92s2yq0rjkf3ecssdkx3y"
+    },
+    {
+      "index": 1,
+      "uivk": "uivktest18q7n0d2unv0cfmfdgmspr35ftw9gwtp0ekuv2h5ehg8gzjxt0rtxg70jt3ydtrsn888nek7vy2nkn0l66xdqwhp8ttgjr8wk2p3kcs6rjch05xyx3pf5la62x99d7gqhfg4sctwf5u"
+    },
+    {
+      "index": 2,
+      "uivk": "uivktest1luuz6gfqza4jcdshjm5805h2wtwh0nk4pcm99ank4zshjatkpycylvpg6dxspz48duehfr4t3wsz5w74fu754cyguxahh56566a3ewl305489hshdr8lynssnd59affsvg9quvauau"
+    }
+  ],
+  "provider": "utest1wnm0vfmfzh0pq6vghzwzn4u62r3qpl0r2gxanw56fj9v983n9hmrrxhtqxm20kv9qufy9nx3n5mk6zu0jkvcgyuuv394q9mu2v2x53kw",
+  "txs": {
+    "fund": "c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54",
+    "refund-0": "e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+    "refund-1": "9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+    "refund-2": "4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+    "account": "bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"
+  },
+  "recovery": {
+    "from": 4522708,
+    "blocks": 20,
+    "hits": [
+      {
+        "height": 4522718,
+        "key": "refund-0",
+        "pool": "Ironwood",
+        "txid": "e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+        "value": 30000
+      },
+      {
+        "height": 4522723,
+        "key": "refund-1",
+        "pool": "Ironwood",
+        "txid": "9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+        "value": 31000
+      },
+      {
+        "height": 4522723,
+        "key": "refund-2",
+        "pool": "Ironwood",
+        "txid": "4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+        "value": 32000
+      },
+      {
+        "height": 4522726,
+        "key": "account",
+        "pool": "Ironwood",
+        "txid": "bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c",
+        "value": 25000
+      }
+    ],
+    "expect": [
+      {
+        "label": "refund-0",
+        "txid": "e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+        "foundBy": [
+          "refund-0"
+        ],
+        "value": 30000,
+        "height": 4522718,
+        "ok": true
+      },
+      {
+        "label": "refund-1",
+        "txid": "9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+        "foundBy": [
+          "refund-1"
+        ],
+        "value": 31000,
+        "height": 4522723,
+        "ok": true
+      },
+      {
+        "label": "refund-2",
+        "txid": "4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+        "foundBy": [
+          "refund-2"
+        ],
+        "value": 32000,
+        "height": 4522723,
+        "ok": true
+      },
+      {
+        "label": "account",
+        "txid": "bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c",
+        "foundBy": [
+          "account"
+        ],
+        "value": 25000,
+        "height": 4522726,
+        "ok": true
+      }
+    ]
+  },
+  "refundToDistinct": true
+}
