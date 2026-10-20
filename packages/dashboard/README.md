@@ -6,4 +6,4 @@ The published run: three real 1Click dry quotes with their one-time `refundTo` n
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 ```
 
-Light and dark; 375 px without horizontal scroll.
+One dark app frame on the brand colour; 375 px without horizontal scroll.
