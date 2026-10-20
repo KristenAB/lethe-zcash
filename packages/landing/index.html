@@ -3,52 +3,143 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>zswap</title>
-    <meta name="description" content="Every swap out of Zcash gets a one-time refund address, so the public refundTo fields cannot link a wallet's swaps." />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='11' height='16' rx='2' fill='none' stroke='%231D7A4F' stroke-width='3'/%3E%3Crect x='17' y='8' width='11' height='16' rx='2' fill='none' stroke='%231F5FA8' stroke-width='3'/%3E%3C/svg%3E" />
+    <title>Unlinkable Swaps (zswap)</title>
+    <meta name="description" content="Swaps out of Zcash where every refundTo is a one-time address: three real NEAR Intents 1Click quotes, three different refund addresses, refunds still recoverable by the wallet." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 16C12 16 14 6 28 6M4 16h24M4 16c8 0 10 10 24 10' fill='none' stroke='%232f5d3a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500;600&family=Geist+Mono&display=swap" rel="stylesheet" />
     <style>
-      :root { --paper: #f4f2ee; --sheet: #fffdf9; --ink: #1f1d1a; --muted: #6b665d; --rule: #ddd7cc; --link: #1f5fa8; color-scheme: light; }
-      @media (prefers-color-scheme: dark) { :root { --paper: #141311; --sheet: #1d1b18; --ink: #ece7de; --muted: #a59e92; --rule: #34302a; --link: #8cbcf2; color-scheme: dark; } }
+      :root { --sky: #e7eee3; --sheet: #f6f9f3; --ink: #102018; --muted: #56685c; --rule: #c9d6c6; --meadow: #2f5d3a; --leaf: #6f9e5c; --link: #c2410c; color-scheme: light; }
+      @media (prefers-color-scheme: dark) { :root { --sky: #0e1712; --sheet: #15211a; --ink: #e5eee4; --muted: #9db0a2; --rule: #26382c; --meadow: #8fd19e; --leaf: #6fae7d; --link: #ff8a5c; color-scheme: dark; } }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.65 'Schibsted Grotesk', system-ui, sans-serif; overflow-x: hidden; }
-      a { color: var(--link); } code { font: 0.85em 'DM Mono', monospace; overflow-wrap: anywhere; }
-      .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
-      header { padding: 60px 0 30px; } .brand { font: 500 1rem 'DM Mono', monospace; margin: 0 0 28px; }
-      h1 { font: 800 clamp(2.1rem, 6vw, 3.6rem)/1.03 'Schibsted Grotesk', sans-serif; letter-spacing: -0.03em; margin: 0 0 16px; max-width: 16ch; }
-      h2 { font: 700 1.35rem/1.2 'Schibsted Grotesk', sans-serif; margin: 0 0 10px; }
-      header p, section p { color: var(--muted); max-width: 60ch; }
-      section { padding: 34px 0; border-top: 1px solid var(--rule); }
-      .stamps { display: grid; gap: 8px; max-width: 520px; }
-      .s { border: 2px solid; border-radius: 6px; padding: 6px 10px; font: 0.85rem 'DM Mono', monospace; overflow-wrap: anywhere; }
-      .cta a { display: inline-block; margin: 18px 10px 0 0; font-weight: 600; text-decoration: none; padding: 10px 16px; border-radius: 4px; border: 1px solid var(--ink); color: var(--ink); }
-      footer { padding: 26px 0 40px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--rule); }
+      body { margin: 0; background: var(--sky); color: var(--ink); font: 400 17px/1.65 'Geist', system-ui, sans-serif; overflow-x: hidden; }
+      a { color: var(--meadow); text-underline-offset: 3px; }
+      :focus-visible { outline: 2px solid var(--meadow); outline-offset: 3px; }
+      code { font: 0.82em 'Geist Mono', monospace; overflow-wrap: anywhere; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+      .top { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; font-weight: 600; }
+      .top a { font-weight: 500; text-decoration: none; padding: 8px 14px; border-radius: 999px; background: var(--ink); color: var(--sky); font-size: 0.9rem; }
+
+      header { padding: 56px 0 24px; text-align: center; }
+      h1 { font: 400 clamp(2.8rem, 8vw, 6rem)/0.95 'Instrument Serif', Georgia, serif; letter-spacing: -0.02em; margin: 0 auto 22px; max-width: 13ch; }
+      h1 i { color: var(--meadow); }
+      .lede { color: var(--muted); max-width: 58ch; margin: 0 auto 8px; font-size: 1.08rem; }
+
+      /* Before and after: one shared refundTo vs three one-time ones. Paths draw once. */
+      .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 48px 0 0; }
+      .card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 28px; padding: 26px 24px 22px; }
+      .card h2 { font: 400 1.7rem/1.1 'Instrument Serif', Georgia, serif; margin: 0 0 4px; }
+      .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+      .card svg { width: 100%; height: auto; margin: 18px 0 8px; overflow: visible; }
+      .card svg text { font: 13px 'Geist Mono', monospace; fill: var(--ink); }
+      .card svg .swap { font: 600 13px 'Geist', sans-serif; }
+      .p { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; transition: stroke-dashoffset 1.6s cubic-bezier(.5,0,.2,1); }
+      .bad .p { stroke: var(--link); }
+      .good .p { stroke: var(--meadow); }
+      .paths.go .p { stroke-dashoffset: 0; }
+      .paths.go .p:nth-of-type(2) { transition-delay: .25s; } .paths.go .p:nth-of-type(3) { transition-delay: .5s; }
+      .node { fill: var(--sheet); stroke-width: 2.5; }
+      .bad .node { stroke: var(--link); } .good .node { stroke: var(--meadow); }
+      .tag { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 500; }
+      .bad .tag { background: rgba(194,65,12,.12); color: var(--link); }
+      .good .tag { background: rgba(47,93,58,.12); color: var(--meadow); }
+
+      section { padding: 88px 0; }
+      h2.s { font: 400 clamp(2rem, 4.4vw, 3.2rem)/1 'Instrument Serif', Georgia, serif; margin: 0 0 14px; }
+      .sub { color: var(--muted); max-width: 64ch; margin: 0 0 32px; }
+      .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .q { background: var(--sheet); border: 1px solid var(--rule); border-radius: 22px; padding: 22px; }
+      .q b { display: block; font: 400 1.9rem/1 'Instrument Serif', Georgia, serif; margin-bottom: 6px; }
+      .q dl { margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.9rem; }
+      .q dt { color: var(--muted); }
+      .q dd { margin: 0; text-align: right; }
+
+      .found { border-top: 1px solid var(--rule); }
+      .f { display: grid; grid-template-columns: 140px 1fr 140px 120px; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+      .f .k { color: var(--meadow); font-weight: 600; }
+      ul.limits { padding-left: 20px; color: var(--muted); max-width: 72ch; }
+      ul.limits li { margin-bottom: 8px; }
+      footer { border-top: 1px solid var(--rule); padding: 28px 0 48px; color: var(--muted); font-size: 0.86rem; }
+
+      @media (max-width: 860px) {
+        .paths, .quotes { grid-template-columns: 1fr; }
+        .f { grid-template-columns: 1fr 1fr; } .f a { grid-column: 1; }
+        section { padding: 64px 0; }
+        header { text-align: left; } h1, .lede { margin-left: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) { .p { transition: none; stroke-dashoffset: 0; } }
     </style>
   </head>
   <body>
     <div class="wrap">
+      <div class="top"><span>zswap</span><a href="https://github.com/nickthelegend/zec-unlinkable-swaps">Read the code</a></div>
       <header>
-        <p class="brand">zswap</p>
-        <h1>Three quotes. Three refund addresses. No shared refundTo.</h1>
-        <p>A swap out of Zcash through NEAR Intents names a refund address, and the provider marks the request public. zswap gives every swap a one-time refund address with its own viewing key, so those public fields cannot tie your swaps together.</p>
-        <p class="cta"><a href="https://github.com/nickthelegend/zec-unlinkable-swaps">Source</a><a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">How and limits</a></p>
+        <h1>Three quotes. Three refund addresses. <i>No shared refundTo.</i></h1>
+        <p class="lede">A swap out of Zcash through NEAR Intents 1Click names a refund address, and 1Click marks that request public. A wallet that reuses its address there links every swap it makes. zswap gives each swap a one-time refund key instead.</p>
       </header>
-      <section>
-        <h2>Real quotes, three refund addresses</h2>
-        <div class="stamps">
-          <div class="s" style="color:hsl(152 55% 38%)">refundTo #0 · u1hvfvml947k…tcpljanr</div>
-          <div class="s" style="color:hsl(212 55% 42%)">refundTo #1 · u1rfk04g66dt…c5498p4q</div>
-          <div class="s" style="color:hsl(280 45% 48%)">refundTo #2 · u1mg67mpgl2p…nvn0dmhx</div>
+      <div class="paths" id="paths">
+        <div class="card bad">
+          <h2>Any wallet today</h2>
+          <p>Every swap names the same address.</p>
+          <svg viewBox="0 0 330 170" role="img" aria-label="Three swaps all pointing at one refund address">
+            <text class="swap" x="0" y="34">swap 0</text><text class="swap" x="0" y="89">swap 1</text><text class="swap" x="0" y="144">swap 2</text>
+            <path class="p" d="M58 30 C140 30 150 85 222 85" /><path class="p" d="M58 85 L222 85" /><path class="p" d="M58 140 C140 140 150 85 222 85" />
+            <circle class="node" cx="230" cy="85" r="8" /><text x="246" y="89">u1ces8…</text>
+          </svg>
+          <span class="tag">all three swaps linked</span>
         </div>
-        <p>On Zcash testnet, a payment to each one-time address (<a href="https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"><code>e08cfef2…</code></a>, <a href="https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"><code>9404c711…</code></a>, <a href="https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"><code>4a7dd0ec…</code></a>) was found only by its own key; the wallet's ordinary key saw none of them.</p>
-      </section>
-      <section>
-        <h2>Limits</h2>
-        <p>No real swap yet (mainnet ZEC needed). The one-time key derivation is a draft convention awaiting review. Amounts and timing can still link swaps. Not audited.</p>
-      </section>
-      <footer>MIT · Copyright (c) 2026 Nivesh Gajengi</footer>
+        <div class="card good">
+          <h2>With zswap</h2>
+          <p>Each swap gets its own one-time address.</p>
+          <svg viewBox="0 0 330 170" role="img" aria-label="Three swaps, each pointing at its own refund address">
+            <text class="swap" x="0" y="34">swap 0</text><text class="swap" x="0" y="89">swap 1</text><text class="swap" x="0" y="144">swap 2</text>
+            <path class="p" d="M58 30 C130 30 150 18 222 18" /><path class="p" d="M58 85 L222 85" /><path class="p" d="M58 140 C130 140 150 152 222 152" />
+            <circle class="node" cx="230" cy="18" r="8" /><circle class="node" cx="230" cy="85" r="8" /><circle class="node" cx="230" cy="152" r="8" />
+            <text x="246" y="22">u1hvfv…</text><text x="246" y="89">u1rfk0…</text><text x="246" y="156">u1mg67…</text>
+          </svg>
+          <span class="tag">nothing links them</span>
+        </div>
+      </div>
     </div>
+
+    <main class="wrap">
+      <section aria-labelledby="quotes">
+        <h2 class="s" id="quotes">Three real 1Click quotes</h2>
+        <p class="sub">Dry quotes from the mainnet API on Oct 20, 2026: no deposit address was created and no funds moved. Each response is signed by the provider and marks the request public. A wallet reusing its address would have sent <code>u1ces8sa6vedcm…</code> three times.</p>
+        <div class="quotes">
+          <div class="q"><b>0.1 ZEC → NEAR</b><dl><dt>refundTo</dt><dd><code>u1hvfvml…pljanr</code></dd><dt>quoted out</dt><dd>24.4211</dd><dt>request</dt><dd>public</dd></dl></div>
+          <div class="q"><b>0.05 ZEC → USDC</b><dl><dt>refundTo</dt><dd><code>u1rfk04g…498p4q</code></dd><dt>quoted out</dt><dd>60.4520</dd><dt>request</dt><dd>public</dd></dl></div>
+          <div class="q"><b>0.2 ZEC → NEAR</b><dl><dt>refundTo</dt><dd><code>u1mg67mp…n0dmhx</code></dd><dt>quoted out</dt><dd>48.8776</dd><dt>request</dt><dd>public</dd></dl></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="rec">
+        <h2 class="s" id="rec">Refunds stay recoverable</h2>
+        <p class="sub">1Click has no testnet, so a demo wallet paid each one-time testnet address as a stand-in refund. A compact-block scan with every reserved key found each payment with its own key only; the account's ordinary key saw none of them.</p>
+        <div class="found" role="table" aria-label="Recovery scan results">
+          <div class="f" role="row"><span>refund 0</span><a href="https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"><code>e08cfef2…</code></a><span class="k">found by key 0</span><span>30,000 zat</span></div>
+          <div class="f" role="row"><span>refund 1</span><a href="https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"><code>9404c711…</code></a><span class="k">found by key 1</span><span>31,000 zat</span></div>
+          <div class="f" role="row"><span>refund 2</span><a href="https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"><code>4a7dd0ec…</code></a><span class="k">found by key 2</span><span>32,000 zat</span></div>
+          <div class="f" role="row"><span>account</span><a href="https://testnet.zcashexplorer.app/transactions/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"><code>bb82609a…</code></a><span class="k">found by the account key</span><span>25,000 zat</span></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="limits">
+        <h2 class="s" id="limits">Limits</h2>
+        <ul class="limits">
+          <li>No real swap yet: a live quote creates a mainnet deposit address and needs mainnet ZEC.</li>
+          <li>The key derivation (<code>zakura-one-time-ivk</code> 0.0.1-rc1) is a draft and says it is not for live addresses before review.</li>
+          <li>Amounts, timing and the destination-chain recipient can still link swaps. This removes the refund-address link only.</li>
+          <li>Not audited.</li>
+        </ul>
+      </section>
+    </main>
+    <footer class="wrap">MIT · Copyright (c) 2026 Nivesh Gajengi</footer>
+    <script>
+      const p = document.getElementById('paths');
+      if ('IntersectionObserver' in window) new IntersectionObserver((e, o) => { if (e[0].isIntersecting) { p.classList.add('go'); o.disconnect(); } }, { threshold: 0.3 }).observe(p);
+      else p.classList.add('go');
+    </script>
   </body>
 </html>
