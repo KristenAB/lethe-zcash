@@ -1,5 +1,9 @@
 # dashboard
 
-Swaps + their unlinked refund addresses
+The published run: three real 1Click dry quotes with their one-time `refundTo` next to what a wallet that reuses its address would send (each distinct address its own colour), the quotes as returned (signature, `confidentiality: public`), the testnet recovery scan (which key found which payment), and what is BLOCKED.
 
-_Placeholder — not built yet. Spec: grokbot/specs/zec-unlinkable-swaps.md._
+```sh
+pnpm --filter @zswap/dashboard dev   # http://localhost:5182
+```
+
+Light and dark; 375 px without horizontal scroll.
