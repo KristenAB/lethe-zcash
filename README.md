@@ -1,4 +1,4 @@
-# zec-unlinkable-swaps — zswap
+# Lethe — unlinkable swaps out of Zcash
 
 **Swaps out of Zcash where every `refundTo` is a one-time address.** A cross-chain swap through NEAR
 Intents 1Click names a refund address, and 1Click marks the request **public**. A wallet that reuses

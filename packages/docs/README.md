@@ -1,4 +1,4 @@
-# Threat model, design and limits
+# Lethe — threat model, design and limits
 
 ## The problem
 

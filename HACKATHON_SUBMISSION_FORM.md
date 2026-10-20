@@ -1,4 +1,4 @@
-# zec-unlinkable-swaps — submission draft (portfolio; DO NOT SUBMIT)
+# Lethe — unlinkable swaps out of Zcash — submission draft (portfolio; DO NOT SUBMIT)
 
 Zecathon allows one entry per team: Shielded x402. This would fit Cross-Chain.
 
