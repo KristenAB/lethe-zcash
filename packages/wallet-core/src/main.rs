@@ -35,9 +35,14 @@ fn main() {
             println!("{{\"created\":true}}");
         }
         Some("account") if a.len() == 2 => {
-            let acct = account(&seed(&a[1]), COIN_TESTNET).unwrap_or_else(|e| fail(e));
+            let s = seed(&a[1]);
+            let acct = account(&s, COIN_TESTNET).unwrap_or_else(|e| fail(e));
+            let main = account(&s, COIN_MAINNET).unwrap_or_else(|e| fail(e));
             let net = network(COIN_TESTNET);
-            println!("{}", serde_json::json!({ "address": address(&acct, net).unwrap_or_else(|e| fail(e)), "uivk": uivk(&acct, net).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&acct) }));
+            println!(
+                "{}",
+                serde_json::json!({ "address": address(&acct, net).unwrap_or_else(|e| fail(e)), "uivk": uivk(&acct, net).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&acct), "mainnet_address": address(&main, network(COIN_MAINNET)).unwrap_or_else(|e| fail(e)) })
+            );
         }
         Some("refund") if a.len() == 3 => {
             let s = seed(&a[1]);

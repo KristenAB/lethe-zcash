@@ -57,3 +57,16 @@ describe('recovery scan (testnet compact blocks)', () => {
   });
 });
 
+describe('the published run, re-scanned (testnet)', () => {
+  const d = JSON.parse(readFileSync(resolve(__dirname, '../../../deployments/testnet.json'), 'utf8'));
+  it('each stand-in refund is found only by its own one-time key; the account key finds only its own payment', () => {
+    const keys: Record<string, string> = { account: d.account.uivk };
+    for (const k of d.refundKeys) keys[`refund-${k.index}`] = k.uivk;
+    const r = scanRange(keys, d.recovery.from, Math.max(...d.recovery.hits.map((h: { height: number }) => h.height)));
+    const by = (txid: string) => r.hits.filter((h) => h.txid === txid).map((h) => h.key);
+    for (const k of d.refundKeys) expect(by(d.txs[`refund-${k.index}`])).toEqual([`refund-${k.index}`]);
+    expect(by(d.txs.account)).toEqual(['account']);
+    expect(new Set(d.quotes.map((q: { refundTo: string }) => q.refundTo)).size).toBe(3);
+  });
+});
+
