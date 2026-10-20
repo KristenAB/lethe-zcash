@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>zswap</title>
+    <meta name="description" content="Every swap out of Zcash gets a one-time refund address, so the public refundTo fields cannot link a wallet's swaps." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root { --paper: #f4f2ee; --sheet: #fffdf9; --ink: #1f1d1a; --muted: #6b665d; --rule: #ddd7cc; --link: #1f5fa8; color-scheme: light; }
+      @media (prefers-color-scheme: dark) { :root { --paper: #141311; --sheet: #1d1b18; --ink: #ece7de; --muted: #a59e92; --rule: #34302a; --link: #8cbcf2; color-scheme: dark; } }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.65 'Schibsted Grotesk', system-ui, sans-serif; overflow-x: hidden; }
+      a { color: var(--link); } code { font: 0.85em 'DM Mono', monospace; overflow-wrap: anywhere; }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+      header { padding: 60px 0 30px; } .brand { font: 500 1rem 'DM Mono', monospace; margin: 0 0 28px; }
+      h1 { font: 800 clamp(2.1rem, 6vw, 3.6rem)/1.03 'Schibsted Grotesk', sans-serif; letter-spacing: -0.03em; margin: 0 0 16px; max-width: 16ch; }
+      h2 { font: 700 1.35rem/1.2 'Schibsted Grotesk', sans-serif; margin: 0 0 10px; }
+      header p, section p { color: var(--muted); max-width: 60ch; }
+      section { padding: 34px 0; border-top: 1px solid var(--rule); }
+      .stamps { display: grid; gap: 8px; max-width: 520px; }
+      .s { border: 2px solid; border-radius: 6px; padding: 6px 10px; font: 0.85rem 'DM Mono', monospace; overflow-wrap: anywhere; }
+      .cta a { display: inline-block; margin: 18px 10px 0 0; font-weight: 600; text-decoration: none; padding: 10px 16px; border-radius: 4px; border: 1px solid var(--ink); color: var(--ink); }
+      footer { padding: 26px 0 40px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--rule); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <p class="brand">zswap</p>
+        <h1>Three swaps. Nothing links them.</h1>
+        <p>A swap out of Zcash through NEAR Intents names a refund address, and the provider marks the request public. zswap gives every swap a one-time refund address with its own viewing key, so those public fields cannot tie your swaps together.</p>
+        <p class="cta"><a href="https://github.com/nickthelegend/zec-unlinkable-swaps">Source</a><a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">How and limits</a></p>
+      </header>
+      <section>
+        <h2>Real quotes, three refund addresses</h2>
+        <div class="stamps">
+          <div class="s" style="color:hsl(152 55% 38%)">refundTo #0 · u1hvfvml947k…tcpljanr</div>
+          <div class="s" style="color:hsl(212 55% 42%)">refundTo #1 · u1rfk04g66dt…c5498p4q</div>
+          <div class="s" style="color:hsl(280 45% 48%)">refundTo #2 · u1mg67mpgl2p…nvn0dmhx</div>
+        </div>
+        <p>On Zcash testnet, a payment to each one-time address was found only by its own key; the wallet's ordinary key saw none of them.</p>
+      </section>
+      <section>
+        <h2>Limits</h2>
+        <p>No real swap yet (mainnet ZEC needed). The one-time key derivation is a draft convention awaiting review. Amounts and timing can still link swaps.</p>
+      </section>
+      <footer>MIT · Copyright (c) 2026 Nivesh Gajengi</footer>
+    </div>
+  </body>
+</html>

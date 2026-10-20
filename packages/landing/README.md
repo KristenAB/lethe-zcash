@@ -1,5 +1,3 @@
 # landing
 
-Landing
-
-_Placeholder — not built yet. Spec: grokbot/specs/zec-unlinkable-swaps.md._
+One static page (`index.html`): the problem, the three real one-time refund addresses, limits.

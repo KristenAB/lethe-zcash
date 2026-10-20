@@ -1,25 +1,15 @@
-# zec-unlinkable-swaps — hackathon submission draft (DO NOT SUBMIT until built and verified)
+# zec-unlinkable-swaps — submission draft (portfolio; DO NOT SUBMIT)
 
-## Project name
-zec-unlinkable-swaps
+Zecathon allows one entry per team: Shielded x402. This would fit Cross-Chain.
 
-## Short overview
-_TBD from spec pitch once built._
+**Name:** zswap — unlinkable refund addresses for swaps out of Zcash
+**One line:** Every 1Click swap gets a one-time refund address with its own viewing key, so the public refundTo fields cannot link a wallet's swaps.
+**Repo:** github.com/nickthelegend/zec-unlinkable-swaps (to be created by Nick)
 
-## Detailed description
-Problem / what it does / what is live on testnet (addresses, txids) / honest scope.
+## Proof
+- 3 real 1Click dry quotes with 3 distinct one-time refundTo; 1Click reports the requests as public.
+- Testnet stand-in refunds `e08cfef2…`, `9404c711…`, `4a7dd0ec…` each found only by its own key in a compact-block scan; the account key saw only its own payment `bb82609a…`.
+- 14 tests (TESTING.md).
 
-## Tracks
-_From the event's actual track list only._
-
-## Tech stack
-_Fill from what was actually used._
-
-## Test coverage
-_Real counts from TESTING.md only._
-
-## Links
-Repo: https://github.com/nickthelegend/zec-unlinkable-swaps (not created yet) · demo video: TBD · explorer links: TBD
-
-## Project continuity
-Pre-existing work: planning docs/specs dated Oct 20, 2026 (disclose). Built during the event: _list_.
+## Not done (BLOCKED / limits)
+Real mainnet swap (needs mainnet ZEC + Nick); draft key derivation (crate says no live addresses before review); spending one-time notes not integrated.
