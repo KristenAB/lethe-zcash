@@ -28,6 +28,7 @@ compact-block scan from block 4,522,708 with every reserved key and the account 
 
 | Payment to | Transaction | Found by | Amount |
 |---|---|---|---|
+| (funding of the demo provider wallet) | [`c1bbb267…`](https://testnet.zcashexplorer.app/transactions/c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54) | — | 4 × 70,000 zat |
 | refund-0 | [`e08cfef2…`](https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b) | refund-0 | 30,000 zat |
 | refund-1 | [`9404c711…`](https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100) | refund-1 | 31,000 zat |
 | refund-2 | [`4a7dd0ec…`](https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899) | refund-2 | 32,000 zat |
@@ -54,21 +55,22 @@ Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
 pnpm install
-pnpm test                         # 5 Rust + 6 cli + 3 mcp = 14 tests, live 1Click and testnet (TESTING.md)
-pnpm --filter @zswap/dashboard dev
+pnpm test                         # 8 Rust (+ doc) + 6 cli + 3 mcp = 17, live 1Click and testnet (TESTING.md)
+pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near <near-account>
+ZSWAP_FUNDER_WALLET=<demo wallet> pnpm --filter @zswap/examples run-live
 ```
 
-Demo video: `grokbot/videos/zec-unlinkable-swaps-demo.mp4`.
+Demo video: `zec-unlinkable-swaps-demo.mp4` (shared separately until hosted).
 
 ## Honest limits
 
 - **No real swap: BLOCKED.** A live quote creates a mainnet deposit address and needs mainnet ZEC
-  (Nick's OK). The testnet refunds are stand-ins.
+  (maintainer sign-off). The testnet refunds are stand-ins.
 - `zakura-one-time-ivk` is a draft convention that "must not be used to issue live addresses before
   review"; mainnet addresses here appear only in dry quotes.
 - Spending one-time notes needs wallet integration (not done here). Amounts, timing and the
   destination recipient can still link swaps.
-- Portfolio piece; the Zecathon entry is Shielded x402.
+- Not audited. Portfolio piece; the Zecathon entry is Shielded x402.
 
 MIT — Copyright (c) 2026 Nivesh Gajengi.

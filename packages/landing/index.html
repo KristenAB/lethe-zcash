@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zswap</title>
     <meta name="description" content="Every swap out of Zcash gets a one-time refund address, so the public refundTo fields cannot link a wallet's swaps." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='11' height='16' rx='2' fill='none' stroke='%231D7A4F' stroke-width='3'/%3E%3Crect x='17' y='8' width='11' height='16' rx='2' fill='none' stroke='%231F5FA8' stroke-width='3'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -30,7 +31,7 @@
     <div class="wrap">
       <header>
         <p class="brand">zswap</p>
-        <h1>Three swaps. Nothing links them.</h1>
+        <h1>Three quotes. Three refund addresses. No shared refundTo.</h1>
         <p>A swap out of Zcash through NEAR Intents names a refund address, and the provider marks the request public. zswap gives every swap a one-time refund address with its own viewing key, so those public fields cannot tie your swaps together.</p>
         <p class="cta"><a href="https://github.com/nickthelegend/zec-unlinkable-swaps">Source</a><a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">How and limits</a></p>
       </header>
@@ -41,11 +42,11 @@
           <div class="s" style="color:hsl(212 55% 42%)">refundTo #1 · u1rfk04g66dt…c5498p4q</div>
           <div class="s" style="color:hsl(280 45% 48%)">refundTo #2 · u1mg67mpgl2p…nvn0dmhx</div>
         </div>
-        <p>On Zcash testnet, a payment to each one-time address was found only by its own key; the wallet's ordinary key saw none of them.</p>
+        <p>On Zcash testnet, a payment to each one-time address (<a href="https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"><code>e08cfef2…</code></a>, <a href="https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"><code>9404c711…</code></a>, <a href="https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"><code>4a7dd0ec…</code></a>) was found only by its own key; the wallet's ordinary key saw none of them.</p>
       </section>
       <section>
         <h2>Limits</h2>
-        <p>No real swap yet (mainnet ZEC needed). The one-time key derivation is a draft convention awaiting review. Amounts and timing can still link swaps.</p>
+        <p>No real swap yet (mainnet ZEC needed). The one-time key derivation is a draft convention awaiting review. Amounts and timing can still link swaps. Not audited.</p>
       </section>
       <footer>MIT · Copyright (c) 2026 Nivesh Gajengi</footer>
     </div>

@@ -41,7 +41,7 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 ## Limits
 
 - **No real swap.** A live quote creates a mainnet deposit address and needs mainnet ZEC: BLOCKED
-  on Nick's OK and funds. The testnet refunds are stand-ins: 1Click has no testnet.
+  on maintainer sign-off and funds. The testnet refunds are stand-ins: 1Click has no testnet.
 - **Draft key derivation.** `zakura-one-time-ivk` says it "must not be used to issue live addresses
   before review", and the `0x85` domain byte is not yet reserved with the ZIP editors. Mainnet
   addresses here appear only as `refundTo` in dry quotes.

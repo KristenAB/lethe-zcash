@@ -6,8 +6,12 @@ scan tests read Zcash testnet compact blocks through a real lightwalletd.
 | Package | Runs against | Tests | What |
 |---|---|---|---|
 | wallet-core (Rust) | local | 5 | 64 refund keys: no repeated IVK or address, same spending authority; deterministic, purposes separate; testnet/mainnet differ; another seed unrelated; refund memo round-trip |
+| scan (Rust) | local | 3 + doc | payment rules (from zpay-verify); the crate doc example compiles |
 | cli | 1Click + testnet | 6 | indices give new addresses and are written first; real dry quote echoes the one-time refundTo (`confidentiality: public`); live swap BLOCKED; malformed refundTo refused by 1Click; compact scan finds a real payment and nothing for an unrelated key; the published refunds re-scanned, each found only by its own key |
 | mcp | stdio MCP client + 1Click + testnet | 3 | two safe quotes, two refundTo; recovery scan; Setup required |
-| **Total** | | **14** | 0 skipped |
+| **Total** | | **17 + doc** | 0 skipped |
 
 Live run: `ZSWAP_FUNDER_WALLET=… pnpm --filter @zswap/examples run-live` (README tables).
+
+`fixtures/testnet.json` holds the zec-shielded-x402 demo merchant's published incoming viewing key and
+one of its payments; the scan test uses it as a known payment to find.

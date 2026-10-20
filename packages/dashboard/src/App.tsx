@@ -13,9 +13,9 @@ const r = run as unknown as {
 const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
 const short = (s: string, a = 10, b = 6) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
 /** Each distinct address on the page gets its own colour; the same address always gets the same one. */
-const PALETTE = [152, 212, 280, 28];
 const distinct = [...new Set([...r.quotes.map((q) => q.refundTo), r.account.mainnetAddress])];
-const hue = (s: string) => PALETTE[distinct.indexOf(s) % PALETTE.length];
+/** Evenly spaced hues, one per distinct address, so no two addresses ever share a colour. */
+const hue = (s: string) => Math.round(152 + (distinct.indexOf(s) * 360) / distinct.length) % 360;
 
 function Stamp({ addr, label }: { addr: string; label: string }) {
   return (
@@ -35,7 +35,7 @@ export function App() {
       </header>
       <main>
         <section className="hero">
-          <h1>Three swaps. Three refund addresses. Nothing links them.</h1>
+          <h1>Three quotes. Three refund addresses. No shared refundTo.</h1>
           <p className="lede">
             A swap out of Zcash names a <code>refundTo</code> address, and the provider marks the request <strong>{r.quotes[0]?.confidentiality}</strong>. Here every swap gets a one-time
             address with its own viewing key, so the public requests cannot be tied to each other or to the wallet.
@@ -136,7 +136,7 @@ export function App() {
           <h2 id="lim">What is not done</h2>
           <ul className="limits">
             <li>
-              <strong>A real swap is BLOCKED:</strong> it needs mainnet ZEC and Nick&apos;s OK.
+              <strong>A real swap is BLOCKED:</strong> it needs mainnet ZEC and maintainer sign-off.
             </li>
             <li>
               <code>{r.oneTimeIvk.crate}</code> {r.oneTimeIvk.version}: {r.oneTimeIvk.caution}. Mainnet addresses here appear only in dry quotes.
