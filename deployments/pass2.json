@@ -1,0 +1,290 @@
+{
+  "ranAt": "2026-10-21T19:25:22.419Z",
+  "note": "Pass 2: real 1Click dry quotes (no deposit address, no funds) with a one-time refundTo AND a fresh NEAR implicit recipient per part, the amount split into common denominations and sent on a random schedule. The demo window is minutes; a real one would be hours. Nothing was delivered, so the NEAR accounts do not exist on chain. Demo seed in .demo, never printed.",
+  "derivation": {
+    "near": "SLIP-0010 ed25519, m/44'/397'/1'/i' (implicit account id = hex public key)",
+    "refund": "zakura-one-time-ivk 0.0.1-rc1, Refund purpose, index i"
+  },
+  "plan": {
+    "start": 1792610380977,
+    "tradeOffs": [
+      "split: 3 swaps instead of 1: about 0.0002 ZEC more in deposit fees (ZIP 317 minimum per transaction), each part priced and slipped separately. Each part needs its own refund address, recipient and time, or the parts link each other.",
+      "delay: the last swap leaves up to 6 min later; each one is quoted at its own time, so prices move between them, and the wallet must stay online (or be re-run) to send them",
+      "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+    ],
+    "parts": [
+      {
+        "part": 0,
+        "amountZat": "20000000",
+        "offsetS": 53
+      },
+      {
+        "part": 1,
+        "amountZat": "10000000",
+        "offsetS": 191
+      },
+      {
+        "part": 2,
+        "amountZat": "5000000",
+        "offsetS": 331
+      }
+    ],
+    "plannedReport": {
+      "swaps": 3,
+      "pairs": 3,
+      "links": [
+        {
+          "field": "within 10 min",
+          "strength": "weak",
+          "pairs": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "why": "both requests went out within ten minutes"
+        },
+        {
+          "field": "token",
+          "strength": "weak",
+          "pairs": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "why": "the same destination token"
+        }
+      ],
+      "sharedFields": 0,
+      "strongLinkedPairs": 0,
+      "weakOnlyPairs": 3,
+      "score": 75,
+      "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+      "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+    }
+  },
+  "quotes": [
+    {
+      "part": 0,
+      "index": 5,
+      "refundTo": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "recipient": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "amountOut": "50.701120324635199193775",
+      "confidentiality": "public",
+      "correlationId": "9605f48f-df33-420e-b87b-7e7379a11ff3",
+      "timestamp": "2026-10-21T19:20:34.167Z",
+      "signature": "ed25519:4NAEr3sDzkUFtgXBdQZZ4P9Vy85g1WERP6yUWYdNJGDfjQoJgWHrtj4CZqsj6hPn2fjRQ4ueT3ijd4mAwyXgSTw5",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "20000000",
+        "refundTo": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-21T20:20:34.022Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    },
+    {
+      "part": 1,
+      "index": 6,
+      "refundTo": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "recipient": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "amountOut": "25.323968833443378562464",
+      "confidentiality": "public",
+      "correlationId": "1b0bf779-206f-476e-9ffb-db5f446c5214",
+      "timestamp": "2026-10-21T19:22:52.176Z",
+      "signature": "ed25519:5qWi55WX9Qz9cy6XQv7rexCiGKVScrqNQzJtrvoH69QvgnaGEactr9HdeWQGkjxhAvU3x8MpbNLc4j76GTgxfViD",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "10000000",
+        "refundTo": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-21T20:22:52.030Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    },
+    {
+      "part": 2,
+      "index": 7,
+      "refundTo": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "recipient": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "amountOut": "12.648185384760528041439",
+      "confidentiality": "public",
+      "correlationId": "2e5461b3-287b-4886-8289-a74a195f21c6",
+      "timestamp": "2026-10-21T19:25:12.180Z",
+      "signature": "ed25519:5VFdrS4ye7uKisWoGHZhANbdePEYJa4kwhkge4yTVkV6N6SVBuX7YmMwi6sg8cpTAB5x2fCBYHxpmVfN6bs8F3kb",
+      "quoteRequest": {
+        "dry": true,
+        "depositMode": "SIMPLE",
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 100,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "5000000",
+        "refundTo": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-21T20:25:12.032Z",
+        "confidentiality": "public",
+        "quoteWaitingTimeMs": 3000,
+        "insured": false,
+        "appFees": [
+          {
+            "recipient": "5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd",
+            "fee": 20
+          }
+        ]
+      }
+    }
+  ],
+  "report": {
+    "swaps": 3,
+    "pairs": 3,
+    "links": [
+      {
+        "field": "within 10 min",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "both requests went out within ten minutes"
+      },
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same destination token"
+      }
+    ],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 3,
+    "score": 75,
+    "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  },
+  "seedOnlyRecovery": {
+    "book": "none (seed only)",
+    "gap": 10,
+    "derived": 10,
+    "nearRpc": "mainnet, read-only",
+    "found": [
+      {
+        "index": 5,
+        "recipient": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+        "foundFromSeedAlone": true,
+        "state": {
+          "account_id": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+          "exists": false,
+          "amountYocto": "0",
+          "ft": {
+            "wrap.near": "0",
+            "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "0"
+          }
+        }
+      },
+      {
+        "index": 6,
+        "recipient": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+        "foundFromSeedAlone": true,
+        "state": {
+          "account_id": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+          "exists": false,
+          "amountYocto": "0",
+          "ft": {
+            "wrap.near": "0",
+            "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "0"
+          }
+        }
+      },
+      {
+        "index": 7,
+        "recipient": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+        "foundFromSeedAlone": true,
+        "state": {
+          "account_id": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+          "exists": false,
+          "amountYocto": "0",
+          "ft": {
+            "wrap.near": "0",
+            "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "0"
+          }
+        }
+      }
+    ]
+  }
+}
