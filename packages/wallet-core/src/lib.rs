@@ -97,3 +97,6 @@ pub fn decode_refund_memo(bytes: &[u8; 512]) -> Option<u64> {
 }
 
 pub use zakura_one_time_ivk::Purpose as KeyPurpose;
+
+pub mod near;
+pub use near::{near_credentials_json, near_path, near_recipient};

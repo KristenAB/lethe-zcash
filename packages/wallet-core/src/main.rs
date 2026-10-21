@@ -4,6 +4,8 @@
 //!     zswap-keys account <seed-file>                      the account's own address + UIVK (testnet)
 //!     zswap-keys refund <seed-file> <index>               one-time refund key i: testnet + mainnet address, testnet UIVK
 //!     zswap-keys memo <index>                             the 512-byte refund memo, hex
+//!     zswap-keys near <seed-file> <index>                 per-swap NEAR implicit recipient i: account id, public key, path
+//!     zswap-keys near-key <seed-file> <index> <out-file>  write recipient i's near-cli credentials (0600, new file only); prints only the account id
 use std::{fs, io::Write, os::unix::fs::OpenOptionsExt};
 use zswap_core::*;
 
@@ -18,6 +20,10 @@ fn seed(path: &str) -> Vec<u8> {
         fail(format!("{path} is not a 32-byte seed"));
     }
     s
+}
+
+fn near_index(s: &str) -> u32 {
+    s.parse::<u32>().ok().filter(|i| *i < 0x8000_0000).unwrap_or_else(|| fail("index must be a whole number below 2^31"))
 }
 
 fn main() {
@@ -62,6 +68,24 @@ fn main() {
             let i: u64 = a[1].parse().unwrap_or_else(|_| fail("index must be a whole number"));
             println!("{}", hex::encode(refund_memo(i)));
         }
-        _ => fail("usage: zswap-keys init|account <seed-file> | refund <seed-file> <index> | memo <index>"),
+        Some("near") if a.len() == 3 => {
+            let s = seed(&a[1]);
+            let i = near_index(&a[2]);
+            let (account_id, public_key) = near_recipient(&s, i);
+            println!("{}", serde_json::json!({ "index": i, "path": near_path(i), "account_id": account_id, "public_key": public_key }));
+        }
+        Some("near-key") if a.len() == 4 => {
+            let s = seed(&a[1]);
+            let i = near_index(&a[2]);
+            let mut f = fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .mode(0o600)
+                .open(&a[3])
+                .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
+            f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
+            println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
+        }
+        _ => fail("usage: zswap-keys init|account <seed-file> | refund|near <seed-file> <index> | near-key <seed-file> <index> <out-file> | memo <index>"),
     }
 }
