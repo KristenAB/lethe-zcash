@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { closeSync, existsSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { deriveNearRecipient } from './recipient.js';
 
 export const ONECLICK = process.env.ZSWAP_ONECLICK_URL ?? 'https://1click.chaindefuser.com';
 export const ZEC_ASSET = 'nep141:zec.omft.near';
@@ -64,11 +65,15 @@ export interface Reservation {
   recipient?: string;
   /** set when the caller accepted reusing a recipient of an earlier swap */
   linkedRecipient?: true;
+  /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
+  freshRecipient?: true;
   quote?: unknown;
 }
 export interface ReserveOptions {
   recipient?: string;
   allowLinkedRecipient?: boolean;
+  /** use this swap's own NEAR implicit account (derived from the seed at the same index) as recipient */
+  freshRecipient?: boolean;
 }
 const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteRequest?: { recipient?: string } } | undefined)?.quoteRequest?.recipient;
 export interface Book {
@@ -124,14 +129,17 @@ export class IndexBook {
   }
   /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+    if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
     return this.locked(() => {
       const b = this.read();
-      const earlier = opts.recipient === undefined ? undefined : b.reservations.find((x) => recipientOf(x) === opts.recipient);
-      if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(opts.recipient!, earlier.index);
       const index = b.next;
+      const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : opts.recipient;
+      const earlier = recipient === undefined ? undefined : b.reservations.find((x) => recipientOf(x) === recipient);
+      if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(recipient!, earlier.index);
       const key = deriveRefund(seedFile, index);
       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
-      if (opts.recipient !== undefined) r.recipient = opts.recipient;
+      if (recipient !== undefined) r.recipient = recipient;
+      if (opts.freshRecipient) r.freshRecipient = true;
       if (earlier) r.linkedRecipient = true;
       b.next = index + 1;
       b.reservations.push(r);
@@ -232,3 +240,5 @@ export function recover(seedFile: string, book: IndexBook, from: number, to: num
     upTo = highest + 1 + gap;
   }
 }
+
+export * from './recipient.js';

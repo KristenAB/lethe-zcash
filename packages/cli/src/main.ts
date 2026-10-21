@@ -1,36 +1,50 @@
 #!/usr/bin/env node
 // zswap — swaps out of a Zcash wallet where every swap's refundTo is a one-time address.
 //   zswap init                                   create the wallet seed (.demo/seed by default; ZSWAP_SEED)
-//   zswap quote <zec> <destAsset> <recipient> [--allow-linked-recipient]
+//   zswap quote <zec> <destAsset> [recipient] [--allow-linked-recipient]
 //                                                reserve the next index, dry 1Click quote with refundTo = its address;
+//                                                without a recipient, the swap's own NEAR implicit account (from the seed) receives;
 //                                                refuses (exit 4) a recipient an earlier swap already used
+//   zswap recipients [--gap N] [--lookup]       the per-swap NEAR recipients re-derived from the seed (works without the book);
+//                                                --lookup checks each on NEAR mainnet (read-only) and extends past used ones
+//   zswap sweep-plan [--to <i>=<account>]...    how to move funds out of them without re-linking the swaps (signs nothing)
+//   zswap near-key <index> <out-file>           write recipient i's near-cli credentials (0600, new file); never printed
 //   zswap swap ...                               BLOCKED (mainnet ZEC, live deposit address)
 //   zswap recover <fromHeight> [toHeight] [--gap N]  compact-block scan (testnet) with the account key and refund keys
 //                                                0..(last reserved + N), N default 10: works from the seed alone
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, IndexBook, initSeed, LinkedRecipientError, quote, recover, SetupRequiredError } from './lib.js';
+import { BlockedError, chainTip, IndexBook, initSeed, LinkedRecipientError, quote, recover, recoverRecipients, requireNearDelivered, SetupRequiredError, sweepPlan, writeNearCredentials } from './lib.js';
 
 const seed = process.env.ZSWAP_SEED ?? resolve('.demo/seed');
 const book = new IndexBook(process.env.ZSWAP_BOOK ?? resolve('.demo/index-book.json'));
 const argv = process.argv.slice(2);
-const allowLinkedRecipient = argv.includes('--allow-linked-recipient');
-const gapAt = argv.indexOf('--gap');
-const gap = gapAt === -1 ? undefined : Number(argv[gapAt + 1]);
-const [cmd, ...a] = argv.filter((x, i) => x !== '--allow-linked-recipient' && (gapAt === -1 || (i !== gapAt && i !== gapAt + 1)));
+const flags = new Set<string>();
+const opts: Record<string, string[]> = {};
+const positional: string[] = [];
+for (let i = 0; i < argv.length; i++) {
+  const x = argv[i];
+  if (x === '--allow-linked-recipient' || x === '--lookup') flags.add(x);
+  else if (x === '--gap' || x === '--to') (opts[x] ??= []).push(argv[++i] ?? '');
+  else positional.push(x);
+}
+const allowLinkedRecipient = flags.has('--allow-linked-recipient');
+const gap = opts['--gap'] ? Number(opts['--gap'][0]) : undefined;
+const [cmd, ...a] = positional;
 const out = (x: unknown) => console.log(JSON.stringify(x, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2));
 
 try {
   if (cmd === 'init') out({ created: initSeed(seed) });
   else if (cmd === 'quote') {
-    const [zec, dest, recipient] = a;
-    if (!zec || !dest || !recipient) throw new Error('usage: zswap quote <zec> <destinationAsset> <recipient>');
+    const [zec, dest, given] = a;
+    if (!zec || !dest) throw new Error('usage: zswap quote <zec> <destinationAsset> [recipient]');
     const zat = BigInt(Math.round(Number(zec) * 1e8));
-    const { r } = book.reserve(seed, { recipient, allowLinkedRecipient });
-    const q = await quote({ amountZat: zat, destinationAsset: dest, recipient, refundTo: r.refundTo });
+    if (given === undefined) await requireNearDelivered(dest); // checked before an index is reserved
+    const { r } = book.reserve(seed, given === undefined ? { freshRecipient: true } : { recipient: given, allowLinkedRecipient });
+    const q = await quote({ amountZat: zat, destinationAsset: dest, recipient: r.recipient!, refundTo: r.refundTo });
     book.attach(r.index, q);
     const qq = q as { quote: Record<string, string>; quoteRequest: Record<string, unknown>; correlationId: string };
-    out({ index: r.index, refundTo: r.refundTo, ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amountIn: qq.quote.amountInFormatted, amountOut: qq.quote.amountOutFormatted, refundFee: qq.quote.refundFee, confidentiality: qq.quoteRequest.confidentiality, correlationId: qq.correlationId });
+    out({ index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amountIn: qq.quote.amountInFormatted, amountOut: qq.quote.amountOutFormatted, refundFee: qq.quote.refundFee, confidentiality: qq.quoteRequest.confidentiality, correlationId: qq.correlationId });
   } else if (cmd === 'swap') {
     throw new BlockedError('BLOCKED: a real swap sends mainnet ZEC to a live 1Click deposit address. Needs Nick’s OK and funds; zakura-one-time-ivk also says not to issue live addresses before review.');
   } else if (cmd === 'recover') {
@@ -38,8 +52,23 @@ try {
     const to = a[1] ? Number(a[1]) : chainTip();
     if (!Number.isSafeInteger(from)) throw new Error('usage: zswap recover <fromHeight> [toHeight]');
     out(recover(seed, book, from, to, gap));
-  } else if (cmd === 'book') out(book.read().reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, reservedAt: r.reservedAt })));
-  else throw new Error('usage: zswap init | quote <zec> <destAsset> <recipient> [--allow-linked-recipient] | swap | recover <from> [to] [--gap N] | book');
+  } else if (cmd === 'recipients') out(await recoverRecipients(seed, book, { gap, lookup: flags.has('--lookup') }));
+  else if (cmd === 'sweep-plan') {
+    const destinations: Record<number, string> = {};
+    for (const t of opts['--to'] ?? []) {
+      const m = /^(\d+)=(.+)$/.exec(t);
+      if (!m) throw new Error('usage: --to <index>=<account>');
+      destinations[Number(m[1])] = m[2];
+    }
+    const fresh = book.read().reservations.filter((r) => r.freshRecipient).map((r) => r.index);
+    const { recipients } = await recoverRecipients(seed, book, { gap: 0, lookup: flags.has('--lookup') });
+    out(sweepPlan(recipients.filter((r) => fresh.includes(r.index)), destinations));
+  } else if (cmd === 'near-key') {
+    const [i, file] = a;
+    if (!i || !file) throw new Error('usage: zswap near-key <index> <out-file>');
+    out(writeNearCredentials(seed, Number(i), resolve(file)));
+  } else if (cmd === 'book') out(book.read().reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), reservedAt: r.reservedAt })));
+  else throw new Error('usage: zswap init | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | swap | recover <from> [to] [--gap N] | book');
 } catch (e) {
   console.error((e as Error).message);
   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
