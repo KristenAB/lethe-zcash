@@ -3,10 +3,13 @@
 **Swaps out of Zcash where every `refundTo` is a one-time address.** A cross-chain swap through NEAR
 Intents 1Click names a refund address, and 1Click marks the request **public**. A wallet that reuses
 its address there links all of its swaps. Here swap *i* gets a one-time refund key
-(`zakura-one-time-ivk` 0.0.1-rc1): the account's spending authority with its own `rivk`, so its own
-viewing key and address. Refunds stay spendable by the wallet and unlinkable from the addresses.
+(`zakura-one-time-ivk` 0.0.1-rc1): the account's spending authority (`ak‖nk`) with its own `rivk`,
+so its own viewing key and address. No two refund addresses share a key, so the refund address no
+longer links swaps. It is the only link Lethe cuts: recipient, amount, timing, a shared `ONECLICK_JWT`
+and your IP can still link them (see Honest limits). Spending a one-time note is not integrated here.
 
-Wallet-side only: no contract, no PIR. Recovery is a compact-block scan with the reserved keys.
+Wallet-side only: no contract, no PIR. Recovery is a compact-block scan with the account key and
+refund keys `0..(last reserved + 10)`, so it also works from the seed alone.
 
 ## Live
 
@@ -36,14 +39,22 @@ compact-block scan from block 4,522,708 with every reserved key and the account 
 
 Each refund is found only by its own key; the account's ordinary key sees none of them.
 
+**Restored from the seed alone** (`deployments/recovery-seed-only.json`, Oct 21): the same scan with
+the demo seed and **no index book** derives keys 0..12 (lookahead 10, extended past the highest hit)
+and finds all four payments above, each by its own key.
+
+All three quotes went to **one NEAR recipient**, so the published run is still linkable through the
+recipient; only the `refundTo` link is under test. `zswap quote` and `safe_quote` now refuse a reused
+recipient unless the caller accepts the link (`--allow-linked-recipient`).
+
 ## Packages
 
 | Package | What |
 |---|---|
 | [`packages/wallet-core`](packages/wallet-core) | Rust 1.99: `zswap-core` / `zswap-keys` — one-time refund keys, testnet/mainnet addresses, UIVKs, refund memo |
 | [`packages/scan`](packages/scan) | `zpay-verify` (copy) + `scan-range`: compact-block trial decryption of Orchard and Ironwood actions with many keys |
-| [`packages/cli`](packages/cli) | `zswap init / quote / book / recover / swap (BLOCKED)` |
-| [`packages/mcp`](packages/mcp) | `zswap-mcp`: `safe_quote`, `book`, `recover` |
+| [`packages/cli`](packages/cli) | `zswap init / quote / book / recover / swap (BLOCKED)`; locked index book, recipient-reuse guard, seed-only recovery |
+| [`packages/mcp`](packages/mcp) | `zswap-mcp`: `safe_quote`, `book`, `recover` (bounded range, private call log) |
 | [`packages/examples`](packages/examples) | the resumable live run above |
 | [`packages/dashboard`](packages/dashboard) | one-time vs reused refund addresses, quotes, recovery |
 | [`packages/docs`](packages/docs) | the linkage problem, the fix, evidence, limits |
@@ -55,13 +66,15 @@ Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
 pnpm install
-pnpm test                         # 8 Rust (+ doc) + 6 cli + 3 mcp = 17, live 1Click and testnet (TESTING.md)
+pnpm test                         # 8 Rust (+ doc) + 12 cli + 6 mcp + 3 dashboard = 29, live 1Click and testnet (TESTING.md)
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near <near-account>
 ZSWAP_FUNDER_WALLET=<demo wallet> pnpm --filter @zswap/examples run-live
 ```
 
-Demo video: `zec-unlinkable-swaps-demo.mp4` (shared separately until hosted).
+Demo video: `zec-unlinkable-swaps-demo.mp4` (Oct 20, before the Oct 21 fixes; shared separately until hosted).
+
+Review: [`docs/JUDGE-2026-10-21.md`](docs/JUDGE-2026-10-21.md) (findings, fixes, what is still open).
 
 ## Honest limits
 
@@ -69,8 +82,15 @@ Demo video: `zec-unlinkable-swaps-demo.mp4` (shared separately until hosted).
   (maintainer sign-off). The testnet refunds are stand-ins.
 - `zakura-one-time-ivk` is a draft convention that "must not be used to issue live addresses before
   review"; mainnet addresses here appear only in dry quotes.
-- Spending one-time notes needs wallet integration (not done here). Amounts, timing and the
-  destination recipient can still link swaps.
+- Spending one-time notes needs wallet integration (not done here). The keys keep the account's
+  `ak‖nk`; the crate's own test spends one, this project does not.
+- **Other links remain:** the destination recipient (now refused on reuse unless accepted), amounts,
+  timing, the same `ONECLICK_JWT` on every quote (the provider can link them privately) and the
+  requesting IP.
+- 1Click accepted an Orchard-only unified address as `refundTo` in a dry quote; **no real refund to
+  one has been seen**. That is part of the BLOCKED real swap.
+- The index book (`.demo/index-book.json`, 0600) links every swap by design; it is the wallet's
+  own record. Keep it as private as the seed.
 - Not audited. Portfolio piece; the Zecathon entry is Shielded x402.
 
 MIT — Copyright (c) 2026 Nivesh Gajengi.

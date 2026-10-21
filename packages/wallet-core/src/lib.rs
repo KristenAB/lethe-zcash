@@ -1,11 +1,11 @@
 //! One-time refund addresses for swaps out of a Zcash wallet.
 //!
 //! A swap provider (NEAR Intents 1Click) is told a `refundTo` address. If every swap names the same
-//! wallet address, a future quantum adversary reading those public `refundTo` fields can link all of a
-//! user's swaps. Here swap `i` gets a **one-time key** derived with `zakura-one-time-ivk`: it keeps
-//! the account's spending authority (`ak`, `nk`) and gets its own `rivk`, so it has its own incoming
-//! viewing key and address. The wallet can still spend refunds; nobody can link two refund
-//! addresses to each other or to the account address from the addresses alone.
+//! wallet address, anyone reading those public `refundTo` fields can link all of a user's swaps (and
+//! a future quantum adversary gains more from each link). Here swap `i` gets a **one-time key**
+//! derived with `zakura-one-time-ivk`: it keeps the account's spending authority (`ak`, `nk`) and
+//! gets its own `rivk`, so it has its own incoming viewing key and address. Two refund addresses
+//! cannot be linked to each other or to the account address from the addresses alone.
 //!
 //! `zakura-one-time-ivk` is a draft convention ("must not be used to issue live addresses before
 //! review"). This crate uses it on Zcash testnet only, and for mainnet `refundTo` in *dry* quotes,
@@ -85,8 +85,9 @@ pub fn authority(fvk: &FullViewingKey) -> [u8; 64] {
     fvk.to_bytes()[..64].try_into().expect("64 bytes")
 }
 
-/// The refund memo a wallet puts in its own internal note of the funding transaction, so a restored
-/// wallet knows which refund index to watch.
+/// The refund memo a wallet could put in its own internal note of the funding transaction, so a
+/// restored wallet knows which refund index to watch. Encoder only: nothing in this project writes it
+/// on chain; recovery uses a gap-limit lookahead instead.
 pub fn refund_memo(index: u64) -> [u8; 512] {
     RefundMemo::new(index).encode()
 }

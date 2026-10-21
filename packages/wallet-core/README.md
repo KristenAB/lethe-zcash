@@ -3,14 +3,15 @@
 One-time refund keys with [`zakura-one-time-ivk`](https://crates.io/crates/zakura-one-time-ivk)
 `=0.0.1-rc1` over `zakura-orchard =4.0.0-rc2`. Swap `i` gets `KeyId::new(Refund, i).derive(account)`:
 the account's spending authority (`ak ‖ nk`) with its own `rivk`, so its own incoming viewing key
-and address. The account can spend the refund; nobody can link two refund addresses, or a refund
-address and the account address, from the addresses.
+and address. Because `ak‖nk` is kept, the account can in principle spend a refund (the crate's own
+test does; this project does not). From the addresses alone, two refund addresses, or a refund
+address and the account address, cannot be linked.
 
 ```sh
 zswap-keys init .demo/seed          # 32 random bytes, 0600 (never printed)
 zswap-keys refund .demo/seed 0      # {"index":0,"testnet":{"address","uivk","fvk_id"},"mainnet":{"address","fvk_id"}}
 zswap-keys account .demo/seed       # the ordinary account address + UIVK, for comparison
-zswap-keys memo 0                   # the 512-byte refund memo (FF 'ZSWP' 01 00 index…), hex
+zswap-keys memo 0                   # the 512-byte refund memo (FF 'ZSWP' 01 00 index…), hex; not written on chain by this project
 ```
 
 Addresses are unified addresses with only an Orchard-family receiver (they receive in Ironwood on

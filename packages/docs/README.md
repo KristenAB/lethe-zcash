@@ -20,11 +20,14 @@ FVK_i  = (ak, nk, rivk_i)  →  its own IVK_i  →  its own address_i  →  refu
 ```
 
 - `ak, nk` (spending authority) are the account's, so the wallet can spend a refund.
-- `rivk_i` differs per index, so `IVK_i` and `address_i` are new: nothing links `address_i` to
-  `address_j` or to the account address.
-- The index is written to the wallet's index book **before** the address is shown.
-- A restored wallet finds refunds by scanning with each reserved key: compact blocks from
-  lightwalletd, trial decryption, no server told which keys or transactions it cares about (no PIR).
+- `rivk_i` differs per index, so `IVK_i` and `address_i` are new: the addresses alone do not link
+  `address_i` to `address_j` or to the account address.
+- The index is written to the wallet's index book **before** the address is shown, under an
+  exclusive lock, so two wallet processes never hand out the same index.
+- Recovery scans with the account key and refund keys `0..(last reserved + 10)`, extending past any
+  hit, so a wallet restored from its seed alone (no book) still finds its refunds: compact blocks
+  from lightwalletd, trial decryption, no server told which keys or transactions it cares about (no
+  PIR). The refund memo encoder exists in wallet-core but nothing writes it on chain here.
 
 No contract is involved. An earlier design with a NEAR contract was dropped as wrong.
 
@@ -47,8 +50,17 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
   addresses here appear only as `refundTo` in dry quotes.
 - **Spending refunds** needs wallet integration (zakura's SQLite backend). The crate's own
   protocol-level test spends one-time notes; this project does not spend them on-chain.
-- **Other leaks remain:** amounts, timing, and the destination-chain recipient can still link swaps.
-  The fix removes the refund-address link only.
+- **Other leaks remain.** The fix removes the refund-address link only.
+  - *Recipient*: sent in clear with every quote. `zswap quote` / `safe_quote` refuse a recipient an
+    earlier swap used, unless the caller accepts the link. The published run used one recipient for
+    all three quotes, so it is linkable through it.
+  - *Amount and timing*: exact amounts and deadlines are in every request.
+  - *Provider-side*: the same `ONECLICK_JWT` on every quote, and the requesting IP, let 1Click link
+    swaps privately.
+  - *Local ledgers*: the index book links every swap (it must, for recovery); keep it 0600 like the
+    seed. The MCP call log keeps only time, tool, error flag and index (0600).
+- **Refund delivery is unproven.** 1Click accepted an Orchard-only unified address as `refundTo` in
+  dry quotes; whether its refund leg pays one has not been observed.
 
 ## Do X → see Y
 
@@ -58,3 +70,5 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 | `zswap quote 0.1 nep141:wrap.near <implicit-account>` twice | two real dry quotes, two different `refundTo` |
 | `zswap swap` | `BLOCKED…`, exit 3 |
 | `zswap recover <height>` | which key found which testnet payment |
+| `ZSWAP_BOOK=/nonexistent zswap recover 4522708 4522730` (with the run's seed) | the same four payments, found from the seed alone |
+| `zswap quote …` twice with the same recipient | the second is refused, exit 4, no index used |
