@@ -5,7 +5,8 @@
 //                                                reserve the next index, dry 1Click quote with refundTo = its address;
 //                                                refuses (exit 4) a recipient an earlier swap already used
 //   zswap swap ...                               BLOCKED (mainnet ZEC, live deposit address)
-//   zswap recover <fromHeight> [toHeight]        compact-block scan (testnet) with every reserved refund key + the account key
+//   zswap recover <fromHeight> [toHeight] [--gap N]  compact-block scan (testnet) with the account key and refund keys
+//                                                0..(last reserved + N), N default 10: works from the seed alone
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { resolve } from 'node:path';
 import { BlockedError, chainTip, IndexBook, initSeed, LinkedRecipientError, quote, recover, SetupRequiredError } from './lib.js';
@@ -14,7 +15,9 @@ const seed = process.env.ZSWAP_SEED ?? resolve('.demo/seed');
 const book = new IndexBook(process.env.ZSWAP_BOOK ?? resolve('.demo/index-book.json'));
 const argv = process.argv.slice(2);
 const allowLinkedRecipient = argv.includes('--allow-linked-recipient');
-const [cmd, ...a] = argv.filter((x) => x !== '--allow-linked-recipient');
+const gapAt = argv.indexOf('--gap');
+const gap = gapAt === -1 ? undefined : Number(argv[gapAt + 1]);
+const [cmd, ...a] = argv.filter((x, i) => x !== '--allow-linked-recipient' && (gapAt === -1 || (i !== gapAt && i !== gapAt + 1)));
 const out = (x: unknown) => console.log(JSON.stringify(x, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2));
 
 try {
@@ -34,9 +37,9 @@ try {
     const from = Number(a[0]);
     const to = a[1] ? Number(a[1]) : chainTip();
     if (!Number.isSafeInteger(from)) throw new Error('usage: zswap recover <fromHeight> [toHeight]');
-    out(recover(seed, book, from, to));
+    out(recover(seed, book, from, to, gap));
   } else if (cmd === 'book') out(book.read().reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, reservedAt: r.reservedAt })));
-  else throw new Error('usage: zswap init | quote <zec> <destAsset> <recipient> [--allow-linked-recipient] | swap | recover <from> [to] | book');
+  else throw new Error('usage: zswap init | quote <zec> <destAsset> <recipient> [--allow-linked-recipient] | swap | recover <from> [to] [--gap N] | book');
 } catch (e) {
   console.error((e as Error).message);
   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);

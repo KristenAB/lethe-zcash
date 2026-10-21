@@ -44,9 +44,9 @@ describe('zswap-mcp', () => {
     expect(book).toHaveLength(2);
   });
 
-  it('recover scans testnet with every reserved key (none of them has been paid in this fresh wallet)', async () => {
-    const r = JSON.parse((await call(client, 'recover', { from_height: chainTip() - 5 })).text);
-    expect(r.keys).toEqual(['account', 'refund-0', 'refund-1']);
+  it('recover scans testnet with every reserved key plus the lookahead (none of them has been paid in this fresh wallet)', async () => {
+    const r = JSON.parse((await call(client, 'recover', { from_height: chainTip() - 5, gap: 2 })).text);
+    expect(r.keys).toEqual(['account', 'refund-0', 'refund-1', 'refund-2', 'refund-3']);
     expect(r.blocks).toBeGreaterThanOrEqual(5);
     expect(r.hits).toEqual([]);
   });

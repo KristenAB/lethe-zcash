@@ -211,10 +211,24 @@ export function chainTip(): number {
   return Number(execFileSync(scanBin(), ['tip'], { env }).toString().trim());
 }
 
-/** Recovery: every reserved index's testnet key plus the account key, scanned over a range. */
-export function recover(seedFile: string, book: IndexBook, from: number, to: number) {
-  const keys: Record<string, string> = { account: accountKey(seedFile).uivk };
-  for (const r of book.read().reservations) keys[`refund-${r.index}`] = deriveRefund(seedFile, r.index).testnet.uivk;
-  const out = scanRange(keys, from, to);
-  return { ...out, keys: Object.keys(keys) };
+/** How many unused indices past the last known one a recovery also scans (like a BIP 44 gap limit). */
+export const RECOVERY_GAP = 10;
+
+/**
+ * Recovery: the account key plus one-time keys 0..n, scanned over a range. n covers every reserved
+ * index plus `gap` more, so a wallet restored from its seed alone (no index book) still finds refunds
+ * to the first indices; a hit inside the lookahead extends it and the range is scanned again.
+ */
+export function recover(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
+  if (!Number.isSafeInteger(gap) || gap < 0) throw new Error('gap must be a whole number');
+  const derived: Record<string, string> = { account: accountKey(seedFile).uivk };
+  let upTo = book.read().next + gap;
+  for (;;) {
+    for (let i = 0; i < upTo; i++) derived[`refund-${i}`] ??= deriveRefund(seedFile, i).testnet.uivk;
+    const keys = Object.fromEntries(Object.entries(derived).filter(([l]) => l === 'account' || Number(l.slice('refund-'.length)) < upTo));
+    const out = scanRange(keys, from, to);
+    const highest = Math.max(-1, ...out.hits.filter((h) => h.key.startsWith('refund-')).map((h) => Number(h.key.slice('refund-'.length))));
+    if (highest + 1 + gap <= upTo) return { ...out, keys: Object.keys(keys), gap };
+    upTo = highest + 1 + gap;
+  }
 }

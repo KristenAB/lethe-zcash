@@ -52,8 +52,8 @@ export function createServer(): McpServer {
 
   server.registerTool(
     'recover',
-    { title: 'Find refunds (testnet)', description: 'Scans testnet compact blocks from `from_height` with every reserved one-time key and the account key; reports which key found which payment. Read-only.', inputSchema: { from_height: z.number().int().positive() }, annotations: { readOnlyHint: true } },
-    (a) => run('recover', a, () => recover(need('ZSWAP_SEED'), book(), a.from_height, chainTip())),
+    { title: 'Find refunds (testnet)', description: 'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, so it also works for a wallet restored from its seed without an index book; reports which key found which payment. Read-only.', inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional() }, annotations: { readOnlyHint: true } },
+    (a) => run('recover', a, () => recover(need('ZSWAP_SEED'), book(), a.from_height, chainTip(), a.gap)),
   );
   return server;
 }
