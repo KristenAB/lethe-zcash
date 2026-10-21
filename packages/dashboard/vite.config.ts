@@ -6,7 +6,8 @@ const ROOT = resolve(__dirname, '../..');
 
 export default defineConfig({
   plugins: [react()],
-  resolve: { alias: { '@deployments': resolve(ROOT, 'deployments') } },
+  // The published run is fetched at runtime (/testnet.json, /recovery-seed-only.json): public data.
+  publicDir: resolve(ROOT, 'deployments'),
   server: {
     port: 5182,
     strictPort: true,

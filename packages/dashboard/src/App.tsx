@@ -1,9 +1,21 @@
-import type { CSSProperties, ReactNode } from 'react';
-import run from '@deployments/testnet.json';
+import { useEffect, useState } from 'react';
 
-type Quote = { index: number; what: string; refundTo: string; testnetAddress: string; amountOut: string; refundFee: string; confidentiality: string; correlationId: string; timestamp: string; signature: string };
+/** The published run (deployments/testnet.json) and the seed-only recovery (deployments/recovery-seed-only.json). */
+type Quote = {
+  index: number;
+  what: string;
+  refundTo: string;
+  testnetAddress: string;
+  amountOut: string;
+  refundFee: string;
+  confidentiality: string;
+  correlationId: string;
+  timestamp: string;
+  signature: string;
+  quoteRequest: { amount: string; recipient: string; deadline: string };
+};
 type Expect = { label: string; txid: string; foundBy: string[]; value: number | null; height: number | null; ok: boolean };
-const r = run as unknown as {
+type Run = {
   ranAt: string;
   oneTimeIvk: { crate: string; version: string; caution: string };
   account: { testnetAddress: string; mainnetAddress: string };
@@ -11,339 +23,323 @@ const r = run as unknown as {
   recovery: { from: number; blocks: number; expect: Expect[] };
   txs: Record<string, string>;
 };
+type SeedOnly = { ranAt: string; from: number; to: number; blocks: number; gap: number; keysScanned: string[]; hits: { key: string; txid: string; height: number; value: number }[] };
+type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null };
+
 const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
 const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
-const short = (s: string, a = 10, b = 6) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
-/** Each distinct address on the page gets its own colour; the same address always gets the same one. */
-const distinct = [...new Set([...r.quotes.map((q) => q.refundTo), r.account.mainnetAddress])];
-/** Evenly spaced hues, one per distinct address, so no two addresses ever share a colour. */
-const hue = (s: string) => Math.round(152 + (distinct.indexOf(s) * 360) / distinct.length) % 360;
-/** The hue of the address a recovery label belongs to: refund-i is quote i's refundTo, account is the account address. */
-const labelHue = (label: string) => {
-  if (label === 'account') return hue(r.account.mainnetAddress);
-  const q = r.quotes.find((x) => `refund-${x.index}` === label);
-  return q ? hue(q.refundTo) : undefined;
-};
-const keyName = (label: string) => (label === 'account' ? 'account key' : label.startsWith('refund-') ? `key ${label.slice('refund-'.length)}` : label);
-const hueStyle = (h: number | undefined) => (h === undefined ? undefined : ({ ['--h' as string]: h } as CSSProperties));
-const fmtDate = (s: string | undefined) => {
-  const d = s ? new Date(s) : null;
-  return d && !Number.isNaN(d.getTime()) ? d.toLocaleString() : 'unknown time';
-};
+const short = (s: string, a = 12, b = 8) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
+const num = (n: number, d = 4) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d }).format(n);
+const day = (s: string) => new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const keyName = (label: string) => (label === 'account' ? 'the account key' : `key #${label.slice('refund-'.length)}`);
 
-const quotes = r.quotes;
-const expect = r.recovery.expect;
-const distinctRefundTo = new Set(quotes.map((q) => q.refundTo)).size;
-const foundOk = expect.filter((e) => e.ok).length;
-const confidentiality = quotes[0]?.confidentiality;
-
-/** A number in the balance style: whole part bright, separator and decimals faded. */
-function Amount({ value, digits = 4 }: { value: number; digits?: number }) {
-  const parts = new Intl.NumberFormat(undefined, { maximumFractionDigits: digits }).formatToParts(value);
-  const at = parts.findIndex((p) => p.type === 'decimal');
-  const whole = (at === -1 ? parts : parts.slice(0, at)).map((p) => p.value).join('');
-  const frac = at === -1 ? '' : parts.slice(at).map((p) => p.value).join('');
-  return (
-    <span className="amount">
-      {whole}
-      {frac && <span className="fade">{frac}</span>}
-    </span>
-  );
+async function getJson<T>(path: string): Promise<T> {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+  return (await res.json()) as T;
 }
 
-function LogoMark({ size = 28 }: { size?: number }) {
+function useRun(): Load {
+  const [load, setLoad] = useState<Load>({ state: 'loading' });
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const run = await getJson<Run>('/testnet.json');
+        if (!Array.isArray(run.quotes)) throw new Error('/testnet.json has no quotes array');
+        const seedOnly = await getJson<SeedOnly>('/recovery-seed-only.json').catch(() => null);
+        if (live) setLoad({ state: 'ready', run, seedOnly });
+      } catch (e) {
+        if (live) setLoad({ state: 'error', message: (e as Error).message });
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
+  return load;
+}
+
+function Mark() {
   return (
-    <svg className="mark" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="10" fill="#5ee0d6" />
-      <g fill="none" stroke="#0b3440" strokeWidth="2.6" strokeLinecap="round">
-        <path d="M6 16h20" />
-        <path d="M6 16c7 0 9-7 20-7.5" />
-        <path d="M6 16c7 0 9 7 20 7.5" />
-      </g>
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="16" fill="#e2f4f6" />
+      <path d="M7 18c3-3 6 3 9 0s6 3 9 0" fill="none" stroke="#0b3440" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="16" cy="11" r="2.4" fill="#5ee0d6" />
     </svg>
   );
 }
 
-function Stamp({ addr, label, h = hue(addr) }: { addr: string; label: string; h?: number }) {
-  return (
-    <div className="chip" style={hueStyle(h)}>
-      <span className="chip-dot" aria-hidden="true" />
-      <span className="chip-body">
-        <span className="chip-label">{label}</span>
-        <code title={addr}>{short(addr, 12, 8)}</code>
-      </span>
-    </div>
-  );
-}
-
-function Empty({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="empty" role="status">
-      <strong>{title}</strong>
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function QuoteCard({ q }: { q: Quote }) {
+function Swap({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => void }) {
+  const q = run.quotes[at];
   const [from, to] = q.what.split(' → ');
-  const out = Number(q.amountOut);
+  const unitIn = from.split(' ')[1] ?? 'ZEC';
+  const refund = run.recovery.expect.find((e) => e.label === `refund-${q.index}`);
   return (
-    <article className="quote" aria-labelledby={`quote-${q.index}`}>
-      <div className="quote-head">
-        <h3 id={`quote-${q.index}`}>Quote #{q.index}</h3>
-        <span className="pill pill-public">request: {q.confidentiality}</span>
-      </div>
-      <div className="legs">
-        <div className="leg">
-          <span className="leg-label">From</span>
-          <span className="leg-from">{to === undefined ? q.what : from}</span>
-        </div>
-        <span className="leg-swap" aria-hidden="true">
-          <svg viewBox="0 0 16 16" width="14" height="14">
-            <path d="M8 2v12M3.5 9.5 8 14l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <div className="leg leg-to">
-          <span className="leg-label">Quoted out{to !== undefined && <> · to {to}</>}</span>
-          {Number.isFinite(out) ? <Amount value={out} /> : <span className="amount">{q.amountOut}</span>}
+    <div className="widget" role="region" aria-label="Swap">
+      <div className="w-head">
+        <span>Dry quote · {day(q.timestamp)}</span>
+        <div className="steps" role="group" aria-label="Choose a swap">
+          {run.quotes.map((x, i) => (
+            <button key={x.index} type="button" aria-pressed={i === at} aria-label={`Swap ${i + 1}: ${x.what}`} onClick={() => setAt(i)}>
+              {i + 1}
+            </button>
+          ))}
         </div>
       </div>
-      <Stamp addr={q.refundTo} label={`refundTo #${q.index}`} />
+      <div className="leg">
+        <span className="leg-label">You send</span>
+        <div className="leg-amt">
+          <strong>{num(Number(q.quoteRequest.amount) / 1e8, 8)}</strong>
+          <span>{unitIn}</span>
+        </div>
+      </div>
+      <div className="leg">
+        <span className="leg-label">Quoted by 1Click</span>
+        <div className="leg-amt">
+          <strong>{num(Number(q.amountOut))}</strong>
+          <span>{to}</span>
+        </div>
+      </div>
+      <div className="refund" aria-live="polite">
+        <div className="refund-label">
+          <span>refundTo · used once</span>
+          <b>key #{q.index}</b>
+        </div>
+        <code key={q.refundTo} className="addr arrive">
+          {q.refundTo}
+        </code>
+      </div>
       <dl className="facts">
         <div>
-          <dt>Refund fee</dt>
-          <dd>{Number(q.refundFee).toLocaleString()} zat</dd>
+          <dt>Testnet twin</dt>
+          <dd>
+            <code title={q.testnetAddress}>{short(q.testnetAddress, 14, 6)}</code>
+          </dd>
         </div>
         <div>
-          <dt>Provider signature</dt>
+          <dt>Stand-in refund</dt>
           <dd>
-            <code title={q.signature}>{short(q.signature, 14, 6)}</code>
+            {refund && refund.value !== null ? (
+              <>
+                {num(refund.value, 0)} zat ·{' '}
+                <a href={EXPLORER + refund.txid} target="_blank" rel="noreferrer">
+                  <code>{short(refund.txid, 8, 4)}</code>
+                </a>
+              </>
+            ) : (
+              'not found'
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Found by</dt>
+          <dd className={refund?.ok ? 'cut' : 'links'}>{refund ? refund.foundBy.map(keyName).join(', ') || 'no key' : '—'}{refund?.ok ? ' only' : ''}</dd>
+        </div>
+        <div>
+          <dt>Request</dt>
+          <dd>{q.confidentiality}</dd>
+        </div>
+        <div>
+          <dt>Signature</dt>
+          <dd>
+            <code title={q.signature}>{short(q.signature, 14, 4)}</code>
           </dd>
         </div>
       </dl>
-    </article>
+    </div>
+  );
+}
+
+function River({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => void }) {
+  return (
+    <ol className="river" aria-label="Refund addresses, one per swap">
+      {run.quotes.map((q, i) => (
+        <li key={q.index} className={i === at ? 'now' : 'gone'}>
+          <button type="button" onClick={() => setAt(i)} aria-label={`Show swap ${i + 1}`}>
+            <span className="n">#{q.index}</span>
+            <code title={q.refundTo}>{q.refundTo}</code>
+            <span className="st">{i === at ? 'shown' : 'used once'}</span>
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Audit({ run }: { run: Run }) {
+  const qs = run.quotes;
+  const n = qs.length;
+  const distinct = (xs: string[]) => new Set(xs).size;
+  const refundTo = distinct(qs.map((q) => q.refundTo));
+  const recipients = distinct(qs.map((q) => q.quoteRequest.recipient));
+  const reusedAccount = qs.some((q) => q.refundTo === run.account.mainnetAddress);
+  const times = qs.map((q) => Date.parse(q.timestamp));
+  const spread = (Math.max(...times) - Math.min(...times)) / 1000;
+  const rows: { field: string; seen: string; verdict: string; ok: boolean }[] = [
+    { field: 'refundTo', seen: `${refundTo} different across ${n}${reusedAccount ? ', one is the account address' : ', none is the account address'}`, verdict: refundTo === n && !reusedAccount ? 'does not link' : 'links swaps', ok: refundTo === n && !reusedAccount },
+    { field: 'recipient', seen: `${recipients} across ${n}`, verdict: recipients === n ? 'does not link' : `links ${n - recipients + 1} swaps`, ok: recipients === n },
+    { field: 'quote time', seen: `all ${n} within ${num(spread, 1)} s`, verdict: 'a timing cluster', ok: false },
+    { field: 'amount', seen: `exact: ${qs.map((q) => num(Number(q.quoteRequest.amount) / 1e8, 8)).join(', ')} ZEC`, verdict: 'public in every request', ok: false },
+  ];
+  return (
+    <section aria-labelledby="audit-h">
+      <h2 id="audit-h">Link audit</h2>
+      <p className="sub">Each field of the {n} published requests, checked for what could tie them together. Computed here from the run record.</p>
+      <ul className="rows">
+        {rows.map((r) => (
+          <li key={r.field}>
+            <span className="k">{r.field}</span>
+            <span className={`v ${r.ok ? 'cut' : 'links'}`}>{r.verdict}</span>
+            <span className="d">{r.seen}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="sub small">
+        Lethe cuts the refundTo link. Since Oct 21, <code>zswap quote</code> and <code>safe_quote</code> refuse a recipient an earlier swap used unless the caller accepts the link; this run predates that and used one recipient on purpose.
+      </p>
+    </section>
+  );
+}
+
+function Recovery({ run, seedOnly }: { run: Run; seedOnly: SeedOnly | null }) {
+  const ex = run.recovery.expect;
+  const seedFound = seedOnly ? ex.filter((e) => seedOnly.hits.some((h) => h.txid === e.txid && h.key === e.label)).length : 0;
+  return (
+    <section aria-labelledby="rec-h">
+      <h2 id="rec-h">Found again</h2>
+      <p className="sub">
+        1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund. A compact-block scan from block {num(run.recovery.from, 0)} ({run.recovery.blocks} blocks) with every key:
+      </p>
+      {ex.length === 0 ? (
+        <p className="empty" role="status">
+          No recovery recorded in this run.
+        </p>
+      ) : (
+        <ul className="rows">
+          {ex.map((e) => (
+            <li key={e.label}>
+              <span className="k">{e.label === 'account' ? 'the account address' : `one-time address #${e.label.slice(7)}`}</span>
+              <span className="v">{e.value === null ? '—' : `${num(e.value, 0)} zat`}</span>
+              <span className="d">
+                found by <strong className={e.ok ? 'cut' : 'links'}>{e.foundBy.map(keyName).join(', ') || 'no key'}</strong>
+                {e.ok ? ' only' : ''} ·{' '}
+                <a href={EXPLORER + e.txid} target="_blank" rel="noreferrer">
+                  <code>{short(e.txid, 10, 6)}</code>
+                </a>
+                {e.height ? ` · block ${num(e.height, 0)}` : ''}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {seedOnly ? (
+        <div className="callout">
+          <strong>From the seed alone.</strong> The same range scanned with no index book, as a restored wallet would ({day(seedOnly.ranAt)}): {seedOnly.keysScanned.length - 1} refund keys (lookahead {seedOnly.gap}), {seedOnly.blocks} blocks, {seedFound} of {ex.length} payments found, each by its own key.
+        </div>
+      ) : (
+        <p className="empty" role="status">
+          No seed-only recovery recorded (<code>deployments/recovery-seed-only.json</code> is missing).
+        </p>
+      )}
+    </section>
+  );
+}
+
+function NotDone({ run }: { run: Run }) {
+  return (
+    <section aria-labelledby="nd-h">
+      <h2 id="nd-h">Not done</h2>
+      <ul className="rows">
+        <li>
+          <span className="k">
+            <span className="tag">BLOCKED</span>A real swap
+          </span>
+          <span className="d">A live quote creates a mainnet deposit address and needs mainnet ZEC and the maintainer's sign-off. No real 1Click refund to a one-time address has been seen; every quote here is dry.</span>
+        </li>
+        <li>
+          <span className="k">Draft key derivation</span>
+          <span className="d">
+            <code>
+              {run.oneTimeIvk.crate} {run.oneTimeIvk.version}
+            </code>
+            : {run.oneTimeIvk.caution}.
+          </span>
+        </li>
+        <li>
+          <span className="k">Spending a refund</span>
+          <span className="d">The one-time keys keep the account's spending authority; this project does not spend a one-time note.</span>
+        </li>
+      </ul>
+    </section>
   );
 }
 
 export function App() {
+  const load = useRun();
+  const [at, setAt] = useState(0);
   return (
-    <div className="page">
+    <>
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <div className="frame">
-        <header className="top">
-          <a className="brand" href="#main" aria-label="Lethe, top of page">
-            <LogoMark />
-            <span>Lethe</span>
+      <header className="top">
+        <a className="brand" href="#main" aria-label="Lethe dashboard, top">
+          <Mark />
+          Lethe
+        </a>
+        <nav aria-label="Links">
+          <span className="chip">Zcash testnet</span>
+          <a href={`${REPO}/tree/main/packages/docs`} target="_blank" rel="noreferrer">
+            Docs
           </a>
-          <nav className="nav" aria-label="Sections">
-            <a href="#quotes">Quotes</a>
-            <a href="#keys">Refund keys</a>
-            <a href="#recovery">Recovery</a>
-            <a href="#limits">Limits</a>
-          </nav>
-          <div className="actions">
-            <span className="pill pill-net">
-              <span className="live-dot" aria-hidden="true" />
-              Zcash testnet
-            </span>
-            <a className="btn-gh" href={REPO} target="_blank" rel="noreferrer">
-              GitHub
-              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-                <path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-          </div>
-        </header>
-
-        <main id="main">
-          <section className="hero" aria-labelledby="title">
-            <div className="hero-copy">
-              <span className="eyebrow">1Click dry quotes (mainnet API) · refunds on Zcash testnet</span>
-              <h1 id="title">Three quotes. Three refund addresses. No shared refundTo.</h1>
-              <p className="lede">
-                A swap out of Zcash names a <code>refundTo</code> address, and the provider marks the request <strong>{confidentiality ?? 'public'}</strong>. Here every swap gets a one-time
-                address with its own viewing key, so the public requests cannot be tied to each other or to the wallet.
-              </p>
-              <div className="stats">
-                <div className="stat">
-                  <span className="stat-num">
-                    {distinctRefundTo}
-                    <span className="fade">/{quotes.length}</span>
-                  </span>
-                  <span className="stat-label">different refundTo addresses across {quotes.length} public requests</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-num">
-                    {foundOk}
-                    <span className="fade">/{expect.length}</span>
-                  </span>
-                  <span className="stat-label">testnet payments found only by their own key</span>
-                </div>
-              </div>
+          <a href={REPO} target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </nav>
+      </header>
+      <main id="main">
+        <div className="hero">
+          <p className="eyebrow">{load.state === 'ready' ? `published run · ${day(load.run.ranAt)}` : 'published run'}</p>
+          <h1>Your swaps, one refund address each.</h1>
+          {load.state === 'loading' && (
+            <div className="widget skeleton" aria-busy="true" role="status">
+              <span>Loading the published run…</span>
             </div>
-
-            <div className="compare" aria-label="One-time refund keys compared with a reused address">
-              <div className="panel">
-                <div className="panel-head">
-                  <h2>With one-time refund keys</h2>
-                  <span className="pill pill-ok">unlinked</span>
-                </div>
-                {quotes.length === 0 ? (
-                  <Empty title="No quotes recorded">deployments/testnet.json has no quotes yet.</Empty>
-                ) : (
-                  quotes.map((q) => (
-                    <div key={q.index} className="swap">
-                      <span className="swap-what">{q.what}</span>
-                      <Stamp addr={q.refundTo} label={`refundTo #${q.index}`} />
-                    </div>
-                  ))
-                )}
-                <p className="verdict ok">3 different addresses, 3 different viewing keys</p>
-              </div>
-              <span className="compare-vs" aria-hidden="true">
-                vs
-              </span>
-              <div className="panel panel-dim">
-                <div className="panel-head">
-                  <h2>The same swaps from a wallet that reuses its address</h2>
-                  <span className="pill pill-no">linked</span>
-                </div>
-                {quotes.map((q) => (
-                  <div key={q.index} className="swap">
-                    <span className="swap-what">{q.what}</span>
-                    <Stamp addr={r.account.mainnetAddress} label="refundTo" />
-                  </div>
-                ))}
-                <p className="verdict no">one address on every public request: all three swaps linked</p>
-              </div>
+          )}
+          {load.state === 'error' && (
+            <div className="error" role="alert">
+              <strong>Could not load the published run.</strong> {load.message}. It is created by <code>pnpm --filter @zswap/examples run-live</code> in <code>deployments/</code>.
             </div>
-          </section>
-
-          <section id="quotes" className="block" aria-labelledby="q">
-            <div className="block-head">
-              <h2 id="q">The quotes, as 1Click returned them</h2>
-              <p className="muted small">
-                Dry quotes: no deposit address was created and no funds moved. Quoted at {fmtDate(quotes[0]?.timestamp)}.
-              </p>
+          )}
+          {load.state === 'ready' && load.run.quotes.length === 0 && (
+            <div className="error empty-state" role="status">
+              <strong>No swaps yet.</strong> Quote one with <code>zswap quote 0.1 nep141:wrap.near &lt;near-account&gt;</code>.
             </div>
-            {quotes.length === 0 ? (
-              <Empty title="No quotes in this run">Run the live example to record real 1Click dry quotes.</Empty>
-            ) : (
-              <div className="quotes">
-                {quotes.map((q) => (
-                  <QuoteCard key={q.index} q={q} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section id="keys" className="block" aria-labelledby="k">
-            <div className="block-head">
-              <h2 id="k">One-time refund keys</h2>
-              <p className="muted small">
-                Swap <em>i</em> gets its own key ({r.oneTimeIvk.crate} {r.oneTimeIvk.version}), so its own viewing key and address. The mainnet address appears only as the refundTo of a dry
-                quote; its testnet address received the stand-in refund.
-              </p>
-            </div>
-            <ul className="keys">
-              {quotes.map((q) => (
-                <li key={q.index} className="key" style={hueStyle(hue(q.refundTo))}>
-                  <span className="key-badge">
-                    <span className="key-idx">{q.index}</span>
-                    <span>
-                      One-time key #{q.index}
-                      <span className="key-sub">{q.what}</span>
-                    </span>
-                  </span>
-                  <div className="key-addrs">
-                    <Stamp addr={q.refundTo} label="refundTo · mainnet (dry quote)" />
-                    <Stamp addr={q.testnetAddress} label="testnet address" h={hue(q.refundTo)} />
-                  </div>
-                </li>
-              ))}
-              <li className="key key-account" style={hueStyle(hue(r.account.mainnetAddress))}>
-                <span className="key-badge">
-                  <span className="key-idx">A</span>
-                  <span>
-                    Account key
-                    <span className="key-sub">the wallet's ordinary address</span>
-                  </span>
-                </span>
-                <div className="key-addrs">
-                  <Stamp addr={r.account.mainnetAddress} label="mainnet (what a reusing wallet sends)" />
-                  <Stamp addr={r.account.testnetAddress} label="testnet address" h={hue(r.account.mainnetAddress)} />
-                </div>
-              </li>
-            </ul>
-          </section>
-
-          <section id="recovery" className="block" aria-labelledby="rec">
-            <div className="block-head">
-              <h2 id="rec">Finding the refunds again (Zcash testnet)</h2>
-              <p className="muted small">
-                1Click has no testnet, so a demo provider wallet paid each one-time testnet address in its own transaction, and paid the account address once. A restored wallet scanned{' '}
-                {r.recovery.blocks} compact blocks from {r.recovery.from.toLocaleString()} with every key it had reserved:
-              </p>
-            </div>
-            {expect.length === 0 ? (
-              <Empty title="No recovery scan recorded">deployments/testnet.json has no expected payments yet.</Empty>
-            ) : (
-              <ul className="scan">
-                {expect.map((e) => (
-                  <li key={e.label} className="scan-row" style={hueStyle(labelHue(e.label))}>
-                    <span className="scan-icon" aria-hidden="true">
-                      {e.label === 'account' ? 'A' : e.label.replace('refund-', '')}
-                    </span>
-                    <div className="scan-main">
-                      <span className="scan-title">{e.label === 'account' ? 'the account address' : `one-time address ${e.label.replace('refund-', '#')}`}</span>
-                      <span className="scan-meta">
-                        <a href={EXPLORER + e.txid} target="_blank" rel="noreferrer" aria-label={`Transaction ${e.txid} on the testnet explorer`}>
-                          <code>{short(e.txid, 8, 4)}</code>
-                          <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
-                            <path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </a>
-                        {e.height !== null && <span>block {e.height.toLocaleString()}</span>}
-                      </span>
-                    </div>
-                    <span className={`pill ${e.ok ? 'pill-found' : 'pill-no'}`}>
-                      {e.foundBy.length ? `found by ${e.foundBy.map(keyName).join(', ')} only` : 'found by no key'}
-                    </span>
-                    <span className="scan-amt">{e.value === null ? '—' : `${e.value.toLocaleString()} zat`}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="muted small">The account's ordinary key saw none of the refunds: without the reserved indices, nobody, the wallet included, links them.</p>
-          </section>
-
-          <section id="limits" className="block" aria-labelledby="lim">
-            <div className="block-head">
-              <h2 id="lim">What is not done</h2>
-            </div>
-            <div className="limits-grid">
-              <div className="blocked" role="note">
-                <span className="pill pill-blocked">BLOCKED</span>
-                <p className="blocked-title">A real swap is BLOCKED: it needs mainnet ZEC and maintainer sign-off.</p>
-                <p className="muted small">The testnet refunds above are stand-ins; the quotes are dry.</p>
-              </div>
-              <ul className="limits">
-                <li>
-                  <code>{r.oneTimeIvk.crate}</code> {r.oneTimeIvk.version}: {r.oneTimeIvk.caution}. Mainnet addresses here appear only in dry quotes.
-                </li>
-                <li>Spending a refund needs wallet integration; amounts, timing and the destination recipient can still link swaps.</li>
-              </ul>
-            </div>
-          </section>
-        </main>
-        <footer className="foot">
-          <span>MIT · Copyright (c) 2026 Nivesh Gajengi</span>
-          <span>run {fmtDate(r.ranAt)}</span>
-        </footer>
-      </div>
-    </div>
+          )}
+          {load.state === 'ready' && load.run.quotes.length > 0 && (
+            <>
+              <Swap run={load.run} at={Math.min(at, load.run.quotes.length - 1)} setAt={setAt} />
+              <River run={load.run} at={Math.min(at, load.run.quotes.length - 1)} setAt={setAt} />
+              <p className="note">Real 1Click dry quotes: no deposit address was created and no funds moved.</p>
+            </>
+          )}
+        </div>
+        {load.state === 'ready' && load.run.quotes.length > 0 && (
+          <>
+            <Audit run={load.run} />
+            <Recovery run={load.run} seedOnly={load.seedOnly} />
+            <NotDone run={load.run} />
+          </>
+        )}
+      </main>
+      <footer>
+        <span>MIT © 2026 Nivesh Gajengi · not audited</span>
+        <nav aria-label="Footer">
+          <a href={`${REPO}/blob/main/deployments/testnet.json`}>Run record</a>
+          <a href={`${REPO}/blob/main/docs/JUDGE-2026-10-21.md`}>Review</a>
+        </nav>
+      </footer>
+    </>
   );
 }

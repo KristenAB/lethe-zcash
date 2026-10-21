@@ -9,8 +9,7 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["vite/client"],
-    "paths": { "@deployments/*": ["../../deployments/*"], "@fixtures/*": ["../../deployments/*"] }
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }
