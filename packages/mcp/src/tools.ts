@@ -31,6 +31,9 @@ async function run(tool: string, fn: () => Promise<unknown> | unknown) {
   }
 }
 
+/** An agent-triggered scan is bounded: about 87 days of testnet blocks per call. */
+const MAX_SCAN_BLOCKS = 100_000;
+
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'zec-unlinkable-swaps', version: '0.1.0' });
   const book = () => new IndexBook(need('ZSWAP_BOOK'));
@@ -62,7 +65,12 @@ export function createServer(): McpServer {
   server.registerTool(
     'recover',
     { title: 'Find refunds (testnet)', description: 'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, so it also works for a wallet restored from its seed without an index book; reports which key found which payment. Read-only.', inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional() }, annotations: { readOnlyHint: true } },
-    (a) => run('recover', () => recover(need('ZSWAP_SEED'), book(), a.from_height, chainTip(), a.gap)),
+    (a) =>
+      run('recover', () => {
+        const tip = chainTip();
+        if (tip - a.from_height > MAX_SCAN_BLOCKS) throw new Error(`recover scans at most ${MAX_SCAN_BLOCKS} blocks per call (asked ${tip - a.from_height} from ${a.from_height}); use a later from_height, or the zswap CLI for a full rescan`);
+        return recover(need('ZSWAP_SEED'), book(), a.from_height, tip, a.gap);
+      }),
   );
   return server;
 }

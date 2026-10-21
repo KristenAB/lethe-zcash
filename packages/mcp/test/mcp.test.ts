@@ -51,6 +51,12 @@ describe('zswap-mcp', () => {
     expect(r.hits).toEqual([]);
   });
 
+  it('recover refuses a range longer than 100,000 blocks instead of starting a multi-million-block scan', async () => {
+    const r = await call(client, 'recover', { from_height: 1 });
+    expect(r.isError).toBe(true);
+    expect(r.text).toMatch(/at most 100000 blocks/);
+  });
+
   it('without a seed: Setup required', async () => {
     const c = await connect({ ZSWAP_BOOK: join(dir, 'b2.json') });
     const r = await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'b'.repeat(64) });
