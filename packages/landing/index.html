@@ -3,411 +3,347 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lethe — unlinkable swaps out of Zcash</title>
-    <meta name="description" content="Lethe gives every swap out of Zcash through NEAR Intents 1Click its own one-time refund address, so a public refundTo no longer links your swaps. Refunds stay recoverable with the wallet's own keys." />
-    <meta name="theme-color" content="#0b3440" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b3440'/%3E%3Cpath d='M6 12c3.3-3 6.7 3 10 0s6.7 3 10 0M6 20c3.3-3 6.7 3 10 0s6.7 3 10 0' fill='none' stroke='%235ee0d6' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <title>Lethe — a new refund address for every swap</title>
+    <meta name="description" content="Lethe gives every swap out of Zcash through NEAR Intents 1Click a one-time refund address with its own viewing key, so the public refundTo no longer ties your swaps together. Real 1Click dry quotes; testnet refunds found again from the seed alone." />
+    <meta name="theme-color" content="#e2f4f6" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23e2f4f6'/%3E%3Cpath d='M7 18c3-3 6 3 9 0s6 3 9 0' fill='none' stroke='%230b3440' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='11' r='2.4' fill='%235ee0d6'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap" rel="stylesheet" />
     <style>
-      :root { --font: 'Figtree', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
-        --deep: #0b3440; --deep-text: #0b3440; --accent: #5ee0d6; --accent-ink: #032a2e; --tint: #e2f4f6; --tint-2: #eef4ef;
-        --paper: #ffffff; --ink: #082a33; --muted: #52707a; --line: rgba(11, 52, 64, .09); --line-strong: rgba(11, 52, 64, .24);
-        --old: #c2453b; color-scheme: light; }
-      /* landing-kit base: Polaris-grade structure. Each page sets the theme variables and its own font. */
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 var(--font);letter-spacing:-.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-img{max-width:100%;display:block}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
-code,.mono{font-family:var(--mono);font-size:.86em;letter-spacing:0;overflow-wrap:anywhere}
-.wrap{max-width:1360px;margin:0 auto;padding:0 40px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+      :root {
+        --river: #0b3440;
+        --aqua: #5ee0d6;
+        --mist: #e2f4f6;
+        --paper: #fbfefe;
+        --ink: #0b3440;
+        --soft: rgba(11, 52, 64, 0.64);
+        --faint: rgba(11, 52, 64, 0.42);
+        --line: rgba(11, 52, 64, 0.1);
+        --aqua-ink: #0c6b66;
+        --link-ink: #9c3b2f;
+        --sans: 'Figtree', system-ui, sans-serif;
+        --mono: 'Fragment Mono', ui-monospace, monospace;
+        --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
+        color-scheme: light;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+      a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+      a:hover { text-decoration-color: var(--aqua-ink); }
+      :focus-visible { outline: 2px solid var(--river); outline-offset: 3px; border-radius: 4px; }
+      code, .mono { font-family: var(--mono); font-size: 0.86em; letter-spacing: 0; overflow-wrap: anywhere; }
+      .skip { position: absolute; left: -9999px; }
+      .skip:focus { left: 16px; top: 12px; background: var(--paper); padding: 6px 10px; z-index: 2; }
 
-/* type */
-.h-hero{font-weight:500;font-size:clamp(46px,6.3vw,96px);line-height:.95;letter-spacing:-.05em;margin:0}
-.h-sec{font-weight:500;font-size:clamp(36px,4.6vw,68px);line-height:1;letter-spacing:-.045em;margin:0}
-.h-card{font-weight:500;font-size:clamp(26px,2.4vw,36px);line-height:1.05;letter-spacing:-.035em;margin:0}
-.lead{font-size:clamp(18px,1.5vw,21px);line-height:1.4;letter-spacing:-.02em}
-.muted{color:var(--muted)}
-.strong{color:var(--ink)}
+      /* top: brand and two quiet links, nothing else */
+      .top { max-width: 1120px; margin: 0 auto; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 18px; letter-spacing: -0.02em; text-decoration: none; }
+      .top nav { display: flex; gap: 28px; font-size: 15px; color: var(--soft); }
+      .top nav a { text-decoration: none; }
+      .top nav a:hover { color: var(--ink); }
 
-/* buttons */
-.btn{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 24px;border-radius:999px;font:500 17px/1 var(--font);letter-spacing:-.02em;text-decoration:none;border:0;cursor:pointer;white-space:nowrap;transition:transform .25s cubic-bezier(.2,.7,.2,1),background .2s,box-shadow .2s}
-.btn:hover{transform:translateY(-2px)}
-.btn svg{width:18px;height:18px}
-.btn-accent{background:var(--accent);color:var(--accent-ink)}
-.btn-white{background:#fff;color:var(--deep)}
-.btn-dark{background:var(--deep);color:#fff}
-.btn-outline{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-strong)}
-.btn-ghost-light{background:transparent;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
-.btn-sm{height:44px;padding:0 18px;font-size:16px}
+      /* hero: a quiet line of type and one centred widget, surrounded by air */
+      .hero { max-width: 1120px; margin: 0 auto; padding: 88px 32px 40px; text-align: center; }
+      .eyebrow { font-family: var(--mono); font-size: 13px; color: var(--soft); letter-spacing: 0; }
+      h1 { font-weight: 500; font-size: clamp(36px, 5.2vw, 60px); line-height: 1.04; letter-spacing: -0.035em; margin: 20px auto 0; max-width: 15ch; }
+      .lede { color: var(--soft); max-width: 34rem; margin: 24px auto 0; font-size: 18px; }
 
-/* nav: links left, logo centre, actions right */
-.nav{position:absolute;inset:0 0 auto 0;z-index:30}
-.nav .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:100px}
-.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0}
-.nav ul a{text-decoration:none;font-size:17px;letter-spacing:-.02em;opacity:.92}
-.nav ul a:hover{opacity:1}
-.nav .act{display:flex;justify-content:flex-end;align-items:center;gap:18px}
-.nav .act>a:not(.btn){text-decoration:none;font-size:17px}
-.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:600;font-size:24px;letter-spacing:-.04em}
-.logo svg{width:30px;height:30px}
-.nav.on-dark{color:#fff}
-.nav.on-light{color:var(--ink)}
+      .widget { width: 100%; max-width: 440px; margin: 56px auto 0; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 1px 0 rgba(11, 52, 64, 0.04), 0 24px 60px -32px rgba(11, 52, 64, 0.22); }
+      .w-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px 0; font-size: 14px; color: var(--soft); }
+      .steps { display: flex; gap: 6px; }
+      .steps button { font: 500 13px/1 var(--sans); color: var(--soft); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+      .steps button[aria-pressed='true'] { background: var(--river); border-color: var(--river); color: #fff; }
+      .leg { padding: 16px 22px; }
+      .leg + .leg { border-top: 1px solid var(--line); }
+      .leg-label { font-size: 13px; color: var(--soft); }
+      .leg-amt { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 2px; }
+      .leg-amt strong { font-weight: 500; font-size: 30px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+      .leg-amt span { font-size: 15px; color: var(--soft); }
+      .refund { margin: 0 10px 10px; padding: 16px 14px 14px; background: var(--mist); border-radius: 14px; }
+      .refund-label { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--soft); }
+      .refund-label b { font-weight: 500; color: var(--aqua-ink); }
+      .addr { display: block; margin-top: 8px; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; min-height: 4.5em; }
+      .w-foot { padding: 0 22px 18px; font-size: 13px; color: var(--soft); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
-/* hero shells */
-.hero{position:relative;isolation:isolate;overflow:hidden}
-.hero-bleed{min-height:max(720px,100svh);padding-top:140px;background:var(--deep);color:#fff;display:flex;align-items:flex-end}
-.hero-bleed .wrap{width:100%;padding-bottom:56px;display:grid;grid-template-columns:1.25fr 1fr;align-items:end;gap:40px}
-.hero-bleed .h-hero{max-width:11ch}
-.hero-bleed .lead{max-width:34ch;margin:26px 0 34px;color:rgba(255,255,255,.86)}
-.hero-centre{background:var(--deep);color:#fff;padding:168px 0 0;text-align:center}
-.hero-centre .h-hero{max-width:14ch;margin:0 auto}
-.hero-centre .lead{max-width:44ch;margin:26px auto 36px;color:rgba(255,255,255,.82)}
-.hero-centre .cta{justify-content:center}
-.hero-split{background:var(--deep);color:#fff;padding:150px 0 90px}
-.hero-split .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
-.hero-split .lead{max-width:38ch;margin:26px 0 34px;color:rgba(255,255,255,.84)}
-.hero-light{background:var(--paper);color:var(--ink);padding:160px 0 40px}
-.hero-light .h-hero{max-width:13ch;color:var(--deep-text)}
-.hero-light .lead{max-width:44ch;margin:26px 0 34px;color:var(--muted)}
-.cta{display:flex;flex-wrap:wrap;gap:12px}
-.glow{position:absolute;z-index:-1;border-radius:50%;filter:blur(10px);pointer-events:none}
+      /* the river: addresses used once, fading downstream */
+      .river { max-width: 440px; margin: 28px auto 0; padding: 0; list-style: none; text-align: left; }
+      .river li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: baseline; padding: 6px 4px; font-size: 13px; color: var(--faint); transition: opacity 1.2s var(--ease), color 1.2s var(--ease); }
+      .river li code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+      .river li .n { font-family: var(--mono); }
+      .river li.now { color: var(--ink); }
+      .river li.gone { opacity: 0.38; }
+      .river li.ahead { opacity: 0.3; }
+      .addr.leave { animation: forget 0.9s var(--ease) forwards; }
+      .addr.arrive { animation: appear 0.9s var(--ease); }
+      @keyframes forget { to { opacity: 0; transform: translateX(28px); filter: blur(2px); } }
+      @keyframes appear { from { opacity: 0; transform: translateX(-10px); } }
+      .note { max-width: 440px; margin: 16px auto 0; font-size: 13px; color: var(--faint); }
 
-/* floating white widget (hero) */
-.widget{justify-self:end;width:min(100%,360px);background:#fff;color:var(--deep-text);border-radius:28px;padding:24px;box-shadow:0 40px 80px -30px rgba(0,0,0,.55)}
-.widget .w-top{display:flex;align-items:center;gap:10px;justify-content:space-between}
-.widget .w-title{font-weight:500;font-size:26px;letter-spacing:-.04em}
-.tag{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:999px;font-size:13px;font-weight:500;letter-spacing:-.01em;white-space:nowrap}
-.tag-deep{background:var(--deep);color:var(--accent)}
-.tag-tint{background:var(--tint);color:var(--deep-text)}
-.tag-accent{background:var(--accent);color:var(--accent-ink)}
-.tag-no{background:#fde2e1;color:#b42318}
-.tag-ok{background:#dcf5e7;color:#14714b}
-.widget .w-note{font-size:14px;color:#6b7280;margin-top:14px}
+      /* quiet sections: one narrow column, wide gaps, hairlines */
+      main section { max-width: 680px; margin: 0 auto; padding: 120px 32px 0; }
+      h2 { font-weight: 500; font-size: clamp(26px, 3vw, 34px); line-height: 1.15; letter-spacing: -0.025em; margin: 0; }
+      .sub { color: var(--soft); margin: 12px 0 0; }
+      .rows { margin: 36px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+      .rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+      .rows .k { font-weight: 500; }
+      .rows .v { color: var(--soft); text-align: right; font-size: 15px; }
+      .rows .d { grid-column: 1 / -1; color: var(--soft); font-size: 15px; }
+      .rows code { font-size: 13px; }
+      .rows .v.cut { color: var(--aqua-ink); }
+      .rows .v.links { color: var(--link-ink); }
+      .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
+      .pair h3 { font-size: 15px; font-weight: 500; margin: 0 0 12px; }
+      .pair ol { margin: 0; padding: 0; list-style: none; }
+      .pair li { font-family: var(--mono); font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--line); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .pair .same li { color: var(--link-ink); }
+      .pair p { font-size: 14px; color: var(--soft); margin: 12px 0 0; }
+      .tag { display: inline-block; font: 500 12px/1 var(--sans); letter-spacing: 0.02em; padding: 5px 8px; border-radius: 6px; background: var(--river); color: #fff; vertical-align: 2px; margin-right: 6px; }
+      pre { margin: 28px 0 0; padding: 20px 22px; background: var(--mist); border-radius: 14px; font: 13px/1.7 var(--mono); overflow-x: auto; color: var(--ink); }
+      footer { max-width: 680px; margin: 0 auto; padding: 120px 32px 56px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--soft); }
+      footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+      .status { min-height: 1em; }
+      .error { max-width: 440px; margin: 72px auto 0; padding: 18px 20px; border: 1px solid var(--link-ink); border-radius: 14px; color: var(--link-ink); text-align: left; font-size: 15px; }
 
-/* built-on strip */
-.built{padding:100px 0 40px;text-align:center}
-.built .pill{display:inline-block;padding:10px 26px;border-radius:999px;background:var(--tint);color:var(--deep-text);font-size:20px;letter-spacing:-.02em}
-.marquee{overflow:hidden;margin-top:44px;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.marquee .track{display:flex;gap:64px;width:max-content;animation:mq 34s linear infinite}
-.marquee span{display:inline-flex;align-items:center;gap:12px;font-weight:500;font-size:32px;letter-spacing:-.04em;color:var(--deep-text);white-space:nowrap}
-.marquee span i{width:26px;height:26px;border-radius:8px;background:var(--deep-text);opacity:.85;display:inline-block}
-@keyframes mq{to{transform:translateX(-50%)}}
-
-/* sections */
-section{padding:110px 0}
-.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:56px}
-.sec-head .h-sec{color:var(--deep-text);max-width:16ch}
-.sec-head p{max-width:46ch;margin:18px 0 0}
-.intro{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}
-.intro .h-sec{color:var(--deep-text)}
-.intro .copy p{margin:0 0 18px;color:var(--muted)}
-.intro .copy p b{color:var(--deep-text);font-weight:500}
-
-/* bento cards */
-.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{position:relative;border-radius:28px;padding:32px;min-height:420px;gap:28px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
-.c-tint{background:var(--tint);color:var(--deep-text)}
-.c-tint-2{background:var(--tint-2);color:var(--deep-text)}
-.c-deep{background:var(--deep);color:#fff}
-.c-deep .h-card{color:var(--accent)}
-.c-accent{background:var(--accent);color:var(--accent-ink)}
-.card p{margin:12px 0 0;font-size:16px;line-height:1.45}
-.c-deep p{color:rgba(255,255,255,.72)}
-.ui{background:#fff;color:var(--deep-text);border-radius:22px;padding:22px;box-shadow:0 24px 50px -28px rgba(0,0,0,.35)}
-.ui .big{font-weight:500;font-size:44px;letter-spacing:-.05em;line-height:1}
-.ui .big small{font-size:16px;letter-spacing:-.01em;color:#6b7280;margin-left:8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips span{height:40px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--tint);color:var(--deep-text);font-size:16px;letter-spacing:-.02em}
-.chips span.on{background:var(--deep);color:#fff}
-.bar{display:flex;height:12px;border-radius:4px;overflow:hidden;gap:3px;margin-top:22px}
-.bar i{display:block}
-
-/* dark proof / FAQ section */
-.dark{background:var(--deep);color:#fff}
-.dark .h-sec{color:var(--accent)}
-.dark .muted{color:rgba(255,255,255,.62)}
-.faq{display:grid;grid-template-columns:1fr 1fr;gap:60px}
-.faq details{border-top:1px solid rgba(255,255,255,.14);padding:26px 0}
-.faq details:last-child{border-bottom:1px solid rgba(255,255,255,.14)}
-.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;font-weight:500;font-size:clamp(22px,2vw,30px);letter-spacing:-.035em;color:var(--accent)}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:'+';font-weight:300;font-size:32px;line-height:1}
-.faq details[open] summary::after{content:'–'}
-.faq details p{margin:16px 0 0;color:rgba(255,255,255,.72);font-size:18px;max-width:52ch}
-
-/* evidence list */
-.ev{border-radius:28px;overflow:hidden;background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
-.ev .row{display:grid;grid-template-columns:1fr auto 130px;gap:18px;align-items:center;padding:18px 26px;border-top:1px solid var(--line);font-size:16px}
-.ev .row:first-child{border-top:0}
-.ev .row a{font-family:var(--mono);font-size:14px;text-align:right;color:var(--deep-text)}
-.dark .ev{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
-.dark .ev .row{border-color:rgba(255,255,255,.08)}
-.dark .ev .row a{color:var(--accent)}
-
-/* stat row */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-.stat{border-radius:24px;padding:28px;background:var(--tint)}
-.stat b{display:block;font-weight:500;font-size:clamp(40px,4vw,60px);letter-spacing:-.05em;line-height:1;color:var(--deep-text)}
-.stat span{display:block;margin-top:12px;color:var(--muted);font-size:16px}
-
-/* centred CTA */
-.talk{padding:130px 0 120px;text-align:center;background:linear-gradient(180deg,var(--paper) 0%,var(--tint) 100%)}
-.talk .h-sec{color:var(--deep-text);margin:0 auto}
-.talk p{max-width:46ch;margin:22px auto 34px;color:var(--muted)}
-.talk pre{display:inline-block;text-align:left;margin:0 0 30px;padding:18px 24px;border-radius:18px;background:var(--deep);color:var(--accent);font:400 15px/1.7 var(--mono);max-width:100%;overflow-x:auto}
-
-/* footer */
-.foot{background:var(--tint);padding:0 40px 40px}
-.foot .box{max-width:1360px;margin:0 auto;background:var(--deep);color:#fff;border-radius:40px;padding:56px 48px 40px;display:grid;grid-template-columns:1.2fr 1fr;gap:40px}
-.foot p{color:rgba(255,255,255,.62);max-width:44ch;margin:22px 0 0}
-.foot nav{display:flex;flex-wrap:wrap;gap:12px 36px;align-content:start}
-.foot nav a{text-decoration:none;font-size:18px;letter-spacing:-.02em}
-.foot .legal{grid-column:1/-1;display:flex;justify-content:space-between;gap:20px;padding-top:40px;color:rgba(255,255,255,.55);font-size:14px}
-
-/* reveal: transform only, so content is never hidden */
-.rv{animation:rv 1s cubic-bezier(.2,.7,.2,1) both}
-.rv.d1{animation-delay:.08s}.rv.d2{animation-delay:.16s}.rv.d3{animation-delay:.26s}.rv.d4{animation-delay:.36s}
-@keyframes rv{from{transform:translateY(22px)}to{transform:none}}
-
-@media (max-width:1024px){
-  .wrap{padding:0 24px}
-  .nav ul{display:none}
-  .nav .wrap{grid-template-columns:auto 1fr;height:84px}
-  .nav .logo{order:-1}
-  .hero-bleed .wrap,.hero-split .wrap,.intro,.faq{grid-template-columns:1fr}
-  .widget{justify-self:start}
-  .bento{grid-template-columns:1fr 1fr}
-  .bento .card:first-child{grid-column:span 2;min-height:0}
-  .stats{grid-template-columns:1fr 1fr}
-  .foot .box{grid-template-columns:1fr}
-  .sec-head{flex-direction:column;align-items:flex-start}
-}
-@media (max-width:640px){
-  body{font-size:16px}
-  .wrap{padding:0 16px}
-  section{padding:76px 0}
-  .nav .act>a:not(.btn){display:none}
-  .hero-bleed{min-height:auto;padding-top:120px}
-  .hero-bleed .wrap{padding-bottom:36px}
-  .hero-centre{padding-top:130px}
-  .hero-split{padding:124px 0 64px}
-  .hero-light{padding-top:120px}
-  .bento{grid-template-columns:1fr}
-  .bento .card:first-child{grid-column:auto}
-  .card{min-height:0;padding:24px;gap:28px}
-  .stats{grid-template-columns:1fr 1fr;gap:12px}
-  .stat{padding:20px}
-  .ev .row{grid-template-columns:1fr;gap:6px;padding:16px 18px}
-  .ev .row a{text-align:left}
-  .marquee span{font-size:24px}
-  .talk{padding:90px 0}
-  .foot{padding:0 12px 12px}
-  .foot .box{padding:36px 22px 26px;border-radius:28px}
-  .foot .legal{flex-direction:column}
-  .btn{height:48px;padding:0 20px;font-size:16px}
-}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv,.marquee .track{animation:none}.btn{transition:none}}
-
-      /* Lethe: a river at night; each quote forgets the address the last one used */
-      .hero-centre { background: radial-gradient(70% 50% at 50% 100%, rgba(94, 224, 214, .2), rgba(94, 224, 214, 0) 70%), radial-gradient(50% 45% at 50% 0%, #11505f, rgba(11, 52, 64, 0) 72%), var(--deep); padding-bottom: 110px; }
-      .hero-centre .h-hero span { color: var(--accent); }
-      .waves { position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; width: 100%; height: 300px; color: var(--accent); opacity: .16; pointer-events: none; }
-      .quotes { margin: 72px auto 0; max-width: 1100px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; text-align: left; }
-      .q { background: #fff; color: var(--deep-text); border-radius: 26px; padding: 22px; box-shadow: 0 40px 80px -36px rgba(0, 0, 0, .7); }
-      .q-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 13px var(--mono); color: var(--muted); }
-      .q h3 { margin: 16px 0 4px; font-weight: 500; font-size: 28px; letter-spacing: -.04em; }
-      .q .out { margin: 0; font-size: 15px; color: var(--muted); }
-      .q .out b { color: var(--deep-text); font-weight: 500; }
-      .rt { margin-top: 18px; padding: 14px; border-radius: 16px; background: var(--tint); }
-      .rt small { display: block; font: 500 12px var(--mono); color: var(--muted); margin-bottom: 8px; }
-      .rt .ln { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
-      .rt code { font-size: 13px; }
-      .old { position: relative; color: #9a6a66; }
-      .old::after { content: ''; position: absolute; left: -2px; right: -2px; top: 52%; height: 2px; background: var(--old); transform-origin: left; transition: transform .6s cubic-bezier(.6, 0, .2, 1); }
-      .ln em { font-style: normal; font-size: 12px; color: var(--muted); white-space: nowrap; }
-      .new { color: var(--deep-text); font-weight: 500; }
-      .ln .one { height: 24px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; background: var(--deep); color: var(--accent); font-size: 12px; white-space: nowrap; }
-      .sig { margin: 14px 0 0; font: 400 12px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
-      .quotes.pre .old::after { transform: scaleX(0); }
-      .q:nth-child(2) .old::after { transition-delay: .35s; } .q:nth-child(3) .old::after { transition-delay: .7s; }
-      .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      .paths div { border-radius: 16px; background: var(--tint); padding: 12px 12px 10px; }
-      .paths svg { width: 100%; height: auto; display: block; }
-      .paths span { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
-      .found { display: grid; gap: 8px; }
-      .found div { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; background: #fff; border-radius: 14px; padding: 11px 14px; font-size: 15px; }
-      .found b { font-weight: 500; }
-      .found code { display: block; font-size: 12px; color: var(--muted); }
-      .found .z { font: 500 14px var(--mono); }
-      .ev .row .oc { font: 400 14px var(--mono); text-align: right; color: rgba(255, 255, 255, .42); }
-      @media (max-width: 1024px) { .quotes { grid-template-columns: 1fr; max-width: 520px; } }
-      @media (max-width: 640px) { .hero-centre { padding-bottom: 72px; } .quotes { margin-top: 52px; } .q { padding: 18px; border-radius: 22px; } .q h3 { font-size: 24px; } .ev .row .oc { text-align: left; } .waves { height: 200px; } }
-      @media (prefers-reduced-motion: reduce) { .old::after { transition: none; } }
+      @media (max-width: 640px) {
+        .top { padding: 20px 16px; }
+        .top nav { gap: 18px; }
+        .hero { padding: 64px 16px 24px; }
+        .widget { margin-top: 48px; border-radius: 18px; }
+        .w-head, .leg, .w-foot { padding-left: 16px; padding-right: 16px; }
+        .leg-amt strong { font-size: 26px; }
+        main section { padding: 88px 16px 0; }
+        .pair { grid-template-columns: 1fr; gap: 28px; }
+        .rows li { grid-template-columns: 1fr; }
+        .rows .v { text-align: left; }
+        footer { padding: 88px 16px 40px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .addr.leave, .addr.arrive { animation: none; }
+        .river li { transition: none; }
+      }
     </style>
   </head>
   <body>
-    <nav class="nav on-dark" aria-label="Main">
-      <div class="wrap">
-        <ul><li><a href="#how">How it works</a></li><li><a href="#recover">Recovery</a></li><li><a href="#faq">FAQ</a></li></ul>
-        <a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11c4-3.6 8 3.6 12 0s8 3.6 12 0M4 21c4-3.6 8 3.6 12 0s8 3.6 12 0" fill="none" stroke="#5ee0d6" stroke-width="3" stroke-linecap="round" /></svg>Lethe</a>
-        <div class="act"><a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">Docs</a><a class="btn btn-white btn-sm" href="https://github.com/nickthelegend/zec-unlinkable-swaps">Get the code</a></div>
-      </div>
-    </nav>
-
-    <header class="hero hero-centre" id="top">
-      <svg class="waves" viewBox="0 0 1440 300" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <path d="M0 120C240 60 480 180 720 120S1200 60 1440 120" /><path d="M0 170C240 110 480 230 720 170S1200 110 1440 170" /><path d="M0 220C240 160 480 280 720 220S1200 160 1440 220" /><path d="M0 270C240 210 480 330 720 270S1200 210 1440 270" />
-      </svg>
-      <div class="wrap">
-        <h1 class="h-hero rv">Every swap <span>forgets the last.</span></h1>
-        <p class="lead rv d1">A swap out of Zcash through NEAR Intents 1Click names a refund address, and 1Click marks that request public. Lethe gives every swap its own one-time refund address, so nothing links them.</p>
-        <div class="cta rv d2"><a class="btn btn-accent" href="#recover">See the recovery scan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a><a class="btn btn-ghost-light" href="https://github.com/nickthelegend/zec-unlinkable-swaps">Read the code</a></div>
-        <div class="quotes rv d3" id="quotes" aria-label="Three real 1Click dry quotes, each with its own one-time refund address">
-          <div class="q">
-            <div class="q-top"><span>1Click quote 0</span><span class="tag tag-tint">public</span></div>
-            <h3>0.1 ZEC → NEAR</h3>
-            <p class="out">quoted out <b>24.4211 NEAR</b></p>
-            <div class="rt"><small>refundTo</small>
-              <div class="ln"><code class="old">u1ces8sa6vedcm…</code><em>reused</em></div>
-              <div class="ln"><code class="new">u1hvfvml947k7g…pljanr</code><span class="one">one-time</span></div>
-            </div>
-            <p class="sig">signed ed25519:3453NB7mLi…</p>
-          </div>
-          <div class="q">
-            <div class="q-top"><span>1Click quote 1</span><span class="tag tag-tint">public</span></div>
-            <h3>0.05 ZEC → USDC</h3>
-            <p class="out">quoted out <b>60.4520 USDC</b>, on NEAR</p>
-            <div class="rt"><small>refundTo</small>
-              <div class="ln"><code class="old">u1ces8sa6vedcm…</code><em>reused</em></div>
-              <div class="ln"><code class="new">u1rfk04g66dtag…498p4q</code><span class="one">one-time</span></div>
-            </div>
-            <p class="sig">signed ed25519:QfJ2eMqFSN…</p>
-          </div>
-          <div class="q">
-            <div class="q-top"><span>1Click quote 2</span><span class="tag tag-tint">public</span></div>
-            <h3>0.2 ZEC → NEAR</h3>
-            <p class="out">quoted out <b>48.8776 NEAR</b></p>
-            <div class="rt"><small>refundTo</small>
-              <div class="ln"><code class="old">u1ces8sa6vedcm…</code><em>reused</em></div>
-              <div class="ln"><code class="new">u1mg67mpgl2pty…n0dmhx</code><span class="one">one-time</span></div>
-            </div>
-            <p class="sig">signed ed25519:3snNjW2Afk…</p>
-          </div>
-        </div>
-      </div>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="brand" href="#main" aria-label="Lethe, top of page">
+        <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#e2f4f6" /><path d="M7 18c3-3 6 3 9 0s6 3 9 0" fill="none" stroke="#0b3440" stroke-width="2.2" stroke-linecap="round" /><circle cx="16" cy="11" r="2.4" fill="#5ee0d6" /></svg>
+        Lethe
+      </a>
+      <nav aria-label="Links">
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">Docs</a>
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps">GitHub</a>
+      </nav>
     </header>
 
-    <div class="built">
-      <span class="pill">Built for Zcash and NEAR Intents, wallet-side only</span>
-      <div class="marquee" aria-hidden="true"><div class="track">
-        <span><i></i>Zcash</span><span><i></i>NEAR Intents</span><span><i></i>1Click</span><span><i></i>Orchard</span><span><i></i>Viewing keys</span><span><i></i>lightwalletd</span><span><i></i>zakura-one-time-ivk</span><span><i></i>Rust</span><span><i></i>MCP</span>
-        <span><i></i>Zcash</span><span><i></i>NEAR Intents</span><span><i></i>1Click</span><span><i></i>Orchard</span><span><i></i>Viewing keys</span><span><i></i>lightwalletd</span><span><i></i>zakura-one-time-ivk</span><span><i></i>Rust</span><span><i></i>MCP</span>
-      </div></div>
-    </div>
+    <main id="main">
+      <div class="hero">
+        <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side</p>
+        <h1>A new refund address for every swap.</h1>
+        <p class="lede">Every swap out of Zcash through 1Click names a refund address in a public request. Lethe gives each one an address used once, with its own viewing key, so no refund address ties two swaps together.</p>
 
-    <main>
-      <section>
-        <div class="wrap intro">
+        <div id="widget-slot">
+          <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading the published run…</span></div></div>
+        </div>
+      </div>
+
+      <section id="forgets" aria-labelledby="forgets-h">
+        <h2 id="forgets-h">The same three swaps, two wallets</h2>
+        <p class="sub">The refundTo each wallet puts on three public 1Click requests.</p>
+        <div class="pair">
+          <div class="same">
+            <h3>A wallet that reuses its address</h3>
+            <ol id="reused"></ol>
+            <p>One address on all three: anyone who reads the requests sees one wallet.</p>
+          </div>
           <div>
-            <h2 class="h-sec">A public refund address is a public link</h2>
-            <div class="cta" style="margin-top: 34px"><a class="btn btn-dark" href="https://github.com/nickthelegend/zec-unlinkable-swaps">Run it locally <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a><a class="btn btn-outline" href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">The linkage problem</a></div>
-          </div>
-          <div class="copy lead">
-            <p><b>A wallet reusing its address</b> would have sent <code>u1ces8sa6vedcm…</code> as refundTo in all three quotes above.</p>
-            <p><b>Here swap <i>i</i> gets a one-time refund key:</b> the account's spending authority with its own rivk, so its own viewing key and address.</p>
+            <h3>Lethe</h3>
+            <ol id="onetime"></ol>
+            <p>Three addresses, three viewing keys. The addresses alone don't connect them.</p>
           </div>
         </div>
       </section>
 
-      <section id="how" style="padding-top: 0">
-        <div class="wrap">
-          <div class="sec-head"><h2 class="h-sec">Forget the address, keep the money</h2><a class="btn btn-outline btn-sm" href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></div>
-          <div class="bento">
-            <div class="card c-tint-2">
-              <div class="ui"><div class="paths">
-                <div><svg viewBox="0 0 120 90" fill="none" stroke-width="2" aria-hidden="true"><g stroke="#c2453b"><path d="M14 14C60 14 60 45 100 45M14 45H100M14 76C60 76 60 45 100 45" /></g><g fill="#0b3440"><circle cx="12" cy="14" r="5" /><circle cx="12" cy="45" r="5" /><circle cx="12" cy="76" r="5" /></g><circle cx="104" cy="45" r="7" fill="#c2453b" /></svg><span>reused: all linked</span></div>
-                <div><svg viewBox="0 0 120 90" fill="none" stroke-width="2" aria-hidden="true"><g stroke="#1fb5aa"><path d="M14 14H100M14 45H100M14 76H100" /></g><g fill="#0b3440"><circle cx="12" cy="14" r="5" /><circle cx="12" cy="45" r="5" /><circle cx="12" cy="76" r="5" /></g><g fill="#5ee0d6" stroke="#0b3440"><circle cx="104" cy="14" r="6" /><circle cx="104" cy="45" r="6" /><circle cx="104" cy="76" r="6" /></g></svg><span>one-time: none linked</span></div>
-              </div></div>
-              <div><h3 class="h-card">One address links them all</h3><p>1Click marks every quote request public. A refund address used twice ties both swaps to the same wallet.</p></div>
-            </div>
-            <div class="card c-tint">
-              <div><h3 class="h-card">Refunds still come home</h3><p>A compact-block scan with every reserved key finds each refund. The account's ordinary key sees none of them.</p></div>
-              <div class="ui"><div class="found">
-                <div><span><b>refund-0</b><code>found by key 0</code></span><span class="z">30,000 zat</span></div>
-                <div><span><b>refund-1</b><code>found by key 1</code></span><span class="z">31,000 zat</span></div>
-                <div><span><b>refund-2</b><code>found by key 2</code></span><span class="z">32,000 zat</span></div>
-              </div></div>
-            </div>
-            <div class="card c-deep">
-              <div><h3 class="h-card">Wallet-side only</h3><p>No contract and no PIR: one-time keys, a scanner and a CLI. An agent gets safe quotes and recovery through MCP.</p></div>
-              <div class="chips"><span class="on">safe_quote</span><span>book</span><span>recover</span></div>
-            </div>
-          </div>
-        </div>
+      <section id="audit" aria-labelledby="audit-h">
+        <h2 id="audit-h">What it forgets, and what it can't</h2>
+        <p class="sub">Every field of the three published requests, checked for what could link them.</p>
+        <ul class="rows" id="audit-rows"></ul>
+        <p class="sub" style="font-size: 15px">Lethe cuts the first row. New quotes refuse a recipient that an earlier swap used, unless you accept the link. Amount, timing, a shared 1Click token and your IP are still yours to manage.</p>
       </section>
 
-      <section style="padding-top: 0">
-        <div class="wrap stats">
-          <div class="stat"><b>3</b><span>real 1Click quotes, three different refundTo</span></div>
-          <div class="stat"><b>64</b><span>refund keys tested: no IVK or address repeats</span></div>
-          <div class="stat"><b>4</b><span>testnet payments, each found only by its own key</span></div>
-          <div class="stat"><b>17</b><span>tests plus a doc example, live 1Click and testnet</span></div>
-        </div>
+      <section id="recover" aria-labelledby="recover-h">
+        <h2 id="recover-h">Found again, from the seed alone</h2>
+        <p class="sub" id="recover-sub">1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund. A compact-block scan finds each payment with its own key only.</p>
+        <ul class="rows" id="recover-rows"></ul>
+        <p class="sub" id="seed-only" style="font-size: 15px"></p>
       </section>
 
-      <section class="dark" id="recover">
-        <div class="wrap">
-          <div class="sec-head"><div><h2 class="h-sec">Recovered on Zcash testnet</h2><p class="muted lead">Oct 20, 2026. 1Click has no testnet, so a demo provider wallet paid each one-time testnet address in its own transaction as a stand-in refund, and paid the account address once. Scanned from block 4,522,708.</p></div></div>
-          <div class="ev" role="list" aria-label="Recovery scan">
-            <div class="row" role="listitem"><span>Funding of the demo provider wallet, 4 × 70,000 zat</span><span class="tag tag-tint">funding</span><a href="https://testnet.zcashexplorer.app/transactions/c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54">c1bbb267…</a></div>
-            <div class="row" role="listitem"><span>refund-0, 30,000 zat</span><span class="tag tag-ok">found by refund-0</span><a href="https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b">e08cfef2…</a></div>
-            <div class="row" role="listitem"><span>refund-1, 31,000 zat</span><span class="tag tag-ok">found by refund-1</span><a href="https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100">9404c711…</a></div>
-            <div class="row" role="listitem"><span>refund-2, 32,000 zat</span><span class="tag tag-ok">found by refund-2</span><a href="https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899">4a7dd0ec…</a></div>
-            <div class="row" role="listitem"><span>The account address, 25,000 zat</span><span class="tag tag-ok">found by the account</span><a href="https://testnet.zcashexplorer.app/transactions/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c">bb82609a…</a></div>
-            <div class="row" role="listitem"><span>A real swap: a live quote creates a mainnet deposit address and needs mainnet ZEC</span><span class="tag tag-no">BLOCKED</span><span class="oc">no tx</span></div>
-          </div>
-        </div>
+      <section id="not-done" aria-labelledby="nd-h">
+        <h2 id="nd-h">Not yet</h2>
+        <ul class="rows">
+          <li><span class="k"><span class="tag">BLOCKED</span>A real swap</span><span class="d">A live quote creates a mainnet deposit address and needs mainnet ZEC and the maintainer's sign-off. So no real 1Click refund to a one-time address has been seen yet; the quotes above are dry.</span></li>
+          <li><span class="k">Draft key derivation</span><span class="d"><code>zakura-one-time-ivk</code> 0.0.1-rc1 says it must not issue live addresses before review. Mainnet addresses appear here only in dry quotes.</span></li>
+          <li><span class="k">Spending a refund</span><span class="d">The one-time keys keep the account's spending authority, but this project does not spend a one-time note.</span></li>
+        </ul>
       </section>
 
-      <section class="dark" id="faq" style="padding-top: 0">
-        <div class="wrap faq">
-          <div><h2 class="h-sec">Frequently asked questions</h2><p class="muted lead" style="margin-top: 18px">What Lethe forgets, and what it can't.</p></div>
-          <div>
-            <details open><summary>Has a real swap run?</summary><p>No: BLOCKED. A live quote creates a mainnet deposit address and needs mainnet ZEC, which waits on the maintainer's sign-off. The quotes are real dry quotes; the testnet refunds are stand-ins.</p></details>
-            <details><summary>Is the key derivation final?</summary><p>No. <code>zakura-one-time-ivk</code> 0.0.1-rc1 is a draft convention that must not be used to issue live addresses before review. Mainnet addresses here appear only in dry quotes.</p></details>
-            <details><summary>What can still link my swaps?</summary><p>Amounts, timing and the recipient on the destination chain. Lethe removes the refund-address link only.</p></details>
-            <details><summary>Can I spend the refunds?</summary><p>They stay spendable by the wallet, but spending one-time notes needs wallet integration, not done here. Not audited. A portfolio piece; the Zecathon entry is Kage (Shielded x402).</p></details>
-          </div>
-        </div>
-      </section>
-
-      <section class="talk">
-        <div class="wrap">
-          <h2 class="h-sec">Let the river take it</h2>
-          <p class="lead">One-time keys in Rust, a compact-block scanner, a CLI and an MCP server. The tests call the real 1Click API with dry quotes and scan real testnet blocks.</p>
-          <pre>pnpm install && pnpm test
-pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near &lt;near-account&gt;</pre>
-          <div class="cta" style="justify-content: center"><a class="btn btn-dark" href="https://github.com/nickthelegend/zec-unlinkable-swaps">Get the code <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></div>
-        </div>
+      <section id="try" aria-labelledby="run-h">
+        <h2 id="run-h">Run it</h2>
+        <p class="sub">Rust, a compact-block scanner, a CLI and an MCP server. The tests call the real 1Click API with dry quotes and scan Zcash testnet.</p>
+        <pre><code>pnpm install &amp;&amp; pnpm test
+pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near &lt;near-account&gt;
+ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&gt;</code></pre>
       </section>
     </main>
 
-    <footer class="foot">
-      <div class="box">
-        <div><a class="logo" href="#top" style="color: #fff"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11c4-3.6 8 3.6 12 0s8 3.6 12 0M4 21c4-3.6 8 3.6 12 0s8 3.6 12 0" fill="none" stroke="#5ee0d6" stroke-width="3" stroke-linecap="round" /></svg>Lethe</a><p>Lethe, the river of forgetting in Greek myth. Every swap out of Zcash gets its own refund address, so nothing links them.</p></div>
-        <nav aria-label="Footer"><a href="#how">How it works</a><a href="#recover">Recovery</a><a href="#faq">FAQ</a><a href="https://github.com/nickthelegend/zec-unlinkable-swaps">GitHub</a><a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json">Run record</a></nav>
-        <div class="legal"><span>MIT · Copyright (c) 2026 Nivesh Gajengi</span><span>Dry mainnet quotes · Zcash testnet · not audited</span></div>
-      </div>
+    <footer>
+      <span>Lethe · MIT © 2026 Nivesh Gajengi · not audited</span>
+      <nav aria-label="Footer">
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json">Run record</a>
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/docs/JUDGE-2026-10-21.md">Review</a>
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps">GitHub</a>
+      </nav>
     </footer>
+
+    <!-- copied from deployments/*.json by sync-run.mjs; never edited by hand -->
+    <script type="application/json" id="run">{"ranAt":"2026-10-20T16:56:41.553Z","oneTimeIvk":{"crate":"zakura-one-time-ivk","version":"0.0.1-rc1","caution":"draft convention; must not be used to issue live addresses before review"},"account":{"mainnetAddress":"u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm","testnetAddress":"utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua"},"quotes":[{"index":0,"what":"0.1 ZEC → NEAR","amountZat":"10000000","amountOut":"24.421148626121563979648046","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr","testnetAddress":"utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:03.320Z","signature":"ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw"},{"index":1,"what":"0.05 ZEC → USDC (NEAR)","amountZat":"5000000","amountOut":"60.452032","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q","testnetAddress":"utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:06.579Z","signature":"ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC"},{"index":2,"what":"0.2 ZEC → NEAR","amountZat":"20000000","amountOut":"48.877605913228493507623616","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx","testnetAddress":"utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:09.916Z","signature":"ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8"}],"recovery":{"from":4522708,"blocks":20,"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]},"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","seedOnly":{"ranAt":"2026-10-21T07:16:18Z","from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":14,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}]}}</script>
     <script>
-      // The reused address is struck from each quote in turn; the one-time address stays.
-      const qs = document.getElementById('quotes');
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { qs.classList.add('pre'); setTimeout(() => qs.classList.remove('pre'), 1600); }
+      (() => {
+        const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
+        const $ = (id) => document.getElementById(id);
+        const el = (tag, attrs = {}, ...kids) => {
+          const n = document.createElement(tag);
+          for (const [k, v] of Object.entries(attrs)) k === 'class' ? (n.className = v) : n.setAttribute(k, v);
+          for (const k of kids) n.append(k);
+          return n;
+        };
+        const short = (s, a = 12, b = 8) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
+        const fmt = (n, d = 4) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d }).format(n);
+        const fail = (msg) => {
+          $('widget-slot').replaceChildren(el('div', { class: 'error', role: 'alert' }, msg));
+        };
+
+        let run;
+        try {
+          run = JSON.parse($('run').textContent);
+        } catch (e) {
+          return fail(`The embedded run could not be read (${e.message}). Run node packages/landing/sync-run.mjs.`);
+        }
+        const quotes = run.quotes || [];
+        if (!quotes.length) return fail('No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs.');
+        const ranOn = new Date(run.ranAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // the widget: one real dry quote at a time
+        const steps = el('div', { class: 'steps', role: 'group', 'aria-label': 'Swap' });
+        const btns = quotes.map((q, i) => el('button', { type: 'button', 'aria-pressed': 'false', 'aria-label': `Swap ${i + 1}: ${q.what}` }, String(i + 1)));
+        btns.forEach((b) => steps.append(b));
+        const sendAmt = el('strong'), sendUnit = el('span');
+        const outAmt = el('strong'), outUnit = el('span');
+        const label = el('b');
+        const addr = el('code', { class: 'addr' });
+        const foot = el('div', { class: 'w-foot' });
+        const widget = el(
+          'div',
+          { class: 'widget', role: 'region', 'aria-label': 'Swap widget: published dry quotes' },
+          el('div', { class: 'w-head' }, el('span', {}, `Dry quote · ${ranOn}`), steps),
+          el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'You send'), el('div', { class: 'leg-amt' }, sendAmt, sendUnit)),
+          el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'Quoted by 1Click'), el('div', { class: 'leg-amt' }, outAmt, outUnit)),
+          el('div', { class: 'refund', 'aria-live': 'polite' }, el('div', { class: 'refund-label' }, el('span', {}, 'refundTo · used once'), label), addr),
+          foot,
+        );
+        const river = el('ol', { class: 'river', 'aria-label': 'Refund addresses, one per swap' });
+        const rows = quotes.map((q, i) => {
+          const li = el('li', {}, el('span', { class: 'n' }, `#${q.index}`), el('code', { title: q.refundTo }, q.refundTo), el('span', { class: 'st' }));
+          river.append(li);
+          return li;
+        });
+        const note = el('p', { class: 'note' }, 'A replay of the three real 1Click dry quotes from the published run: no deposit address was created and no funds moved.');
+        $('widget-slot').replaceChildren(widget, river, note);
+
+        let at = -1, timer = null;
+        const show = (i, animate) => {
+          const q = quotes[i];
+          const [from, to] = q.what.split(' → ');
+          const [, unitIn] = from.split(' ');
+          sendAmt.textContent = fmt(Number(q.amountZat) / 1e8, 8);
+          sendUnit.textContent = unitIn || 'ZEC';
+          outAmt.textContent = fmt(Number(q.amountOut));
+          outUnit.textContent = to;
+          label.textContent = `key #${q.index}`;
+          foot.replaceChildren(el('span', {}, `request: ${q.confidentiality}`), el('span', { class: 'mono', title: q.signature }, short(q.signature, 16, 4)));
+          const put = () => {
+            addr.textContent = q.refundTo;
+            addr.classList.remove('leave');
+            if (animate) {
+              addr.classList.remove('arrive');
+              void addr.offsetWidth;
+              addr.classList.add('arrive');
+            }
+          };
+          if (animate && at !== -1) {
+            addr.classList.remove('arrive');
+            addr.classList.add('leave');
+            setTimeout(put, 650);
+          } else put();
+          btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+          rows.forEach((r, j) => {
+            r.className = j === i ? 'now' : j < i ? 'gone' : 'ahead';
+            r.querySelector('.st').textContent = j === i ? 'in use' : j < i ? 'used, forgotten' : '';
+          });
+          at = i;
+        };
+        const stop = () => {
+          clearInterval(timer);
+          timer = null;
+        };
+        btns.forEach((b, i) => b.addEventListener('click', () => {
+          stop();
+          show(i, !reduce);
+        }));
+        show(0, false);
+        if (!reduce && quotes.length > 1) {
+          timer = setInterval(() => show((at + 1) % quotes.length, true), 4200);
+          widget.addEventListener('mouseenter', stop);
+          widget.addEventListener('focusin', stop);
+        }
+
+        // two wallets
+        for (const q of quotes) {
+          $('reused').append(el('li', { title: run.account.mainnetAddress }, short(run.account.mainnetAddress, 14, 8)));
+          $('onetime').append(el('li', { title: q.refundTo }, short(q.refundTo, 14, 8)));
+        }
+
+        // link audit, computed from the published requests
+        const distinct = (xs) => new Set(xs).size;
+        const n = quotes.length;
+        const times = quotes.map((q) => Date.parse(q.timestamp));
+        const spread = (Math.max(...times) - Math.min(...times)) / 1000;
+        const audit = [
+          ['refundTo', `${distinct(quotes.map((q) => q.refundTo))} different across ${n}`, distinct(quotes.map((q) => q.refundTo)) === n ? 'does not link' : 'links swaps'],
+          ['recipient', `${distinct(quotes.map((q) => q.recipient))} across ${n}`, distinct(quotes.map((q) => q.recipient)) === n ? 'does not link' : `links ${n - distinct(quotes.map((q) => q.recipient)) + 1} swaps`],
+          ['quote time', `all ${n} within ${fmt(spread, 1)} s`, 'a timing cluster'],
+          ['amount', `exact (${quotes.map((q) => fmt(Number(q.amountZat) / 1e8, 8)).join(', ')} ZEC)`, 'public in every request'],
+        ];
+        for (const [k, v, verdict] of audit)
+          $('audit-rows').append(el('li', {}, el('span', { class: 'k' }, k), el('span', { class: `v ${verdict === 'does not link' ? 'cut' : 'links'}` }, verdict), el('span', { class: 'd' }, v)));
+
+        // recovery
+        for (const e of run.recovery.expect) {
+          const who = e.label === 'account' ? 'the account address' : `one-time address #${e.label.slice(7)}`;
+          const by = e.foundBy.map((k) => (k === 'account' ? 'the account key' : `key #${k.slice(7)}`)).join(', ') || 'no key';
+          $('recover-rows').append(
+            el('li', {}, el('span', { class: 'k' }, who), el('span', { class: 'v' }, e.value === null ? '—' : `${fmt(e.value, 0)} zat`), el('span', { class: 'd' }, 'found by ', el('strong', {}, by), ' only · ', el('a', { href: EXPLORER + e.txid }, el('code', {}, short(e.txid, 10, 6))), e.height ? ` · block ${fmt(e.height, 0)}` : '')),
+          );
+        }
+        const s = run.seedOnly;
+        if (s) {
+          const found = run.recovery.expect.filter((e) => s.hits.some((h) => h.txid === e.txid && h.key === e.label)).length;
+          $('seed-only').textContent = `Then the same scan with the seed and no index book, as a restored wallet would run it: ${s.keysScanned - 1} refund keys (a lookahead of ${s.gap}), ${s.blocks} blocks, ${found} of ${run.recovery.expect.length} payments found, each by its own key.`;
+        }
+      })();
     </script>
   </body>
 </html>
