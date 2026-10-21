@@ -242,3 +242,4 @@ export function recover(seedFile: string, book: IndexBook, from: number, to: num
 }
 
 export * from './recipient.js';
+export * from './decorrelate.js';
