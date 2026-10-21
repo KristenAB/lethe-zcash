@@ -1,5 +1,5 @@
 // Real MCP client ↔ zswap-mcp (stdio) ↔ real 1Click API (dry quotes) and testnet lightwalletd.
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -57,5 +57,20 @@ describe('zswap-mcp', () => {
     await c.close();
     expect(r.isError).toBe(true);
     expect(r.text).toBe('Setup required: ZSWAP_SEED');
+  });
+
+  it('the call log (ZSWAP_MCP_LOG) is private (0600) and holds no address, recipient or correlation id', async () => {
+    const log = join(dir, 'calls.jsonl');
+    writeFileSync(log, '', { mode: 0o644 }); // an existing, world-readable file is tightened too
+    const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b3.json'), ZSWAP_MCP_LOG: log });
+    const q = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'd'.repeat(64) })).text);
+    await c.close();
+    expect(statSync(log).mode & 0o777).toBe(0o600);
+    const text = readFileSync(log, 'utf8');
+    for (const secret of [q.refundTo, 'd'.repeat(64), q.correlation_id, q.signature]) expect(text).not.toContain(secret);
+    const lines = text.trim().split('\n').map((l) => JSON.parse(l));
+    expect(lines).toHaveLength(1);
+    expect(Object.keys(lines[0]).sort()).toEqual(['at', 'index', 'isError', 'tool']);
+    expect(lines[0]).toMatchObject({ tool: 'safe_quote', isError: false, index: q.index });
   });
 });
