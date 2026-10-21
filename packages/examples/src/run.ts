@@ -57,7 +57,9 @@ async function main() {
   st.quotes ??= [];
   while (st.quotes.length < plans.length) {
     const p = plans[st.quotes.length];
-    const { r } = book.reserve(SEED);
+    // The published run sends all three quotes to one NEAR account on purpose, and so accepts that
+    // the recipient links them (the README says so); only the refundTo link is under test here.
+    const { r } = book.reserve(SEED, { recipient, allowLinkedRecipient: true });
     const q = (await quote({ amountZat: p.zec, destinationAsset: p.dest, recipient, refundTo: r.refundTo })) as any;
     book.attach(r.index, q);
     st.quotes.push({ index: r.index, what: p.what, refundTo: r.refundTo, testnetAddress: r.testnetAddress, amountOut: q.quote.amountOutFormatted, refundFee: q.quote.refundFee, confidentiality: q.quoteRequest.confidentiality, correlationId: q.correlationId, timestamp: q.timestamp, signature: q.signature, quoteRequest: q.quoteRequest });

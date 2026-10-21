@@ -13,6 +13,12 @@ export class SetupRequiredError extends Error {
   }
 }
 export class BlockedError extends Error {}
+/** The destination recipient already received an earlier swap from this wallet: a second swap to it is linked. */
+export class LinkedRecipientError extends Error {
+  constructor(readonly recipient: string, readonly earlierIndex: number) {
+    super(`refused: recipient ${recipient} already received swap #${earlierIndex} from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.`);
+  }
+}
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
@@ -54,8 +60,17 @@ export interface Reservation {
   reservedAt: string;
   refundTo: string;
   testnetAddress: string;
+  /** destination recipient of this swap (sent in clear with the quote) */
+  recipient?: string;
+  /** set when the caller accepted reusing a recipient of an earlier swap */
+  linkedRecipient?: true;
   quote?: unknown;
 }
+export interface ReserveOptions {
+  recipient?: string;
+  allowLinkedRecipient?: boolean;
+}
+const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteRequest?: { recipient?: string } } | undefined)?.quoteRequest?.recipient;
 export interface Book {
   next: number;
   reservations: Reservation[];
@@ -107,12 +122,17 @@ export class IndexBook {
       unlinkSync(lock);
     }
   }
-  reserve(seedFile: string): { r: Reservation; key: RefundKey } {
+  /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
+  reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
     return this.locked(() => {
       const b = this.read();
+      const earlier = opts.recipient === undefined ? undefined : b.reservations.find((x) => recipientOf(x) === opts.recipient);
+      if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(opts.recipient!, earlier.index);
       const index = b.next;
       const key = deriveRefund(seedFile, index);
       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+      if (opts.recipient !== undefined) r.recipient = opts.recipient;
+      if (earlier) r.linkedRecipient = true;
       b.next = index + 1;
       b.reservations.push(r);
       this.write(b);

@@ -28,12 +28,20 @@ afterAll(async () => client?.close());
 describe('zswap-mcp', () => {
   it('two safe quotes get two different one-time refund addresses, both real 1Click dry quotes', async () => {
     const a = JSON.parse((await call(client, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'b'.repeat(64) })).text);
-    const b = JSON.parse((await call(client, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'b'.repeat(64) })).text);
+    const b = JSON.parse((await call(client, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'c'.repeat(64) })).text);
     expect([a.index, b.index]).toEqual([0, 1]);
     expect(a.refundTo).not.toBe(b.refundTo);
     expect(a.signature).toMatch(/^ed25519:/);
     const book = JSON.parse((await call(client, 'book')).text);
     expect(book.map((x: { refundTo: string }) => x.refundTo)).toEqual([a.refundTo, b.refundTo]);
+  });
+
+  it('refuses a second swap to a recipient an earlier swap used, without burning an index', async () => {
+    const r = await call(client, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'b'.repeat(64) });
+    expect(r.isError).toBe(true);
+    expect(r.text).toMatch(/already received swap #0/);
+    const book = JSON.parse((await call(client, 'book')).text);
+    expect(book).toHaveLength(2);
   });
 
   it('recover scans testnet with every reserved key (none of them has been paid in this fresh wallet)', async () => {
