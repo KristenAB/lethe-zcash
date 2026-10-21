@@ -79,4 +79,35 @@ describe('zswap-mcp', () => {
     expect(Object.keys(lines[0]).sort()).toEqual(['at', 'index', 'isError', 'tool']);
     expect(lines[0]).toMatchObject({ tool: 'safe_quote', isError: false, index: q.index });
   });
+
+  it('without a recipient, each swap gets its own fresh NEAR recipient, and the seed alone finds them again', async () => {
+    const env = { ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b4.json') };
+    const c = await connect(env);
+    const a = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near' })).text);
+    const b = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.2, destination_asset: 'nep141:wrap.near' })).text);
+    expect(a.recipient).toMatch(/^[0-9a-f]{64}$/);
+    expect(b.recipient).toMatch(/^[0-9a-f]{64}$/);
+    expect(a.recipient).not.toBe(b.recipient);
+    expect([a.fresh_recipient, b.fresh_recipient]).toEqual([true, true]);
+    const other = await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:eth.omft.near' });
+    expect(other.isError).toBe(true);
+    expect(other.text).toMatch(/delivers it on eth/);
+    const plan = JSON.parse((await call(c, 'sweep_plan', { destinations: { [a.index]: 'me.near', [b.index]: 'me.near' } })).text);
+    expect(plan.relinked).toBe(2);
+    await c.close();
+    const restored = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'restored-no-book.json') });
+    const r = JSON.parse((await call(restored, 'recipients', { gap: 3 })).text);
+    await restored.close();
+    expect(r.recipients.map((x: { account_id: string }) => x.account_id).slice(0, 2)).toEqual([a.recipient, b.recipient]);
+    expect(JSON.stringify(r)).not.toMatch(/private/);
+  });
+
+  it('plan_batch returns parts, trade-offs and a linkability report, and sends nothing', async () => {
+    const p = JSON.parse((await call(client, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', split: true, window_minutes: 90, min_gap_seconds: 300 })).text);
+    expect(p.swaps.map((s: { amountZat: string }) => s.amountZat)).toEqual(['20000000', '10000000']);
+    expect(p.report.sharedFields).toBe(0);
+    expect(p.tradeOffs.length).toBe(3);
+    const lazy = JSON.parse((await call(client, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', recipient: 'me.near', split: true })).text);
+    expect(lazy.report.verdict).toBe('1 of 1 pairs linked by recipient, same minute');
+  });
 });
