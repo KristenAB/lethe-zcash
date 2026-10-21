@@ -12,8 +12,8 @@ scan tests read Zcash testnet compact blocks through a real lightwalletd.
 | cli: recipient | local | 3 | a reused recipient is refused before an index is reserved; accepted only with the explicit flag, and recorded; also found in older reservations' stored quotes |
 | cli: recovery | testnet | 2 | no index book → keys 0..9 scanned; with a book → every reserved index plus the lookahead |
 | mcp | stdio MCP client + 1Click + testnet | 6 | two safe quotes, two refundTo; a reused recipient refused; recovery scan with lookahead; range over 100,000 blocks refused; Setup required; call log 0600 with no address, recipient or correlation id |
-| dashboard | real Vite dev server | 3 | serves the published run; 403 for a file under `.demo/`; 403 for other repo files |
-| **Total** | | **29 + doc** | 0 skipped |
+| dashboard | real Vite dev server + landing | 4 | serves the published run; 403 for a file under `.demo/`; 403 for other repo files; the landing's embedded data equals `deployments/` |
+| **Total** | | **30 + doc** | 0 skipped (run 2026-10-21, `pnpm test`, exit 0) |
 
 Live run: `ZSWAP_FUNDER_WALLET=… pnpm --filter @zswap/examples run-live` (README tables).
 Seed-only recovery evidence: `deployments/recovery-seed-only.json`.

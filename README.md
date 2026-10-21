@@ -66,7 +66,7 @@ Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
 pnpm install
-pnpm test                         # 8 Rust (+ doc) + 12 cli + 6 mcp + 3 dashboard = 29, live 1Click and testnet (TESTING.md)
+pnpm test                         # 8 Rust (+ doc) + 12 cli + 6 mcp + 4 dashboard = 30, live 1Click and testnet (TESTING.md)
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near <near-account>
 ZSWAP_FUNDER_WALLET=<demo wallet> pnpm --filter @zswap/examples run-live
