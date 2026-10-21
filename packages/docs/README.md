@@ -31,6 +31,25 @@ FVK_i  = (ak, nk, rivk_i)  →  its own IVK_i  →  its own address_i  →  refu
 
 No contract is involved. An earlier design with a NEAR contract was dropped as wrong.
 
+## The other links (Oct 22)
+
+- **A fresh NEAR recipient per swap.** Swap `i` is delivered to its own NEAR implicit account:
+  `sk_i = SLIP-0010-ed25519(seed, m/44'/397'/1'/i')`, account id = hex(`pk_i`). NEAR implicit
+  accounts need no creation step, so the id is a valid recipient before anything is sent. The seed
+  alone re-derives them (lookahead 10, extended past any account found on NEAR mainnet). Only for
+  assets 1Click delivers on NEAR (checked against 1Click's token list).
+- **Sweeping.** Funds left on per-swap accounts stay unlinked. Moving them into one account re-links
+  those swaps for anyone reading NEAR; `zswap sweep-plan` reports it. Safer: spend from each account,
+  sweep each to a different place, or swap each back into a shielded address at another time and
+  amount. An account that received only a token has no NEAR for gas; whoever tops it up is linked to it.
+- **Amount and timing (opt-in).** Split into common denominations (1-2-5 series, 0.01–1 ZEC), round,
+  and send on a random schedule with a minimum gap. Costs: one ZIP 317 deposit fee per extra part,
+  separate pricing and slippage per part, a later finish, a wallet that stays online.
+- **Linkability report.** For a planned or quoted batch, every pair is checked: the same refundTo,
+  recipient, unusual amount or minute links it from the public request alone (strong); the same
+  common amount, ten-minute window or token narrows it (weak); a shared `ONECLICK_JWT` lets only
+  1Click link it (provider). The first run scores 0/100; see the README for pass 2.
+
 ## What was shown
 
 | Claim | Evidence |
@@ -39,6 +58,8 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 | the provider publishes `refundTo` | 1Click's own response: `confidentiality: public` |
 | a payment to `address_i` is found only with `IVK_i` | testnet: a demo provider wallet paid each one-time address in its own transaction; the recovery scan found each with its own key and no other |
 | the account's ordinary key does not see them | the same scan: the account key found only the payment to the account address |
+| each swap can have its own recipient | pass 2: three real dry quotes, three NEAR implicit recipients from the seed, three refundTo (`deployments/pass2.json`) |
+| the seed alone finds the recipients | pass 2: the demo seed with no index book re-derived all three |
 | keys never repeat and keep spending authority | 64 indices, Rust tests |
 
 ## Limits
@@ -51,10 +72,11 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 - **Spending refunds** needs wallet integration (zakura's SQLite backend). The crate's own
   protocol-level test spends one-time notes; this project does not spend them on-chain.
 - **Other leaks remain.** The fix removes the refund-address link only.
-  - *Recipient*: sent in clear with every quote. `zswap quote` / `safe_quote` refuse a recipient an
-    earlier swap used, unless the caller accepts the link. The published run used one recipient for
-    all three quotes, so it is linkable through it.
-  - *Amount and timing*: exact amounts and deadlines are in every request.
+  - *Recipient*: sent in clear with every quote. Without one, each swap gets its own NEAR account
+    (above); a recipient an earlier swap used is refused unless the caller accepts the link. The
+    first run used one recipient for all three quotes, so it is linkable through it.
+  - *Amount and timing*: exact amounts and deadlines are in every request. Splitting, rounding and
+    delays are opt-in and planned, not executed for real swaps (the swap is BLOCKED).
   - *Provider-side*: the same `ONECLICK_JWT` on every quote, and the requesting IP, let 1Click link
     swaps privately.
   - *Local ledgers*: the index book links every swap (it must, for recovery); keep it 0600 like the
@@ -72,3 +94,7 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 | `zswap recover <height>` | which key found which testnet payment |
 | `ZSWAP_BOOK=/nonexistent zswap recover 4522708 4522730` (with the run's seed) | the same four payments, found from the seed alone |
 | `zswap quote …` twice with the same recipient | the second is refused, exit 4, no index used |
+| `zswap quote 0.1 nep141:wrap.near` twice | two dry quotes, two `refundTo`, two NEAR implicit recipients |
+| `ZSWAP_BOOK=/nonexistent zswap recipients --lookup` | the recipients re-derived from the seed, each looked up on NEAR mainnet |
+| `zswap sweep-plan --to 0=me.near --to 1=me.near` | a warning that the sweep re-links swaps #0 and #1 |
+| `zswap plan 0.35 nep141:wrap.near --split --window 180` | parts, send times, costs and the linkability report; nothing sent |
