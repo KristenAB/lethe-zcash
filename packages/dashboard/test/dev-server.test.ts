@@ -34,5 +34,10 @@ describe('dashboard dev server file access', () => {
   it('refuses other repo files outside the dashboard and the published run', async () => {
     expect(await get(resolve(ROOT, 'README.md'))).toBe(403);
     expect(await get(resolve(ROOT, 'packages/cli/src/lib.ts'))).toBe(403);
+    expect(await get(resolve(ROOT, 'packages/cli/src/recipient.ts'))).toBe(403);
+  });
+  it('serves the one pure module the dashboard imports (the linkability report), and the pass-2 run', async () => {
+    expect(await get(resolve(ROOT, 'packages/cli/src/decorrelate.ts'))).toBe(200);
+    expect(await get(resolve(ROOT, 'deployments/pass2.json'))).toBe(200);
   });
 });

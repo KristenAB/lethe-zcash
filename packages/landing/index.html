@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lethe — a new refund address for every swap</title>
-    <meta name="description" content="Lethe gives every swap out of Zcash through NEAR Intents 1Click a one-time refund address with its own viewing key, so the public refundTo no longer ties your swaps together. Real 1Click dry quotes; testnet refunds found again from the seed alone." />
+    <title>Lethe — a new refund address and recipient for every swap</title>
+    <meta name="description" content="Lethe gives every swap out of Zcash through NEAR Intents 1Click a one-time refund address and its own NEAR recipient, both from one seed, and scores what still links a batch. Real 1Click dry quotes; testnet refunds and recipients found again from the seed alone." />
     <meta name="theme-color" content="#e2f4f6" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23e2f4f6'/%3E%3Cpath d='M7 18c3-3 6 3 9 0s6 3 9 0' fill='none' stroke='%230b3440' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='11' r='2.4' fill='%235ee0d6'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -104,6 +104,24 @@
       footer { max-width: 680px; margin: 0 auto; padding: 120px 32px 56px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--soft); }
       footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
       .status { min-height: 1em; }
+      .batches { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px; }
+      .batch { min-width: 0; padding: 18px 18px 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+      .batch-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+      .batch h3 { margin: 0; font-size: 15px; font-weight: 500; }
+      .batch .when { font-size: 13px; color: var(--faint); }
+      .score { margin: 10px 0 0; font-size: 14px; color: var(--soft); }
+      .score strong { font-weight: 500; font-size: 30px; letter-spacing: -0.03em; margin-right: 4px; font-variant-numeric: tabular-nums; }
+      .score strong.cut { color: var(--aqua-ink); }
+      .score strong.links { color: var(--link-ink); }
+      .fields { margin: 12px 0 0; padding: 0; list-style: none; }
+      .fields li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+      .fields b { font-weight: 500; font-family: var(--mono); font-size: 12px; }
+      .fields .clear b { color: var(--aqua-ink); }
+      .fields .weak b { color: var(--soft); }
+      .fields .strong b { color: var(--link-ink); }
+      .verdict { margin: 10px 0 0; font-size: 13.5px; color: var(--soft); }
+      .muted { color: var(--faint); font-weight: 400; }
+      .rows .d .cut { color: var(--aqua-ink); }
       .error { max-width: 440px; margin: 72px auto 0; padding: 18px 20px; border: 1px solid var(--link-ink); border-radius: 14px; color: var(--link-ink); text-align: left; font-size: 15px; }
 
       @media (max-width: 640px) {
@@ -115,6 +133,7 @@
         .leg-amt strong { font-size: 26px; }
         main section { padding: 88px 16px 0; }
         .pair { grid-template-columns: 1fr; gap: 28px; }
+        .batches { grid-template-columns: 1fr; }
         .rows li { grid-template-columns: 1fr; }
         .rows .v { text-align: left; }
         footer { padding: 88px 16px 40px; }
@@ -141,8 +160,8 @@
     <main id="main">
       <div class="hero">
         <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side</p>
-        <h1>A new refund address for every swap.</h1>
-        <p class="lede">Every swap out of Zcash through 1Click names a refund address in a public request. Lethe gives each one an address used once, with its own viewing key, so no refund address ties two swaps together.</p>
+        <h1>A new refund address and recipient for every swap.</h1>
+        <p class="lede">Every swap out of Zcash through 1Click names a refund address and a recipient in a public request. Lethe gives each swap a refund address used once and its own NEAR account, both from one seed, and tells you what still links them.</p>
 
         <div id="widget-slot">
           <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading the published run…</span></div></div>
@@ -170,7 +189,16 @@
         <h2 id="audit-h">What it forgets, and what it can't</h2>
         <p class="sub">Every field of the three published requests, checked for what could link them.</p>
         <ul class="rows" id="audit-rows"></ul>
-        <p class="sub" style="font-size: 15px">Lethe cuts the first row. New quotes refuse a recipient that an earlier swap used, unless you accept the link. Amount, timing, a shared 1Click token and your IP are still yours to manage.</p>
+        <p class="sub" style="font-size: 15px">That first run cut the first row only. Since then a swap with no recipient goes to its own NEAR account, and a reused recipient is refused unless you accept the link. A shared 1Click token and your IP are still yours to manage.</p>
+      </section>
+
+      <section id="links" aria-labelledby="links-h">
+        <h2 id="links-h">All three links, measured</h2>
+        <p class="sub">The refund address was the easy link. The recipient, the amount and the timing are the others. Both batches are scored from their real 1Click requests by the report the CLI and MCP print.</p>
+        <div class="batches" id="batches"></div>
+        <ul class="rows" id="pass2-rows" aria-label="Pass 2 swaps"></ul>
+        <p class="sub" id="pass2-note" style="font-size: 15px"></p>
+        <p class="sub" style="font-size: 15px"><strong style="font-weight: 500; color: var(--ink)">Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that: leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.</p>
       </section>
 
       <section id="recover" aria-labelledby="recover-h">
@@ -186,6 +214,7 @@
           <li><span class="k"><span class="tag">BLOCKED</span>A real swap</span><span class="d">A live quote creates a mainnet deposit address and needs mainnet ZEC and the maintainer's sign-off. So no real 1Click refund to a one-time address has been seen yet; the quotes above are dry.</span></li>
           <li><span class="k">Draft key derivation</span><span class="d"><code>zakura-one-time-ivk</code> 0.0.1-rc1 says it must not issue live addresses before review. Mainnet addresses appear here only in dry quotes.</span></li>
           <li><span class="k">Spending a refund</span><span class="d">The one-time keys keep the account's spending authority, but this project does not spend a one-time note.</span></li>
+          <li><span class="k">Delivery to a per-swap NEAR account</span><span class="d">1Click accepted each fresh implicit account in a dry quote; nothing was delivered, so no sweep has been run. Amount splitting and delays are planned by Lethe, not sent on a schedule by it.</span></li>
         </ul>
       </section>
 
@@ -193,7 +222,9 @@
         <h2 id="run-h">Run it</h2>
         <p class="sub">Rust, a compact-block scanner, a CLI and an MCP server. The tests call the real 1Click API with dry quotes and scan Zcash testnet.</p>
         <pre><code>pnpm install &amp;&amp; pnpm test
-pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near &lt;near-account&gt;
+pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near        # its own refund address and NEAR recipient
+pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180
+ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recipients
 ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&gt;</code></pre>
       </section>
     </main>
@@ -208,7 +239,7 @@ ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&g
     </footer>
 
     <!-- copied from deployments/*.json by sync-run.mjs; never edited by hand -->
-    <script type="application/json" id="run">{"ranAt":"2026-10-20T16:56:41.553Z","oneTimeIvk":{"crate":"zakura-one-time-ivk","version":"0.0.1-rc1","caution":"draft convention; must not be used to issue live addresses before review"},"account":{"mainnetAddress":"u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm","testnetAddress":"utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua"},"quotes":[{"index":0,"what":"0.1 ZEC → NEAR","amountZat":"10000000","amountOut":"24.421148626121563979648046","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr","testnetAddress":"utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:03.320Z","signature":"ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw"},{"index":1,"what":"0.05 ZEC → USDC (NEAR)","amountZat":"5000000","amountOut":"60.452032","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q","testnetAddress":"utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:06.579Z","signature":"ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC"},{"index":2,"what":"0.2 ZEC → NEAR","amountZat":"20000000","amountOut":"48.877605913228493507623616","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx","testnetAddress":"utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:09.916Z","signature":"ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8"}],"recovery":{"from":4522708,"blocks":20,"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]},"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","seedOnly":{"ranAt":"2026-10-21T07:16:18Z","from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":14,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}]}}</script>
+    <script type="application/json" id="run">{"ranAt":"2026-10-20T16:56:41.553Z","oneTimeIvk":{"crate":"zakura-one-time-ivk","version":"0.0.1-rc1","caution":"draft convention; must not be used to issue live addresses before review"},"account":{"mainnetAddress":"u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm","testnetAddress":"utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua"},"quotes":[{"index":0,"what":"0.1 ZEC → NEAR","amountZat":"10000000","amountOut":"24.421148626121563979648046","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr","testnetAddress":"utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:03.320Z","signature":"ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw"},{"index":1,"what":"0.05 ZEC → USDC (NEAR)","amountZat":"5000000","amountOut":"60.452032","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q","testnetAddress":"utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:06.579Z","signature":"ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC"},{"index":2,"what":"0.2 ZEC → NEAR","amountZat":"20000000","amountOut":"48.877605913228493507623616","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx","testnetAddress":"utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:09.916Z","signature":"ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8"}],"recovery":{"from":4522708,"blocks":20,"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]},"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","pass2":{"ranAt":"2026-10-21T19:25:22.419Z","near":"SLIP-0010 ed25519, m/44'/397'/1'/i' (implicit account id = hex public key)","parts":[{"index":5,"amountZat":"20000000","amountOut":"50.701120324635199193775","timestamp":"2026-10-21T19:20:34.167Z","recipient":"66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a","refundTo":"u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur","foundFromSeedAlone":true},{"index":6,"amountZat":"10000000","amountOut":"25.323968833443378562464","timestamp":"2026-10-21T19:22:52.176Z","recipient":"3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada","refundTo":"u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j","foundFromSeedAlone":true},{"index":7,"amountZat":"5000000","amountOut":"12.648185384760528041439","timestamp":"2026-10-21T19:25:12.180Z","recipient":"4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d","refundTo":"u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr","foundFromSeedAlone":true}],"before":{"sharedFields":2,"score":0,"pairs":3,"verdict":"3 of 3 pairs linked by recipient, same minute","links":[{"field":"recipient","strength":"strong","pairs":3,"why":"the same recipient is in both public requests and receives both on chain"},{"field":"same minute","strength":"strong","pairs":3,"why":"both requests went out within a minute of each other"},{"field":"token","strength":"weak","pairs":1,"why":"the same destination token"}]},"after":{"sharedFields":0,"score":75,"pairs":3,"verdict":"no public field links any pair; 3 pair(s) share only weak hints","links":[{"field":"within 10 min","strength":"weak","pairs":3,"why":"both requests went out within ten minutes"},{"field":"token","strength":"weak","pairs":3,"why":"the same destination token"}]}},"seedOnly":{"ranAt":"2026-10-21T07:16:18Z","from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":14,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}]}}</script>
     <script>
       (() => {
         const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
@@ -329,6 +360,32 @@ ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&g
         ];
         for (const [k, v, verdict] of audit)
           $('audit-rows').append(el('li', {}, el('span', { class: 'k' }, k), el('span', { class: `v ${verdict === 'does not link' ? 'cut' : 'links'}` }, verdict), el('span', { class: 'd' }, v)));
+
+        // all three links: two batches scored at sync time by the CLI's linkabilityReport
+        const p2 = run.pass2;
+        const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'partner token'];
+        const day = (s) => new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+        const batch = (title, when, r) =>
+          el(
+            'div',
+            { class: 'batch' },
+            el('div', { class: 'batch-head' }, el('h3', {}, title), el('span', { class: 'when' }, when)),
+            el('p', { class: 'score' }, el('strong', { class: r.sharedFields === 0 ? 'cut' : 'links' }, String(r.sharedFields)), `shared public field${r.sharedFields === 1 ? '' : 's'} · score ${r.score}/100`),
+            el('ul', { class: 'fields', 'aria-label': `${title}: fields` }, ...FIELDS.map((f) => {
+              const l = r.links.find((x) => x.field === f);
+              return el('li', { class: !l ? 'clear' : l.strength === 'strong' ? 'strong' : 'weak', title: l ? l.why : 'links no pair' }, el('span', {}, f), el('b', {}, !l ? 'clear' : `${l.strength} · ${l.pairs}/${r.pairs}`));
+            })),
+            el('p', { class: 'verdict' }, `${r.verdict}.`),
+          );
+        if (p2) {
+          $('batches').append(batch('First run', ranOn, p2.before), batch('Pass 2', day(p2.ranAt), p2.after));
+          const t0 = Math.min(...p2.parts.map((q) => Date.parse(q.timestamp)));
+          for (const q of p2.parts)
+            $('pass2-rows').append(
+              el('li', {}, el('span', { class: 'k' }, `${fmt(Number(q.amountZat) / 1e8, 8)} ZEC `, el('span', { class: 'muted' }, `at +${Math.round((Date.parse(q.timestamp) - t0) / 1000)} s`)), el('span', { class: 'v' }, `→ ${fmt(Number(q.amountOut))} wNEAR`), el('span', { class: 'd' }, 'recipient ', el('code', { title: q.recipient }, short(q.recipient, 10, 6)), ' · refundTo ', el('code', { title: q.refundTo }, short(q.refundTo, 10, 6)), ' · ', el('span', { class: q.foundFromSeedAlone ? 'cut' : '' }, q.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed'))),
+            );
+          $('pass2-note').textContent = `${p2.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account (${p2.near}). The NEAR accounts do not exist on chain: dry quotes deliver nothing.`;
+        } else $('batches').append(el('p', { class: 'sub' }, 'No pass-2 run recorded yet.'));
 
         // recovery
         for (const e of run.recovery.expect) {

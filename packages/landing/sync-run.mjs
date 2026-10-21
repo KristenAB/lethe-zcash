@@ -2,7 +2,7 @@
 // Copies the published run (deployments/*.json) into the landing page's embedded data block, so the
 // page shows exactly what the run recorded and nothing typed by hand. `node sync-run.mjs --check`
 // exits 1 if the page is out of date (the dashboard tests run it).
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,6 +10,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../..');
 const run = JSON.parse(readFileSync(resolve(root, 'deployments/testnet.json'), 'utf8'));
 const seedOnly = JSON.parse(readFileSync(resolve(root, 'deployments/recovery-seed-only.json'), 'utf8'));
+const pass2 = JSON.parse(readFileSync(resolve(root, 'deployments/pass2.json'), 'utf8'));
+// the linkability report is computed with the CLI's own pure function (built: packages/cli/dist)
+const decorrelate = resolve(root, 'packages/cli/dist/decorrelate.js');
+if (!existsSync(decorrelate)) throw new Error('Setup required: build the CLI first (pnpm --filter @zswap/cli build)');
+const { linkabilityReport, swapsFromQuotes } = await import(decorrelate);
+const brief = (r) => ({ sharedFields: r.sharedFields, score: r.score, pairs: r.pairs, verdict: r.verdict, links: r.links.map((l) => ({ field: l.field, strength: l.strength, pairs: l.pairs.length, why: l.why })) });
 
 export function landingData() {
   return {
@@ -30,6 +36,13 @@ export function landingData() {
     })),
     recovery: { from: run.recovery.from, blocks: run.recovery.blocks, expect: run.recovery.expect },
     fund: run.txs.fund,
+    pass2: {
+      ranAt: pass2.ranAt,
+      near: pass2.derivation.near,
+      parts: pass2.quotes.map((q) => ({ index: q.index, amountZat: q.quoteRequest.amount, amountOut: q.amountOut, timestamp: q.timestamp, recipient: q.recipient, refundTo: q.refundTo, foundFromSeedAlone: pass2.seedOnlyRecovery.found.find((f) => f.index === q.index)?.foundFromSeedAlone === true })),
+      before: brief(linkabilityReport(swapsFromQuotes(run.quotes))),
+      after: brief(linkabilityReport(swapsFromQuotes(pass2.quotes))),
+    },
     seedOnly: { ranAt: seedOnly.ranAt, from: seedOnly.from, to: seedOnly.to, blocks: seedOnly.blocks, gap: seedOnly.gap, keysScanned: seedOnly.keysScanned.length, hits: seedOnly.hits },
   };
 }

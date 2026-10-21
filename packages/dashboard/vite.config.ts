@@ -6,7 +6,7 @@ const ROOT = resolve(__dirname, '../..');
 
 export default defineConfig({
   plugins: [react()],
-  // The published run is fetched at runtime (/testnet.json, /recovery-seed-only.json): public data.
+  // The published run is fetched at runtime (/testnet.json, /recovery-seed-only.json, /pass2.json): public data.
   publicDir: resolve(ROOT, 'deployments'),
   server: {
     port: 5182,
@@ -15,7 +15,8 @@ export default defineConfig({
     // wallet (.demo/: seed, index book, keys); the dev server must never hand those out.
     fs: {
       strict: true,
-      allow: [__dirname, resolve(ROOT, 'deployments'), resolve(ROOT, 'node_modules')],
+      // plus one pure source file: the linkability report (no keys, no I/O)
+      allow: [__dirname, resolve(ROOT, 'deployments'), resolve(ROOT, 'node_modules'), resolve(ROOT, 'packages/cli/src/decorrelate.ts')],
       deny: ['.env', '.env.*', '*.{crt,pem,key}', '**/.git/**', '**/.demo/**', '**/seed', '**/*.dat'],
     },
   },

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+// the same pure function the CLI and MCP use (the dev server allows this one file, nothing else in cli/)
+import { linkabilityReport, swapsFromQuotes } from '../../cli/src/decorrelate';
 
 /** The published run (deployments/testnet.json) and the seed-only recovery (deployments/recovery-seed-only.json). */
 type Quote = {
@@ -24,7 +26,15 @@ type Run = {
   txs: Record<string, string>;
 };
 type SeedOnly = { ranAt: string; from: number; to: number; blocks: number; gap: number; keysScanned: string[]; hits: { key: string; txid: string; height: number; value: number }[] };
-type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null };
+type Pass2Quote = { part: number; index: number; refundTo: string; recipient: string; amountOut: string; timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string } };
+type Pass2 = {
+  ranAt: string;
+  derivation: { near: string };
+  plan: { tradeOffs: string[]; parts: { part: number; amountZat: string; offsetS: number }[] };
+  quotes: Pass2Quote[];
+  seedOnlyRecovery: { gap: number; derived: number; found: { index: number; recipient: string; foundFromSeedAlone: boolean; state?: { exists: boolean } }[] };
+};
+type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null; pass2: Pass2 | null };
 
 const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
 const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
@@ -48,7 +58,8 @@ function useRun(): Load {
         const run = await getJson<Run>('/testnet.json');
         if (!Array.isArray(run.quotes)) throw new Error('/testnet.json has no quotes array');
         const seedOnly = await getJson<SeedOnly>('/recovery-seed-only.json').catch(() => null);
-        if (live) setLoad({ state: 'ready', run, seedOnly });
+        const pass2 = await getJson<Pass2>('/pass2.json').catch(() => null);
+        if (live) setLoad({ state: 'ready', run, seedOnly, pass2: pass2 && Array.isArray(pass2.quotes) ? pass2 : null });
       } catch (e) {
         if (live) setLoad({ state: 'error', message: (e as Error).message });
       }
@@ -196,8 +207,88 @@ function Audit({ run }: { run: Run }) {
         ))}
       </ul>
       <p className="sub small">
-        Lethe cuts the refundTo link. Since Oct 21, <code>zswap quote</code> and <code>safe_quote</code> refuse a recipient an earlier swap used unless the caller accepts the link; this run predates that and used one recipient on purpose.
+        This first run cut only the refundTo link and used one recipient on purpose. Since pass 2 a swap with no recipient goes to its own NEAR account (below), and a reused recipient is refused unless the caller accepts the link.
       </p>
+    </section>
+  );
+}
+
+type Report = ReturnType<typeof linkabilityReport>;
+const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'partner token'] as const;
+
+function Batch({ title, when, r }: { title: string; when: string; r: Report }) {
+  return (
+    <div className="batch">
+      <div className="batch-head">
+        <h3>{title}</h3>
+        <span className="when">{when}</span>
+      </div>
+      <p className="score">
+        <strong className={r.sharedFields === 0 ? 'cut' : 'links'}>{r.sharedFields}</strong> shared public field{r.sharedFields === 1 ? '' : 's'}
+        <span> · score {r.score}/100</span>
+      </p>
+      <ul className="fields" aria-label={`${title}: fields`}>
+        {FIELDS.map((f) => {
+          const l = r.links.find((x) => x.field === f);
+          const cls = !l ? 'clear' : l.strength === 'strong' ? 'strong' : 'weak';
+          return (
+            <li key={f} className={cls} title={l ? l.why : 'links no pair'}>
+              <span>{f}</span>
+              <b>{!l ? 'clear' : `${l.strength} · ${l.pairs.length}/${r.pairs}`}</b>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="verdict">{r.verdict}.</p>
+    </div>
+  );
+}
+
+function Links({ run, pass2 }: { run: Run; pass2: Pass2 | null }) {
+  const before = linkabilityReport(swapsFromQuotes(run.quotes as unknown as Parameters<typeof swapsFromQuotes>[0]));
+  const after = pass2 ? linkabilityReport(swapsFromQuotes(pass2.quotes)) : null;
+  const t0 = pass2 ? Math.min(...pass2.quotes.map((q) => Date.parse(q.timestamp))) : 0;
+  return (
+    <section aria-labelledby="links-h">
+      <h2 id="links-h">All three links, measured</h2>
+      <p className="sub">The refund address was the easy link. The recipient, the amount and the timing are the others. Each batch below is scored from its real 1Click requests by the same report the CLI and MCP print.</p>
+      <div className="batches">
+        <Batch title="First run" when={day(run.ranAt)} r={before} />
+        {after && pass2 ? (
+          <Batch title="Pass 2" when={day(pass2.ranAt)} r={after} />
+        ) : (
+          <p className="empty" role="status">
+            No pass-2 run recorded (<code>deployments/pass2.json</code> is missing; <code>pnpm --filter @zswap/examples run-pass2</code>).
+          </p>
+        )}
+      </div>
+      {pass2 && (
+        <>
+          <ul className="rows" aria-label="Pass 2 swaps">
+            {pass2.quotes.map((q) => {
+              const f = pass2.seedOnlyRecovery.found.find((x) => x.index === q.index);
+              return (
+                <li key={q.index}>
+                  <span className="k">
+                    {num(Number(q.quoteRequest.amount) / 1e8, 8)} ZEC <span className="muted">at +{Math.round((Date.parse(q.timestamp) - t0) / 1000)} s</span>
+                  </span>
+                  <span className="v">→ {num(Number(q.amountOut))} wNEAR</span>
+                  <span className="d">
+                    recipient <code title={q.recipient}>{short(q.recipient, 10, 6)}</code> · refundTo <code title={q.refundTo}>{short(q.refundTo, 10, 6)}</code> ·{' '}
+                    <span className={f?.foundFromSeedAlone ? 'cut' : 'links'}>{f?.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed'}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="sub small">
+            {pass2.plan.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account ({pass2.derivation.near}). The weak hints left are the shared token and the ten-minute window. The NEAR accounts do not exist on chain: dry quotes deliver nothing.
+          </p>
+          <div className="callout">
+            <strong>Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that; leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -301,7 +392,7 @@ export function App() {
       <main id="main">
         <div className="hero">
           <p className="eyebrow">{load.state === 'ready' ? `published run · ${day(load.run.ranAt)}` : 'published run'}</p>
-          <h1>Your swaps, one refund address each.</h1>
+          <h1>Every swap its own refund address and recipient.</h1>
           {load.state === 'loading' && (
             <div className="widget skeleton" aria-busy="true" role="status">
               <span>Loading the published run…</span>
@@ -328,6 +419,7 @@ export function App() {
         {load.state === 'ready' && load.run.quotes.length > 0 && (
           <>
             <Audit run={load.run} />
+            <Links run={load.run} pass2={load.pass2} />
             <Recovery run={load.run} seedOnly={load.seedOnly} />
             <NotDone run={load.run} />
           </>
