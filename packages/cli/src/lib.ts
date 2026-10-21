@@ -1,6 +1,6 @@
 // zswap library: index reservation, one-time keys (zswap-keys), 1Click quotes, recovery scans.
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,7 +48,6 @@ export function initSeed(seedFile: string): boolean {
   return JSON.parse(execFileSync(keysBin(), ['init', seedFile]).toString()).created;
 }
 
-/** Durable index book: an index is written down before its address is shown to anyone. */
 export interface Reservation {
   index: number;
   purpose: 'refund';
@@ -62,31 +61,72 @@ export interface Book {
   reservations: Reservation[];
 }
 
+/** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
+const STALE_LOCK_MS = 30_000;
+const LOCK_WAIT_MS = 20_000;
+const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
+/**
+ * Durable index book: an index is written down before its address is shown to anyone.
+ * Every read-modify-write holds an exclusive lock file (`<book>.lock`, O_CREAT|O_EXCL), so two wallet
+ * processes (the CLI and the MCP server, or two agents) can never hand out the same index, which
+ * would put the same refundTo on two public quotes.
+ */
 export class IndexBook {
   constructor(readonly path: string) {}
   read(): Book {
     return existsSync(this.path) ? JSON.parse(readFileSync(this.path, 'utf8')) : { next: 0, reservations: [] };
   }
   private write(b: Book) {
-    writeFileSync(`${this.path}.tmp`, JSON.stringify(b, null, 2), { mode: 0o600 });
-    renameSync(`${this.path}.tmp`, this.path);
+    const tmp = `${this.path}.${process.pid}.tmp`;
+    writeFileSync(tmp, JSON.stringify(b, null, 2), { mode: 0o600 });
+    renameSync(tmp, this.path);
+  }
+  private locked<T>(fn: () => T): T {
+    const lock = `${this.path}.lock`;
+    const until = Date.now() + LOCK_WAIT_MS;
+    let fd: number | undefined;
+    while (fd === undefined) {
+      try {
+        fd = openSync(lock, 'wx', 0o600);
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+        try {
+          if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) unlinkSync(lock);
+        } catch {
+          /* released meanwhile */
+        }
+        if (Date.now() > until) throw new Error(`index book ${this.path} is locked by another process (${lock}); refusing to reserve without it`);
+        pause(10 + Math.floor(Math.random() * 20));
+      }
+    }
+    try {
+      return fn();
+    } finally {
+      closeSync(fd);
+      unlinkSync(lock);
+    }
   }
   reserve(seedFile: string): { r: Reservation; key: RefundKey } {
-    const b = this.read();
-    const index = b.next;
-    const key = deriveRefund(seedFile, index);
-    const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
-    b.next = index + 1;
-    b.reservations.push(r);
-    this.write(b);
-    return { r, key };
+    return this.locked(() => {
+      const b = this.read();
+      const index = b.next;
+      const key = deriveRefund(seedFile, index);
+      const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+      b.next = index + 1;
+      b.reservations.push(r);
+      this.write(b);
+      return { r, key };
+    });
   }
   attach(index: number, quote: unknown) {
-    const b = this.read();
-    const r = b.reservations.find((x) => x.index === index);
-    if (!r) throw new Error(`index ${index} is not reserved`);
-    r.quote = quote;
-    this.write(b);
+    this.locked(() => {
+      const b = this.read();
+      const r = b.reservations.find((x) => x.index === index);
+      if (!r) throw new Error(`index ${index} is not reserved`);
+      r.quote = quote;
+      this.write(b);
+    });
   }
 }
 
