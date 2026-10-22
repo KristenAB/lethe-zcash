@@ -10,14 +10,15 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { IndexBook, linkabilityReport, planBatch, quote, recoverRecipients, requireNearDelivered, swapsFromQuotes } from '@zswap/cli';
+import { IndexBook, linkabilityReport, planBatch, quote, recoverRecipients, requireNearDelivered, swapsFromQuotes, walletPaths } from '@zswap/cli';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const DEMO = resolve(ROOT, '.demo');
-const SEED = resolve(DEMO, 'seed');
+const WALLET = walletPaths(); // the same seed and index book as the CLI and the MCP server
+const DEMO = dirname(WALLET.seed);
+const SEED = WALLET.seed;
 const STATE = resolve(DEMO, 'pass2-state.json');
 if (!existsSync(SEED)) throw new Error('Setup required: .demo/seed (run the first live run, or zswap init)');
-const book = new IndexBook(resolve(DEMO, 'index-book.json'));
+const book = new IndexBook(WALLET.book);
 const st: Record<string, any> = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {};
 const save = () => writeFileSync(STATE, JSON.stringify(st, null, 2), { mode: 0o600 });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

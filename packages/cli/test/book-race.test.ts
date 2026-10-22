@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
-import { initSeed } from '../src/lib.js';
+import { IndexBook, initSeed } from '../src/lib.js';
 
 const run = promisify(execFile);
 const TSX = resolve(__dirname, '../node_modules/.bin/tsx');
@@ -18,6 +18,7 @@ describe('index book under concurrent wallet processes', () => {
     const seed = join(dir, 'seed');
     const book = join(dir, 'book.json');
     initSeed(seed);
+    new IndexBook(book).create(seed);
     const startAt = Date.now() + 2500;
     const outs = await Promise.allSettled(Array.from({ length: 6 }, () => run(TSX, [WORKER, seed, book, String(startAt)])));
     const failed = outs.flatMap((o) => (o.status === 'rejected' ? [String((o.reason as Error).message).split('\n').find((l) => /Error/.test(l))] : []));

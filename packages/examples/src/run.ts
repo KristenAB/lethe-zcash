@@ -9,13 +9,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { accountKey, chainTip, deriveRefund, IndexBook, initSeed, quote, scanRange } from '@zswap/cli';
+import { accountKey, chainTip, deriveRefund, IndexBook, initWallet, quote, scanRange, walletPaths } from '@zswap/cli';
 import { address, quicksend, spendable, zingoConfig } from './zingo.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const DEMO = resolve(ROOT, '.demo');
+const WALLET = walletPaths(); // the same seed and index book as the CLI and the MCP server
+const DEMO = dirname(WALLET.seed);
 const STATE = resolve(DEMO, 'run-state.json');
-const SEED = resolve(DEMO, 'seed');
+const SEED = WALLET.seed;
 const cfg = zingoConfig();
 mkdirSync(resolve(DEMO, 'wallets'), { recursive: true, mode: 0o700 });
 const st: Record<string, any> = existsSync(STATE) ? JSON.parse(readFileSync(STATE, 'utf8')) : {};
@@ -43,8 +44,8 @@ async function sendOnce(label: string, from: string, to: { address: string; amou
 }
 
 async function main() {
-  initSeed(SEED);
-  const book = new IndexBook(resolve(DEMO, 'index-book.json'));
+  const book = new IndexBook(WALLET.book);
+  initWallet(SEED, book); // a new wallet gets its seed and its index book together
   const recipient = JSON.parse(readFileSync(resolve(DEMO, 'near-recipient.json'), 'utf8')).account_id as string;
   const acct = accountKey(SEED);
 
@@ -57,8 +58,9 @@ async function main() {
   st.quotes ??= [];
   while (st.quotes.length < plans.length) {
     const p = plans[st.quotes.length];
-    // The published run sends all three quotes to one NEAR account on purpose, and so accepts that
-    // the recipient links them (the README says so); only the refundTo link is under test here.
+    // The Oct 20 run sent all three quotes to one NEAR account. The first review recorded that shared
+    // recipient as a linkability defect; per-swap recipients (pass 2, run-pass2.ts) fix it. This script
+    // is kept to reproduce the published Oct 20 record, which tests only the refundTo link.
     const { r } = book.reserve(SEED, { recipient, allowLinkedRecipient: true });
     const q = (await quote({ amountZat: p.zec, destinationAsset: p.dest, recipient, refundTo: r.refundTo })) as any;
     book.attach(r.index, q);

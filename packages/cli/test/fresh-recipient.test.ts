@@ -10,6 +10,7 @@ const dir = mkdtempSync(join(tmpdir(), 'zswap-fresh-'));
 const seed = join(dir, 'seed');
 initSeed(seed);
 const book = new IndexBook(join(dir, 'book.json'));
+book.create(seed);
 const implicit = /^[0-9a-f]{64}$/;
 
 describe('fresh NEAR recipient per swap', () => {

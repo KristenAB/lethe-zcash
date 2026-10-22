@@ -117,9 +117,10 @@ export interface RecoveredRecipient extends NearRecipient {
 export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; tokens?: string[] } = {}) {
   const gap = opts.gap ?? RECOVERY_GAP;
   if (!Number.isSafeInteger(gap) || gap < 0 || gap > 1000) throw new Error('gap must be a whole number up to 1000');
-  const booked = new Set(book.read().reservations.map((r) => r.index));
+  const b = book.readFor(seedFile);
+  const booked = new Set(b.reservations.map((r) => r.index));
   const out: RecoveredRecipient[] = [];
-  let upTo = book.read().next + gap;
+  let upTo = b.next + gap;
   for (let i = 0; i < upTo; i++) {
     const r: RecoveredRecipient = { ...deriveNearRecipient(seedFile, i), inBook: booked.has(i) };
     if (opts.lookup) {
@@ -128,7 +129,10 @@ export async function recoverRecipients(seedFile: string, book: IndexBook, opts:
     }
     out.push(r);
   }
-  return { gap, recipients: out, used: out.filter((r) => used(r.state)).map((r) => r.index) };
+  const usedIdx = out.filter((r) => used(r.state)).map((r) => r.index);
+  // a lookup is a recovery: the book never hands out an index it looked at (see IndexBook.advance)
+  const next = opts.lookup ? book.advance(seedFile, Math.max(-1, ...usedIdx) + 1 + gap) : b.next;
+  return { gap, recipients: out, used: usedIdx, next };
 }
 
 export interface SweepStep {

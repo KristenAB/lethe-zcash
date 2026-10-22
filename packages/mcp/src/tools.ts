@@ -1,7 +1,8 @@
 // MCP for agents swapping out of Zcash: every quote's refundTo is a fresh one-time address.
-//   ZSWAP_SEED (wallet seed file), ZSWAP_BOOK (index book), ZSWAP_MCP_LOG (one JSON line per call:
+//   ZSWAP_SEED (wallet seed file), ZSWAP_BOOK (its index book; default next to the seed), ZSWAP_MCP_LOG (one JSON line per call:
 //   time, tool, error flag and refund index only; 0600)
 import { appendFileSync, chmodSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { IndexBook, quote, recover, chainTip, SetupRequiredError, requireNearDelivered, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
@@ -36,7 +37,7 @@ const MAX_SCAN_BLOCKS = 100_000;
 
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'zec-unlinkable-swaps', version: '0.1.0' });
-  const book = () => new IndexBook(need('ZSWAP_BOOK'));
+  const book = () => new IndexBook(process.env.ZSWAP_BOOK || join(dirname(need('ZSWAP_SEED')), 'index-book.json'));
 
   server.registerTool(
     'safe_quote',
@@ -60,7 +61,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'book',
     { title: 'Reserved refund indices', description: 'Each reserved index and the refundTo address it was given. Read-only.', annotations: { readOnlyHint: true } },
-    () => run('book', () => book().read().reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, reservedAt: r.reservedAt }))),
+    () => run('book', () => book().readFor(need('ZSWAP_SEED')).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, reservedAt: r.reservedAt }))),
   );
 
   server.registerTool(
@@ -94,7 +95,7 @@ export function createServer(): McpServer {
     },
     (a) =>
       run('sweep_plan', async () => {
-        const fresh = new Set(book().read().reservations.filter((r) => r.freshRecipient).map((r) => r.index));
+        const fresh = new Set(book().readFor(need('ZSWAP_SEED')).reservations.filter((r) => r.freshRecipient).map((r) => r.index));
         const { recipients } = await recoverRecipients(need('ZSWAP_SEED'), book(), { gap: 0, lookup: a.lookup === true });
         const dest = Object.fromEntries(Object.entries(a.destinations ?? {}).map(([k, v]) => [Number(k), v]));
         return sweepPlan(recipients.filter((r) => fresh.has(r.index)), dest);

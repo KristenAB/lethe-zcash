@@ -15,16 +15,25 @@ describe('recovery without the index book', () => {
 
   it('a restored wallet (seed only, no book) scans the first 10 refund keys', () => {
     const tip = chainTip();
-    const r = recover(seed, new IndexBook(join(dir, 'missing-book.json')), tip - 2, tip);
+    const restored = new IndexBook(join(dir, 'missing-book.json'));
+    const r = recover(seed, restored, tip - 2, tip);
     expect(r.keys).toEqual(['account', ...labels(10)]);
     expect(r.blocks).toBe(3);
+    // the restored wallet's new book never hands out an index recovery looked at (0..9 may be on public quotes)
+    expect(restored.read().next).toBe(10);
+    expect(r.next).toBe(10);
   });
 
   it('with a book, it scans every reserved index plus the lookahead past it', () => {
     const book = new IndexBook(join(dir, 'book.json'));
+    book.create(seed);
     for (let i = 0; i < 3; i++) book.reserve(seed);
     const tip = chainTip();
-    expect(recover(seed, book, tip - 1, tip).keys).toEqual(['account', ...labels(13)]);
     expect(recover(seed, book, tip - 1, tip, 2).keys).toEqual(['account', ...labels(5)]);
+    expect(book.read().next).toBe(3);
+    expect(recover(seed, book, tip - 1, tip).keys).toEqual(['account', ...labels(13)]);
+    // after looking at 0..9, the book moves past them (it is at 10, the lookahead end with no hit)
+    expect(book.read().next).toBe(10);
+    expect(book.reserve(seed).r.index).toBe(10);
   });
 });

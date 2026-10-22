@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // zswap — swaps out of a Zcash wallet where every swap's refundTo is a one-time address.
-//   zswap init                                   create the wallet seed (.demo/seed by default; ZSWAP_SEED)
+//   zswap init [--new]                           create the wallet seed and its index book (<repo>/.demo/ by default;
+//                                                ZSWAP_SEED, ZSWAP_BOOK); --new: a book for an existing, never-used seed
+//   zswap where                                  the seed and index book paths this command uses (names only)
 //   zswap quote <zec> <destAsset> [recipient] [--allow-linked-recipient]
 //                                                reserve the next index, dry 1Click quote with refundTo = its address;
 //                                                without a recipient, the swap's own NEAR implicit account (from the seed) receives;
@@ -17,18 +19,20 @@
 //   zswap recover <fromHeight> [toHeight] [--gap N]  compact-block scan (testnet) with the account key and refund keys
 //                                                0..(last reserved + N), N default 10: works from the seed alone
 //   zswap book                                   reserved indices and their public refundTo addresses
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, IndexBook, initSeed, LinkedRecipientError, linkabilityReport, planBatch, quote, recover, recoverRecipients, requireNearDelivered, SetupRequiredError, sweepPlan, swapsFromQuotes, writeNearCredentials } from './lib.js';
+import { BlockedError, chainTip, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, quote, recover, recoverRecipients, requireNearDelivered, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
 
-const seed = process.env.ZSWAP_SEED ?? resolve('.demo/seed');
-const book = new IndexBook(process.env.ZSWAP_BOOK ?? resolve('.demo/index-book.json'));
+const paths = walletPaths();
+const seed = paths.seed;
+const book = new IndexBook(paths.book);
 const argv = process.argv.slice(2);
 const flags = new Set<string>();
 const opts: Record<string, string[]> = {};
 const positional: string[] = [];
 for (let i = 0; i < argv.length; i++) {
   const x = argv[i];
-  if (x === '--allow-linked-recipient' || x === '--lookup' || x === '--split') flags.add(x);
+  if (x === '--allow-linked-recipient' || x === '--lookup' || x === '--split' || x === '--new') flags.add(x);
   else if (['--gap', '--to', '--round', '--window', '--min-gap'].includes(x)) (opts[x] ??= []).push(argv[++i] ?? '');
   else positional.push(x);
 }
@@ -38,7 +42,8 @@ const [cmd, ...a] = positional;
 const out = (x: unknown) => console.log(JSON.stringify(x, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2));
 
 try {
-  if (cmd === 'init') out({ created: initSeed(seed) });
+  if (cmd === 'init') out(initWallet(seed, book, { assertNew: flags.has('--new') }));
+  else if (cmd === 'where') out({ seed, book: book.path, seedExists: existsSync(seed), bookExists: book.exists() });
   else if (cmd === 'quote') {
     const [zec, dest, given] = a;
     if (!zec || !dest) throw new Error('usage: zswap quote <zec> <destinationAsset> [recipient]');
@@ -64,13 +69,13 @@ try {
       if (!m) throw new Error('usage: --to <index>=<account>');
       destinations[Number(m[1])] = m[2];
     }
-    const fresh = book.read().reservations.filter((r) => r.freshRecipient).map((r) => r.index);
+    const fresh = book.readFor(seed).reservations.filter((r) => r.freshRecipient).map((r) => r.index);
     const { recipients } = await recoverRecipients(seed, book, { gap: 0, lookup: flags.has('--lookup') });
     out(sweepPlan(recipients.filter((r) => fresh.includes(r.index)), destinations));
   } else if (cmd === 'near-key') {
     const [i, file] = a;
     if (!i || !file) throw new Error('usage: zswap near-key <index> <out-file>');
-    out(writeNearCredentials(seed, Number(i), resolve(file)));
+    out(writeNearCredentials(seed, Number(i), resolve(process.env.INIT_CWD ?? process.cwd(), file)));
   } else if (cmd === 'plan') {
     const [zec, dest, recipient] = a;
     if (!zec || !dest) throw new Error('usage: zswap plan <zec> <destinationAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S]');
@@ -81,10 +86,10 @@ try {
     const p = planBatch({ amountZat: BigInt(Math.round(Number(zec) * 1e8)), destinationAsset: dest, recipient, round, split: flags.has('--split'), delay: windowMin === undefined ? undefined : { windowS: windowMin * 60, minGapS: opts['--min-gap'] ? Number(opts['--min-gap'][0]) : undefined }, start: now, jwt: !!process.env.ONECLICK_JWT });
     out({ ...p, swaps: p.swaps.map((s) => ({ ...s, at: new Date(Number(s.at)).toISOString() })) });
   } else if (cmd === 'report') {
-    const quoted = book.read().reservations.filter((r) => r.quote) as unknown as { quote: Parameters<typeof swapsFromQuotes>[0][number] }[];
+    const quoted = book.readFor(seed).reservations.filter((r) => r.quote) as unknown as { quote: Parameters<typeof swapsFromQuotes>[0][number] }[];
     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
-  } else if (cmd === 'book') out(book.read().reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), reservedAt: r.reservedAt })));
-  else throw new Error('usage: zswap init | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] | book');
+  } else if (cmd === 'book') out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), reservedAt: r.reservedAt })));
+  else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] | book');
 } catch (e) {
   console.error((e as Error).message);
   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);

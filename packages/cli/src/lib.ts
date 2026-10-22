@@ -1,7 +1,7 @@
 // zswap library: index reservation, one-time keys (zswap-keys), 1Click quotes, recovery scans.
 import { execFileSync } from 'node:child_process';
-import { closeSync, existsSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deriveNearRecipient } from './recipient.js';
 
@@ -21,7 +21,20 @@ export class LinkedRecipientError extends Error {
   }
 }
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+/** The repository root (from packages/cli/src or packages/cli/dist). */
+export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+
+/**
+ * Where the wallet lives, the same for the CLI (whatever directory pnpm runs it in), the MCP server and
+ * the examples: ZSWAP_SEED, default <repo>/.demo/seed; ZSWAP_BOOK, default the index book next to that
+ * seed. A relative path is taken from the directory the command was typed in (pnpm's INIT_CWD).
+ */
+export function walletPaths(env: NodeJS.ProcessEnv = process.env): { seed: string; book: string } {
+  const base = env.INIT_CWD ?? process.cwd();
+  const seed = env.ZSWAP_SEED ? resolve(base, env.ZSWAP_SEED) : resolve(ROOT, '.demo/seed');
+  const book = env.ZSWAP_BOOK ? resolve(base, env.ZSWAP_BOOK) : join(dirname(seed), 'index-book.json');
+  return { seed, book };
+}
 
 function bin(envName: string, rel: string, name: string): string {
   const v = process.env[envName];
@@ -48,11 +61,33 @@ export function deriveRefund(seedFile: string, index: number): RefundKey {
 }
 
 export function accountKey(seedFile: string): { address: string; uivk: string; fvk_id: string } {
+  if (!existsSync(seedFile)) throw new SetupRequiredError(seedFile, 'run `zswap init`');
   return JSON.parse(execFileSync(keysBin(), ['account', seedFile]).toString());
 }
 
+/** Creates a 32-byte seed (0600) if missing, and its folder (0700). Returns whether it was created. */
 export function initSeed(seedFile: string): boolean {
+  mkdirSync(dirname(seedFile), { recursive: true, mode: 0o700 });
   return JSON.parse(execFileSync(keysBin(), ['init', seedFile]).toString()).created;
+}
+
+/**
+ * A new wallet: the seed and its empty index book, bound to each other. For a seed that already exists
+ * without a book, the book is created only with `assertNew` (the caller says this seed never quoted a
+ * swap); otherwise its indices may already be public, and `zswap recover` must rebuild the book first.
+ */
+export function initWallet(seedFile: string, book: IndexBook, opts: { assertNew?: boolean } = {}): { seedCreated: boolean; bookCreated: boolean; seed: string; book: string } {
+  const seedCreated = initSeed(seedFile);
+  let bookCreated = false;
+  if (!book.exists()) {
+    if (!seedCreated && !opts.assertNew)
+      throw new SetupRequiredError(
+        `index book for the existing seed ${seedFile}`,
+        `expected at ${book.path}. Run \`zswap recover <birthday-height>\` to rebuild it from the chain, or \`zswap init --new\` if this seed has never quoted a swap`,
+      );
+    bookCreated = book.create(seedFile);
+  }
+  return { seedCreated, bookCreated, seed: seedFile, book: book.path };
 }
 
 export interface Reservation {
@@ -79,7 +114,12 @@ const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteReques
 export interface Book {
   next: number;
   reservations: Reservation[];
+  /** the seed this book belongs to: fvk_id of its account key (a hash, not a key) */
+  fvk_id?: string;
 }
+
+const fvkIds = new Map<string, string>();
+const seedId = (seedFile: string) => fvkIds.get(seedFile) ?? fvkIds.set(seedFile, accountKey(seedFile).fvk_id).get(seedFile)!;
 
 /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
 const STALE_LOCK_MS = 30_000;
@@ -94,15 +134,65 @@ const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(
  */
 export class IndexBook {
   constructor(readonly path: string) {}
+  exists(): boolean {
+    return existsSync(this.path);
+  }
   read(): Book {
     return existsSync(this.path) ? JSON.parse(readFileSync(this.path, 'utf8')) : { next: 0, reservations: [] };
   }
+  /**
+   * Refuses a book written for another seed: its indices say nothing about this seed's, and reserving
+   * from it would hand out indices this seed already put on public quotes. A book from before the
+   * binding is checked by re-deriving its first refundTo, then bound.
+   */
+  private bind(b: Book, seedFile: string): Book {
+    const id = seedId(seedFile);
+    const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+    if (b.fvk_id !== undefined) {
+      if (b.fvk_id !== id) throw other();
+      return b;
+    }
+    const first = b.reservations[0];
+    if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
+    b.fvk_id = id;
+    return b;
+  }
+  /** The read-only view of this seed's book (refuses another seed's). */
+  readFor(seedFile: string): Book {
+    return this.bind(this.read(), seedFile);
+  }
+  /** Creates the empty book bound to `seedFile`; false if it already exists. */
+  create(seedFile: string): boolean {
+    return this.locked(() => {
+      if (existsSync(this.path)) {
+        this.bind(this.read(), seedFile);
+        return false;
+      }
+      this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
+      return true;
+    });
+  }
+  /**
+   * After a recovery: never hand out an index that recovery looked at. Indices inside the lookahead may
+   * have been named in public quotes with nothing ever paid to them, so `next` moves past them. Creates
+   * the book (bound to the seed) for a wallet restored from its seed alone.
+   */
+  advance(seedFile: string, next: number): number {
+    return this.locked(() => {
+      const b = existsSync(this.path) ? this.bind(this.read(), seedFile) : { next: 0, reservations: [], fvk_id: seedId(seedFile) };
+      b.next = Math.max(b.next, next);
+      this.write(b);
+      return b.next;
+    });
+  }
   private write(b: Book) {
+    mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     const tmp = `${this.path}.${process.pid}.tmp`;
     writeFileSync(tmp, JSON.stringify(b, null, 2), { mode: 0o600 });
     renameSync(tmp, this.path);
   }
   private locked<T>(fn: () => T): T {
+    mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     const lock = `${this.path}.lock`;
     const until = Date.now() + LOCK_WAIT_MS;
     let fd: number | undefined;
@@ -131,7 +221,12 @@ export class IndexBook {
   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
     return this.locked(() => {
-      const b = this.read();
+      if (!existsSync(this.path))
+        throw new SetupRequiredError(
+          `this seed has no index book (${this.path})`,
+          'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
+        );
+      const b = this.bind(this.read(), seedFile);
       const index = b.next;
       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : opts.recipient;
       const earlier = recipient === undefined ? undefined : b.reservations.find((x) => recipientOf(x) === recipient);
@@ -230,13 +325,16 @@ export const RECOVERY_GAP = 10;
 export function recover(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
   if (!Number.isSafeInteger(gap) || gap < 0) throw new Error('gap must be a whole number');
   const derived: Record<string, string> = { account: accountKey(seedFile).uivk };
-  let upTo = book.read().next + gap;
+  let upTo = book.readFor(seedFile).next + gap;
   for (;;) {
     for (let i = 0; i < upTo; i++) derived[`refund-${i}`] ??= deriveRefund(seedFile, i).testnet.uivk;
     const keys = Object.fromEntries(Object.entries(derived).filter(([l]) => l === 'account' || Number(l.slice('refund-'.length)) < upTo));
     const out = scanRange(keys, from, to);
     const highest = Math.max(-1, ...out.hits.filter((h) => h.key.startsWith('refund-')).map((h) => Number(h.key.slice('refund-'.length))));
-    if (highest + 1 + gap <= upTo) return { ...out, keys: Object.keys(keys), gap };
+    if (highest + 1 + gap <= upTo) {
+      const next = book.advance(seedFile, highest + 1 + gap);
+      return { ...out, keys: Object.keys(keys), gap, next };
+    }
     upTo = highest + 1 + gap;
   }
 }

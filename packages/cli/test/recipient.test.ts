@@ -10,7 +10,9 @@ import { IndexBook, initSeed, LinkedRecipientError } from '../src/lib.js';
 const fresh = () => {
   const dir = mkdtempSync(join(tmpdir(), 'zswap-recipient-'));
   initSeed(join(dir, 'seed'));
-  return { seed: join(dir, 'seed'), book: new IndexBook(join(dir, 'book.json')) };
+  const book = new IndexBook(join(dir, 'book.json'));
+  book.create(join(dir, 'seed'));
+  return { seed: join(dir, 'seed'), book };
 };
 const A = 'a'.repeat(64);
 const B = 'b'.repeat(64);

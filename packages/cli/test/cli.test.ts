@@ -16,6 +16,7 @@ describe('one-time refund addresses', () => {
     expect(initSeed(seed)).toBe(true);
     expect(initSeed(seed)).toBe(false);
     const book = new IndexBook(join(dir, 'book.json'));
+    expect(book.create(seed)).toBe(true);
     const a = book.reserve(seed);
     const b = book.reserve(seed);
     expect([a.r.index, b.r.index]).toEqual([0, 1]);

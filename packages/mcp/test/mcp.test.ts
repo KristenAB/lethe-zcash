@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { chainTip, initSeed, keysBin, scanBin } from '@zswap/cli';
+import { chainTip, IndexBook, initSeed, keysBin, scanBin } from '@zswap/cli';
 
 const dir = mkdtempSync(join(tmpdir(), 'zswap-mcp-'));
 let client: Client;
@@ -19,8 +19,11 @@ const call = async (c: Client, name: string, args: Record<string, unknown> = {})
   return { isError: r.isError, text: r.content[0].text };
 };
 
+const newBook = (name: string) => new IndexBook(join(dir, name)).create(join(dir, 'seed'));
+
 beforeAll(async () => {
   initSeed(join(dir, 'seed'));
+  newBook('book.json');
   client = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'book.json') });
 });
 afterAll(async () => client?.close());
@@ -68,6 +71,7 @@ describe('zswap-mcp', () => {
   it('the call log (ZSWAP_MCP_LOG) is private (0600) and holds no address, recipient or correlation id', async () => {
     const log = join(dir, 'calls.jsonl');
     writeFileSync(log, '', { mode: 0o644 }); // an existing, world-readable file is tightened too
+    newBook('b3.json');
     const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b3.json'), ZSWAP_MCP_LOG: log });
     const q = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'd'.repeat(64) })).text);
     await c.close();
@@ -82,6 +86,7 @@ describe('zswap-mcp', () => {
 
   it('without a recipient, each swap gets its own fresh NEAR recipient, and the seed alone finds them again', async () => {
     const env = { ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b4.json') };
+    newBook('b4.json');
     const c = await connect(env);
     const a = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near' })).text);
     const b = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.2, destination_asset: 'nep141:wrap.near' })).text);
