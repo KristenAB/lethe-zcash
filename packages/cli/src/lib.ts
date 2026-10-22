@@ -366,7 +366,10 @@ export class IndexBook {
  * its refundTo goes out; the quote is attached to it, or its failure recorded (with whether 1Click could
  * have seen the request, which the recipient guard needs).
  */
-export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean }) {
+export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+  // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+  if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+    throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
   const { r } = book.reserve(
     seedFile,
@@ -376,7 +379,7 @@ export async function safeQuote(seedFile: string, book: IndexBook, input: { amou
   );
   let q: Record<string, unknown>;
   try {
-    q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo });
+    q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
   } catch (e) {
     book.failed(r.index, e);
     throw e;
@@ -385,6 +388,15 @@ export async function safeQuote(seedFile: string, book: IndexBook, input: { amou
   return { r, q };
 }
 
+/**
+ * 1Click's request visibility. `public` (its default) publishes the quote request; `basic` and
+ * `advanced` are Confidential Intents, answered only for an authenticated partner (ONECLICK_JWT). In
+ * every mode 1Click and its solvers still see refundTo and recipient, and the deposit, refund and
+ * delivery are still on public chains.
+ */
+export type Confidentiality = 'public' | 'basic' | 'advanced';
+export const CONFIDENTIALITY: readonly Confidentiality[] = ['public', 'basic', 'advanced'];
+
 export interface QuoteInput {
   amountZat: bigint;
   destinationAsset: string;
@@ -392,6 +404,8 @@ export interface QuoteInput {
   refundTo: string;
   slippageBps?: number;
   dry?: boolean;
+  /** passed through to 1Click when set; basic/advanced need ONECLICK_JWT */
+  confidentiality?: Confidentiality;
 }
 
 /** A 1Click quote with `refundTo` set to a one-time address. dry=false creates a live deposit address. */
@@ -411,10 +425,19 @@ export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
     recipientType: 'DESTINATION_CHAIN',
     deadline: new Date(Date.now() + 3_600_000).toISOString(),
     quoteWaitingTimeMs: 3000,
+    ...(q.confidentiality ? { confidentiality: q.confidentiality } : {}),
   };
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (process.env.ONECLICK_JWT) headers.authorization = `Bearer ${process.env.ONECLICK_JWT}`;
   const r = await httpJson('1Click', `${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (r.status === 401) {
+    const said = (r.body as { message?: string } | undefined)?.message ?? answerSnippet(r);
+    throw new SetupRequiredError(
+      'ONECLICK_JWT',
+      process.env.ONECLICK_JWT ? `1Click rejected the partner JWT: ${said} (HTTP 401)` : `1Click: ${said} (HTTP 401); ${q.confidentiality ?? 'this'} quotes need a 1Click partner JWT`,
+      'refused',
+    );
+  }
   if (!r.ok) throw new HttpError(`1Click refused the quote: HTTP ${r.status} ${answerSnippet(r)}`, 'refused', r.status);
   if (r.body === null || typeof r.body !== 'object') throw new HttpError(`1Click answered HTTP ${r.status} with a body that is not a JSON object: ${answerSnippet(r)}`, 'refused', r.status);
   return r.body as Record<string, unknown>;

@@ -60,6 +60,14 @@ describe('zswap-mcp', () => {
     expect(r.text).toMatch(/at most 100000 blocks/);
   });
 
+  it('a Confidential Intents quote (confidentiality basic) without ONECLICK_JWT: Setup required, no index reserved', async () => {
+    const before = JSON.parse((await call(client, 'book')).text).length;
+    const r = await call(client, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', confidentiality: 'basic' });
+    expect(r.isError).toBe(true);
+    expect(r.text).toMatch(/^Setup required: ONECLICK_JWT/);
+    expect(JSON.parse((await call(client, 'book')).text)).toHaveLength(before);
+  });
+
   it('without a seed: Setup required', async () => {
     const c = await connect({ ZSWAP_BOOK: join(dir, 'b2.json') });
     const r = await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'b'.repeat(64) });

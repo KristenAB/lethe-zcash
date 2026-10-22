@@ -44,12 +44,12 @@ export function createServer(): McpServer {
     {
       title: 'Quote a ZEC swap with a one-time refund address',
       description:
-        'Reserves the next refund index, derives its one-time Zcash address, and asks NEAR Intents 1Click for a DRY quote with refundTo set to it. No deposit address is created and no funds move. Omit recipient to have the swap delivered to its own fresh NEAR implicit account derived from the wallet seed (only for assets 1Click delivers on NEAR). Returns the refundTo, recipient, quoted output and provider signature. Refuses a recipient that an earlier swap from this wallet already used (the recipient is public, so reuse links the swaps) unless allow_linked_recipient is true.',
-      inputSchema: { amount_zec: z.number().positive().max(10), destination_asset: z.string().min(3), recipient: z.string().min(2).optional(), allow_linked_recipient: z.boolean().optional() },
+        'Reserves the next refund index, derives its one-time Zcash address, and asks NEAR Intents 1Click for a DRY quote with refundTo set to it. No deposit address is created and no funds move. Omit recipient to have the swap delivered to its own fresh NEAR implicit account derived from the wallet seed (only for assets 1Click delivers on NEAR). Returns the refundTo, recipient, quoted output and provider signature. Refuses a recipient that an earlier swap from this wallet already used (the recipient is public, so reuse links the swaps) unless allow_linked_recipient is true. confidentiality basic or advanced asks for a 1Click Confidential Intents quote (not published; 1Click and its solvers still see refundTo and recipient) and needs ONECLICK_JWT, else Setup required.',
+      inputSchema: { amount_zec: z.number().positive().max(10), destination_asset: z.string().min(3), recipient: z.string().min(2).optional(), allow_linked_recipient: z.boolean().optional(), confidentiality: z.enum(['public', 'basic', 'advanced']).optional() },
     },
     (a) =>
       run('safe_quote', async () => {
-        const res = await safeQuote(need('ZSWAP_SEED'), book(), { amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true });
+        const res = await safeQuote(need('ZSWAP_SEED'), book(), { amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true, confidentiality: a.confidentiality });
         const r = res.r;
         const q = res.q as { quote: Record<string, string>; quoteRequest: Record<string, string>; signature: string; correlationId: string };
         return { index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { fresh_recipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amount_out: q.quote.amountOutFormatted, refund_fee_zat: q.quote.refundFee, request_visibility: q.quoteRequest.confidentiality, signature: q.signature, correlation_id: q.correlationId };
