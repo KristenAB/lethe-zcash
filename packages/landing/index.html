@@ -386,6 +386,8 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
             playing(false);
           };
           const start = () => {
+            // the replay is quiet again: a picked swap made the addresses polite, the timer must not announce them
+            keys.setAttribute('aria-live', 'off');
             clearInterval(timer);
             timer = setInterval(() => show((at + 1) % parts.length, !reduce), 4200);
             playing(true);

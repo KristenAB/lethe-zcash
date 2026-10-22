@@ -101,6 +101,13 @@ test.describe('landing', () => {
     await steps(page).getByRole('button', { name: `Swap 3: ${partName(P[2])}` }).click();
     await expect(keys).toHaveAttribute('aria-live', 'polite');
     await expectSwap(page, 2);
+    // Play after a pick: the replay is quiet again while its timer runs (a long address every 4.2 s otherwise)
+    await widget(page).getByRole('button', { name: 'Play replay' }).click();
+    await page.mouse.move(0, 0);
+    await expect(widget(page).getByRole('button', { name: 'Pause replay' })).toBeVisible();
+    await expect(keys).toHaveAttribute('aria-live', 'off');
+    await expectSwap(page, 0);
+    await expect(keys).toHaveAttribute('aria-live', 'off');
   });
 
   test('clicking each swap shows its own quote, refund address and recipient', async ({ page }, info) => {
