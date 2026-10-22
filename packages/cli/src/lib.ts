@@ -1,5 +1,5 @@
 // zswap library: index reservation, one-time keys (zswap-keys), 1Click quotes, recovery scans.
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -545,6 +545,38 @@ export function chainTip(): number {
   return Number(execFileSync(scanBin(), ['tip'], { env }).toString().trim());
 }
 
+/** How long one block scan or tip request may take when run asynchronously: ZSWAP_SCAN_TIMEOUT_MS, default 5 min. */
+export function scanTimeoutMs(): number {
+  const v = Number(process.env.ZSWAP_SCAN_TIMEOUT_MS ?? 300_000);
+  return Number.isFinite(v) && v > 0 ? v : 300_000;
+}
+/** Runs the scanner without blocking the event loop (the MCP server keeps answering), killed after the timeout. */
+function scanner(args: string[], env: Record<string, string>, what: string): Promise<string> {
+  const ms = scanTimeoutMs();
+  return new Promise((done, fail) => {
+    execFile(scanBin(), args, { env, maxBuffer: 16 << 20, timeout: ms, killSignal: 'SIGKILL' }, (e, stdout, stderr) => {
+      if (!e) return done(stdout.toString());
+      if ((e as { killed?: boolean }).killed) return fail(new Error(`${what} did not finish in ${ms / 1000} s (ZSWAP_SCAN_TIMEOUT_MS); is lightwalletd at ${process.env.ZSWAP_LWD_URL ?? 'the default URL'} answering? Nothing was changed`));
+      fail(new Error(`${what} failed: ${String(stderr).trim().slice(0, 300) || e.message}`));
+    });
+  });
+}
+const lwdEnv = (extra: Record<string, string> = {}) => {
+  const env: Record<string, string> = { PATH: process.env.PATH ?? '', ...extra };
+  if (process.env.ZSWAP_LWD_URL) env.ZPV_LWD_URL = process.env.ZSWAP_LWD_URL;
+  return env;
+};
+/** scanRange without blocking: for the MCP server. */
+export async function scanRangeAsync(keys: Record<string, string>, from: number, to: number): Promise<{ blocks: number; hits: Hit[] }> {
+  return JSON.parse(await scanner(['scan-range', String(from), String(to)], lwdEnv({ ZPV_UIVKS: Object.entries(keys).map(([l, k]) => `${l}=${k}`).join(',') }), `block scan ${from}..${to}`));
+}
+/** chainTip without blocking: for the MCP server. */
+export async function chainTipAsync(): Promise<number> {
+  const tip = Number((await scanner(['tip'], lwdEnv(), 'chain tip request')).trim());
+  if (!Number.isSafeInteger(tip)) throw new Error('chain tip request: lightwalletd returned no height');
+  return tip;
+}
+
 /** How many unused indices past the last known one a recovery also scans (like a BIP 44 gap limit). */
 export const RECOVERY_GAP = 10;
 
@@ -554,20 +586,42 @@ export const RECOVERY_GAP = 10;
  * to the first indices; a hit inside the lookahead extends it and the range is scanned again.
  */
 export function recover(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
+  const s = recoverySteps(seedFile, book, gap);
+  for (;;) {
+    const done = s.after(scanRange(s.keys(), from, to));
+    if (done) return done;
+  }
+}
+/** recover without blocking the event loop, each scan bounded by ZSWAP_SCAN_TIMEOUT_MS: for the MCP server. */
+export async function recoverAsync(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
+  const s = recoverySteps(seedFile, book, gap);
+  for (;;) {
+    const done = s.after(await scanRangeAsync(s.keys(), from, to));
+    if (done) return done;
+  }
+}
+/** The recovery loop of recover / recoverAsync: which keys to scan next, and whether a scan's hits close the window. */
+function recoverySteps(seedFile: string, book: IndexBook, gap: number) {
   if (!Number.isSafeInteger(gap) || gap < 0) throw new Error('gap must be a whole number');
   const derived: Record<string, string> = { account: accountKey(seedFile).uivk };
   let upTo = book.readFor(seedFile).next + gap;
-  for (;;) {
-    for (let i = 0; i < upTo; i++) derived[`refund-${i}`] ??= deriveRefund(seedFile, i).testnet.uivk;
-    const keys = Object.fromEntries(Object.entries(derived).filter(([l]) => l === 'account' || Number(l.slice('refund-'.length)) < upTo));
-    const out = scanRange(keys, from, to);
-    const highest = Math.max(-1, ...out.hits.filter((h) => h.key.startsWith('refund-')).map((h) => Number(h.key.slice('refund-'.length))));
-    if (highest + 1 + gap <= upTo) {
-      const next = book.advance(seedFile, highest + 1 + gap);
-      return { ...out, keys: Object.keys(keys), gap, next };
-    }
-    upTo = highest + 1 + gap;
-  }
+  let keys: Record<string, string> = {};
+  return {
+    keys() {
+      for (let i = 0; i < upTo; i++) derived[`refund-${i}`] ??= deriveRefund(seedFile, i).testnet.uivk;
+      keys = Object.fromEntries(Object.entries(derived).filter(([l]) => l === 'account' || Number(l.slice('refund-'.length)) < upTo));
+      return keys;
+    },
+    after(out: { blocks: number; hits: Hit[] }) {
+      const highest = Math.max(-1, ...out.hits.filter((h) => h.key.startsWith('refund-')).map((h) => Number(h.key.slice('refund-'.length))));
+      if (highest + 1 + gap <= upTo) {
+        const next = book.advance(seedFile, highest + 1 + gap);
+        return { ...out, keys: Object.keys(keys), gap, next };
+      }
+      upTo = highest + 1 + gap;
+      return undefined;
+    },
+  };
 }
 
 /** The end of a recovery's window: every known index, the highest one any signal found, plus the gap. */
@@ -580,11 +634,12 @@ export const lookaheadEnd = (next: number, found: number[], gap: number) => Math
  * starts past it, until neither finds more. Read-only on both chains.
  */
 export async function recoverAll(seedFile: string, book: IndexBook, from: number, to: number, opts: { gap?: number; tokens?: string[] } = {}) {
+  // the scan runs without blocking (and bounded), so the MCP server keeps answering other tools meanwhile
   const gap = opts.gap ?? RECOVERY_GAP;
   let before = -1;
   for (;;) {
     const near = await recoverRecipients(seedFile, book, { gap, lookup: true, probeAhead: true, tokens: opts.tokens });
-    const zcash = recover(seedFile, book, from, to, gap);
+    const zcash = await recoverAsync(seedFile, book, from, to, gap);
     if (zcash.next === before) return { ...zcash, near: { used: near.used, checked: near.checked } };
     before = zcash.next;
   }

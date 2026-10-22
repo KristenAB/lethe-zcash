@@ -1,6 +1,7 @@
 // Real MCP client ↔ zswap-mcp (stdio) ↔ real 1Click API (dry quotes) and testnet lightwalletd.
 import { spawn } from 'node:child_process';
 import { createServer as httpServer } from 'node:http';
+import { createServer as tcpServer, type Socket } from 'node:net';
 import { chmodSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -208,5 +209,30 @@ describe('zswap-mcp', () => {
     // only the booked swap's recipient was sent, not the unused ones ahead
     expect([...new Set(asked)]).toEqual([a.recipient]);
     expect(JSON.parse(readFileSync(bookPath, 'utf8')).next).toBe(1);
+  });
+
+  it('a lightwalletd that never answers: recover fails after ZSWAP_SCAN_TIMEOUT_MS, and other tools answer meanwhile (the scan used to block the whole server)', async () => {
+    const held: Socket[] = [];
+    const silent = tcpServer((sock) => held.push(sock)); // accepts, never answers
+    await new Promise<void>((r) => silent.listen(0, '127.0.0.1', r));
+    const lwd = `http://127.0.0.1:${(silent.address() as { port: number }).port}`;
+    newBook('b7.json');
+    const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b7.json'), ZSWAP_LWD_URL: lwd, ZSWAP_SCAN_TIMEOUT_MS: '3000' });
+    const t0 = Date.now();
+    const rec = call(c, 'recover', { from_height: 3_000_000 });
+    await new Promise((r) => setTimeout(r, 300));
+    const p0 = Date.now();
+    const plan = await call(c, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', split: true });
+    const planMs = Date.now() - p0;
+    const r = await rec;
+    const recMs = Date.now() - t0;
+    await c.close();
+    for (const s of held) s.destroy();
+    await new Promise((done) => silent.close(done));
+    expect(plan.isError).toBeUndefined();
+    expect(planMs).toBeLessThan(1500);
+    expect(r.isError).toBe(true);
+    expect(r.text).toMatch(/chain tip request did not finish in 3 s \(ZSWAP_SCAN_TIMEOUT_MS\)/);
+    expect(recMs).toBeLessThan(10_000);
   });
 });

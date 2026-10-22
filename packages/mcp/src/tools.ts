@@ -5,7 +5,7 @@ import { appendFileSync, chmodSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { IndexBook, recover, recoverAll, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch, zecNumberToZat } from '@zswap/cli';
+import { IndexBook, recoverAsync, recoverAll, chainTipAsync, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch, zecNumberToZat } from '@zswap/cli';
 
 const need = (k: string) => process.env[k] || (() => { throw new SetupRequiredError(k); })();
 /**
@@ -89,15 +89,15 @@ export function createServer(): McpServer {
     {
       title: 'Find refunds (testnet)',
       description:
-        'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, extended past any hit, so it also works for a wallet restored from its seed; reports which key found which payment. With lookup: true it also reads each per-swap NEAR recipient on NEAR mainnet, including the gap of unused ones ahead (a restored wallet needs them), and finds on either chain extend the other lookahead. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s. The Zcash scan does not leak this way (it decrypts locally). Afterwards the local index book never hands out an index the recovery looked at (it is created for a restored wallet). Sends nothing.',
+        'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, extended past any hit, so it also works for a wallet restored from its seed; reports which key found which payment. With lookup: true it also reads each per-swap NEAR recipient on NEAR mainnet, including the gap of unused ones ahead (a restored wallet needs them), and finds on either chain extend the other lookahead. Each block scan runs in the background, bounded by ZSWAP_SCAN_TIMEOUT_MS (default 5 min), so other tools keep answering. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s. The Zcash scan does not leak this way (it decrypts locally). Afterwards the local index book never hands out an index the recovery looked at (it is created for a restored wallet). Sends nothing.',
       inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional() },
       annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
     },
     (a) =>
       run('recover', async () => {
-        const tip = chainTip();
+        const tip = await chainTipAsync();
         if (tip - a.from_height > MAX_SCAN_BLOCKS) throw new Error(`recover scans at most ${MAX_SCAN_BLOCKS} blocks per call (asked ${tip - a.from_height} from ${a.from_height}); use a later from_height, or the zswap CLI for a full rescan`);
-        return a.lookup ? recoverAll(need('ZSWAP_SEED'), book(), a.from_height, tip, { gap: a.gap }) : recover(need('ZSWAP_SEED'), book(), a.from_height, tip, a.gap);
+        return a.lookup ? recoverAll(need('ZSWAP_SEED'), book(), a.from_height, tip, { gap: a.gap }) : recoverAsync(need('ZSWAP_SEED'), book(), a.from_height, tip, a.gap);
       }),
   );
   server.registerTool(
