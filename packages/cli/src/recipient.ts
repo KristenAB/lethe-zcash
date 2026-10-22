@@ -6,7 +6,7 @@
 // m/44'/397'/1'/i'), so the seed alone finds every one of them again.
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { IndexBook, keysBin, ONECLICK, RECOVERY_GAP, SetupRequiredError } from './lib.js';
+import { answerSnippet, httpJson, IndexBook, keysBin, ONECLICK, RECOVERY_GAP, SetupRequiredError } from './lib.js';
 
 export const NEAR_RPC = process.env.ZSWAP_NEAR_RPC ?? 'https://rpc.mainnet.fastnear.com';
 
@@ -37,9 +37,10 @@ let tokenList: Promise<{ assetId: string; blockchain: string; symbol: string; co
  * own token list (no funds, no key). An asset delivered on another chain needs a recipient there.
  */
 export async function assetChain(destinationAsset: string): Promise<{ blockchain: string; symbol: string; contract?: string }> {
-  tokenList ??= fetch(`${ONECLICK}/v0/tokens`).then(async (r) => {
-    if (!r.ok) throw new Error(`1Click token list: HTTP ${r.status}`);
-    return r.json();
+  tokenList ??= httpJson('1Click token list', `${ONECLICK}/v0/tokens`).then((r) => {
+    if (!r.ok) throw new Error(`HTTP ${r.status} ${answerSnippet(r)}`);
+    if (!Array.isArray(r.body)) throw new Error(`HTTP ${r.status}, not a JSON list: ${answerSnippet(r)}`);
+    return r.body;
   });
   let list;
   try {
@@ -70,14 +71,10 @@ export interface NearAccountState {
 }
 
 async function rpc(params: Record<string, unknown>): Promise<{ result?: any; error?: any }> {
-  let r: Response;
-  try {
-    r = await fetch(NEAR_RPC, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'query', params: { finality: 'final', ...params } }) });
-  } catch (e) {
-    throw new Error(`NEAR RPC unreachable at ${NEAR_RPC}: ${(e as Error).message}`);
-  }
-  if (!r.ok) throw new Error(`NEAR RPC ${NEAR_RPC}: HTTP ${r.status}`);
-  return r.json() as Promise<{ result?: any; error?: any }>;
+  const r = await httpJson('NEAR RPC', NEAR_RPC, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'query', params: { finality: 'final', ...params } }) });
+  if (!r.ok) throw new Error(`NEAR RPC ${NEAR_RPC}: HTTP ${r.status} ${answerSnippet(r)}`);
+  if (r.body === null || typeof r.body !== 'object') throw new Error(`NEAR RPC ${NEAR_RPC}: HTTP ${r.status}, not a JSON-RPC answer: ${answerSnippet(r)}`);
+  return r.body as { result?: any; error?: any };
 }
 
 /** Read-only NEAR mainnet lookup: does the account exist, and what does it hold on `tokens`? */

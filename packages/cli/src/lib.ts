@@ -14,6 +14,62 @@ export class SetupRequiredError extends Error {
   }
 }
 export class BlockedError extends Error {}
+
+/** How long any 1Click or NEAR request may take: ZSWAP_HTTP_TIMEOUT_MS, default 20 s. */
+export function httpTimeoutMs(): number {
+  const v = Number(process.env.ZSWAP_HTTP_TIMEOUT_MS ?? 20_000);
+  return Number.isFinite(v) && v > 0 ? v : 20_000;
+}
+/**
+ * What a failed request means for privacy. `unsent`: it provably never left this machine (connection
+ * refused, no such host), so the server never saw it. `no-answer`: it may have arrived (timeout, reset).
+ * `refused`: the server answered with an error, so it saw the request.
+ */
+export type RequestOutcome = 'unsent' | 'no-answer' | 'refused';
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly outcome: RequestOutcome,
+    readonly status?: number,
+  ) {
+    super(message);
+  }
+}
+const UNSENT_CODES = new Set(['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'EAI_NONAME', 'ENETUNREACH', 'EHOSTUNREACH']);
+
+/**
+ * One HTTP request with a timeout. The body is read as text first, so an HTML error page from a proxy
+ * reports its status and first characters instead of a JSON parse error.
+ */
+export async function httpJson(service: string, url: string, init: RequestInit = {}): Promise<{ status: number; ok: boolean; body: unknown; text: string }> {
+  const ms = httpTimeoutMs();
+  const signal = AbortSignal.timeout(ms);
+  const late = () => new HttpError(`${service} did not answer in ${ms / 1000} s (${url})`, 'no-answer');
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, signal });
+  } catch (e) {
+    if (signal.aborted) throw late();
+    const cause = (e as { cause?: { code?: string; message?: string } }).cause;
+    throw new HttpError(`${service} unreachable at ${url}: ${cause?.message || cause?.code || (e as Error).message}`, cause?.code && UNSENT_CODES.has(cause.code) ? 'unsent' : 'no-answer');
+  }
+  let text: string;
+  try {
+    text = await res.text();
+  } catch (e) {
+    if (signal.aborted) throw late();
+    throw new HttpError(`${service} answer could not be read (HTTP ${res.status}): ${(e as Error).message}`, 'no-answer', res.status);
+  }
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = undefined;
+  }
+  return { status: res.status, ok: res.ok, body, text };
+}
+/** The first 200 characters of an answer, for an error message. */
+export const answerSnippet = (r: { body: unknown; text: string }) => (r.body !== undefined ? JSON.stringify(r.body) : r.text).replace(/\s+/g, ' ').trim().slice(0, 200);
 /** The destination recipient already received an earlier swap from this wallet: a second swap to it is linked. */
 export class LinkedRecipientError extends Error {
   constructor(readonly recipient: string, readonly earlierIndex: number) {
@@ -282,15 +338,10 @@ export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
   };
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (process.env.ONECLICK_JWT) headers.authorization = `Bearer ${process.env.ONECLICK_JWT}`;
-  let res: Response;
-  try {
-    res = await fetch(`${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });
-  } catch (e) {
-    throw new Error(`1Click unreachable at ${ONECLICK}: ${(e as Error).message}`);
-  }
-  const j = (await res.json()) as Record<string, unknown>;
-  if (!res.ok) throw new Error(`1Click refused the quote (HTTP ${res.status}): ${JSON.stringify(j).slice(0, 300)}`);
-  return j;
+  const r = await httpJson('1Click', `${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!r.ok) throw new HttpError(`1Click refused the quote: HTTP ${r.status} ${answerSnippet(r)}`, 'refused', r.status);
+  if (r.body === null || typeof r.body !== 'object') throw new HttpError(`1Click answered HTTP ${r.status} with a body that is not a JSON object: ${answerSnippet(r)}`, 'refused', r.status);
+  return r.body as Record<string, unknown>;
 }
 
 export interface Hit {
