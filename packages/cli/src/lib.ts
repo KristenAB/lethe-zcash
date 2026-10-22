@@ -1,6 +1,7 @@
 // zswap library: index reservation, one-time keys (zswap-keys), 1Click quotes, recovery scans.
 import { execFileSync } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { canonicalRecipient, cryptoRng, type Rng } from './decorrelate.js';
@@ -203,15 +204,25 @@ const fvkIds = new Map<string, string>();
 const seedId = (seedFile: string) => fvkIds.get(seedFile) ?? fvkIds.set(seedFile, accountKey(seedFile).fvk_id).get(seedFile)!;
 
 /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
-const STALE_LOCK_MS = 30_000;
-const LOCK_WAIT_MS = 20_000;
+export const STALE_LOCK_MS = 15_000;
+/** A waiter waits longer than a lock takes to go stale, so a crashed holder never makes reserving fail. */
+export const LOCK_WAIT_MS = 45_000;
 const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+const readToken = (f: string) => {
+  try {
+    return readFileSync(f, 'utf8');
+  } catch {
+    return undefined;
+  }
+};
 
 /**
- * Durable index book: an index is written down before its address is shown to anyone.
- * Every read-modify-write holds an exclusive lock file (`<book>.lock`, O_CREAT|O_EXCL), so two wallet
- * processes (the CLI and the MCP server, or two agents) can never hand out the same index, which
- * would put the same refundTo on two public quotes.
+ * The index book: an index is written down (and fsynced, file and folder) before its address is shown
+ * to anyone. Every read-modify-write holds an exclusive lock file (`<book>.lock`, O_CREAT|O_EXCL) that
+ * carries its holder's token, so two wallet processes (the CLI and the MCP server, or two agents) never
+ * hand out the same index, which would put the same refundTo on two public quotes. A lock left by a
+ * crashed process is broken only under a second lock (`<book>.lock.break`), after checking again that
+ * the lock is still the same stale one, so a waiter can never delete a lock another waiter just took.
  */
 export class IndexBook {
   constructor(readonly path: string) {}
@@ -266,24 +277,73 @@ export class IndexBook {
       return b.next;
     });
   }
+  /** Write to a temporary file, fsync it, rename it over the book, then fsync the folder: on disk, not in a cache. */
   private write(b: Book) {
-    mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
+    const dir = dirname(this.path);
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
     const tmp = `${this.path}.${process.pid}.tmp`;
-    writeFileSync(tmp, JSON.stringify(b, null, 2), { mode: 0o600 });
+    const fd = openSync(tmp, 'w', 0o600);
+    try {
+      writeSync(fd, JSON.stringify(b, null, 2));
+      fsyncSync(fd);
+    } finally {
+      closeSync(fd);
+    }
     renameSync(tmp, this.path);
+    const d = openSync(dir, 'r');
+    try {
+      fsyncSync(d);
+    } finally {
+      closeSync(d);
+    }
+  }
+  /**
+   * Breaks `lock` if it is still the stale lock this process saw (same token, still old). Only one
+   * breaker at a time (`<lock>.break`, O_EXCL); a break lock older than STALE_LOCK_MS is itself left by
+   * a crashed breaker and removed.
+   */
+  private breakStale(lock: string, seen: string | undefined) {
+    const brk = `${lock}.break`;
+    let fd: number;
+    try {
+      fd = openSync(brk, 'wx', 0o600);
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+      try {
+        if (Date.now() - statSync(brk).mtimeMs > STALE_LOCK_MS) unlinkSync(brk);
+      } catch {
+        /* the other breaker finished */
+      }
+      return;
+    }
+    try {
+      if (readToken(lock) === seen && Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) unlinkSync(lock);
+    } catch {
+      /* released meanwhile */
+    } finally {
+      closeSync(fd);
+      unlinkSync(brk);
+    }
   }
   private locked<T>(fn: () => T): T {
     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     const lock = `${this.path}.lock`;
     const until = Date.now() + LOCK_WAIT_MS;
+    const token = `${process.pid}.${randomBytes(8).toString('hex')}`;
     let fd: number | undefined;
     while (fd === undefined) {
       try {
         fd = openSync(lock, 'wx', 0o600);
+        writeSync(fd, token);
       } catch (e) {
         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+        const seen = readToken(lock);
         try {
-          if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) unlinkSync(lock);
+          if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) {
+            // test hook: widens the window between judging a lock stale and breaking it
+            pause(Math.floor(Math.random() * Number(process.env.ZSWAP_LOCK_BREAK_PAUSE_MS ?? 0)));
+            this.breakStale(lock, seen);
+          }
         } catch {
           /* released meanwhile */
         }
@@ -295,7 +355,8 @@ export class IndexBook {
       return fn();
     } finally {
       closeSync(fd);
-      unlinkSync(lock);
+      // remove the lock only while it is still this process's own
+      if (readToken(lock) === token) unlinkSync(lock);
     }
   }
   /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
