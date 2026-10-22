@@ -3,9 +3,10 @@
 //   5182  the dashboard's Vite dev server (reads deployments/*.json at runtime; .demo/ and the CLI's
 //         wallet source must stay 403)
 //   8431  the static landing (packages/landing, its data block synced from deployments/)
+//   8432  the static site build (pnpm build:site, which pnpm test:e2e runs first)
 // Needs the CLI built (pnpm --filter @zswap/cli build): the tests score both runs with its linkabilityReport.
 import { defineConfig } from '@playwright/test';
-import { DASH, LANDING } from './tests/urls';
+import { DASH, LANDING, SITE } from './tests/urls';
 
 export default defineConfig({
   testDir: './tests',
@@ -30,5 +31,6 @@ export default defineConfig({
   webServer: [
     { command: './serve.sh dashboard', url: `${DASH}/`, reuseExistingServer: false, timeout: 60_000, stdout: 'pipe', stderr: 'pipe' },
     { command: './serve.sh landing', url: `${LANDING}/index.html`, reuseExistingServer: false, timeout: 30_000 },
+    { command: './serve.sh site', url: `${SITE}/index.html`, reuseExistingServer: false, timeout: 30_000 },
   ],
 });

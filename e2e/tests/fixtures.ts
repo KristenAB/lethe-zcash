@@ -2,9 +2,9 @@
 // request, unless the test declared that exact response as expected (Chrome logs any 4xx fetch as a
 // console error, e.g. the 403s the security test asks for on purpose).
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test';
-import { DASH, LANDING } from './urls';
+import { DASH, LANDING, SITE } from './urls';
 
-export { DASH, LANDING };
+export { DASH, LANDING, SITE };
 
 type Allowed = { status: number; path: RegExp };
 
@@ -14,7 +14,7 @@ export interface Guard {
   errors: string[];
 }
 
-const isSameOrigin = (url: string) => [DASH, LANDING].some((o) => url.startsWith(o));
+const isSameOrigin = (url: string) => [DASH, LANDING, SITE].some((o) => url.startsWith(o));
 
 export const test = base.extend<{ guard: Guard }>({
   guard: [

@@ -8,6 +8,7 @@
     "test:rust": "cd packages/wallet-core && cargo test --release && cd ../scan && cargo test --release",
     "build": "pnpm build:rust && pnpm -r --if-present build",
     "test": "pnpm build && pnpm test:rust && pnpm -r --workspace-concurrency=1 --if-present test",
-    "test:e2e": "pnpm --filter @zswap/cli build && pnpm --filter @zswap/e2e test:e2e"
+    "test:e2e": "pnpm --filter @zswap/cli build && pnpm build:site && pnpm --filter @zswap/e2e test:e2e",
+    "build:site": "node scripts/build-site.mjs"
   }
 }
