@@ -1,5 +1,6 @@
 // Real MCP client ↔ zswap-mcp (stdio) ↔ real 1Click API (dry quotes) and testnet lightwalletd.
-import { mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { chmodSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -90,6 +91,40 @@ describe('zswap-mcp', () => {
     expect(lines).toHaveLength(1);
     expect(Object.keys(lines[0]).sort()).toEqual(['at', 'index', 'isError', 'tool']);
     expect(lines[0]).toMatchObject({ tool: 'safe_quote', isError: false, index: q.index });
+  });
+
+  it('a call log that cannot be created stops the server at startup with Setup required (it used to fail every call after the work was done)', async () => {
+    const p = spawn(resolve(__dirname, '../node_modules/.bin/tsx'), [resolve(__dirname, '../src/main.ts')], { detached: true, env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', ZSWAP_SEED: join(dir, 'seed'), ZSWAP_MCP_LOG: '/nonexistent-dir/log.jsonl' } });
+    let stderr = '';
+    p.stderr.on('data', (d) => (stderr += d));
+    const code = await new Promise<number | null>((done) => {
+      const t = setTimeout(() => {
+        process.kill(-p.pid!, 'SIGKILL');
+        done(null);
+      }, 15_000);
+      p.on('exit', (c) => {
+        clearTimeout(t);
+        done(c);
+      });
+    });
+    expect(code).toBe(2);
+    expect(stderr).toMatch(/Setup required: ZSWAP_MCP_LOG directory does not exist or is not writable \(\/nonexistent-dir\/log\.jsonl: ENOENT\)/);
+  });
+
+  it('a call log that stops being writable never turns a done tool call into an error: safe_quote still returns its index and refundTo', async () => {
+    const log = join(dir, 'locked.jsonl');
+    newBook('b5.json');
+    const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b5.json'), ZSWAP_MCP_LOG: log });
+    chmodSync(log, 0o400); // created by the server at startup; now read-only
+    const q = await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near', recipient: 'e'.repeat(64) });
+    const b = await call(c, 'book');
+    await c.close();
+    chmodSync(log, 0o600);
+    expect(q.isError).toBeUndefined();
+    expect(JSON.parse(q.text)).toMatchObject({ index: 0, refundTo: expect.stringMatching(/^u1/) });
+    expect(b.isError).toBeUndefined();
+    expect(JSON.parse(b.text)).toHaveLength(1);
+    expect(readFileSync(log, 'utf8')).toBe('');
   });
 
   it('without a recipient, each swap gets its own fresh NEAR recipient, and the seed alone finds them again', async () => {

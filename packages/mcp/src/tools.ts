@@ -9,27 +9,49 @@ import { IndexBook, recover, recoverAll, chainTip, SetupRequiredError, safeQuote
 
 const need = (k: string) => process.env[k] || (() => { throw new SetupRequiredError(k); })();
 /**
+ * Checked once at startup: a call log that cannot be written is a setup error, reported before any tool
+ * runs (the file is created 0600 if missing). Exported for main.ts.
+ */
+export function openCallLog(): void {
+  const f = process.env.ZSWAP_MCP_LOG;
+  if (!f) return;
+  try {
+    appendFileSync(f, '', { mode: 0o600 });
+    chmodSync(f, 0o600);
+  } catch (e) {
+    throw new SetupRequiredError('ZSWAP_MCP_LOG directory does not exist or is not writable', `${f}: ${(e as NodeJS.ErrnoException).code ?? (e as Error).message}`);
+  }
+}
+/**
  * The call log must not become a ledger that links swaps: it records when a tool ran, whether it
  * failed and which refund index it reserved, never addresses, recipients, amounts, signatures or
- * correlation ids, and it is readable by the owner only.
+ * correlation ids, and it is readable by the owner only. Writing it is best effort: a tool call that
+ * already reserved an index or recorded a quote must still return that result, so a failed append is a
+ * warning on stderr and never replaces the result.
  */
 function log(tool: string, isError: boolean, result: unknown) {
   const f = process.env.ZSWAP_MCP_LOG;
   if (!f) return;
   const index = !isError && typeof (result as { index?: unknown })?.index === 'number' ? (result as { index: number }).index : null;
-  appendFileSync(f, JSON.stringify({ at: new Date().toISOString(), tool, isError, index }) + '\n', { mode: 0o600 });
-  chmodSync(f, 0o600);
+  try {
+    appendFileSync(f, JSON.stringify({ at: new Date().toISOString(), tool, isError, index }) + '\n', { mode: 0o600 });
+    chmodSync(f, 0o600);
+  } catch (e) {
+    process.stderr.write(`zswap-mcp: warning: call log ${f} not written (${(e as NodeJS.ErrnoException).code ?? (e as Error).message}); the ${tool} result is returned unchanged\n`);
+  }
 }
 async function run(tool: string, fn: () => Promise<unknown> | unknown) {
+  let out: { isError?: true; content: { type: 'text'; text: string }[] };
+  let result: unknown;
   try {
-    const result = await fn();
-    log(tool, false, result);
-    return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
+    result = await fn();
+    out = { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
   } catch (e) {
-    const text = (e as Error).message;
-    log(tool, true, text);
-    return { isError: true, content: [{ type: 'text' as const, text }] };
+    result = (e as Error).message;
+    out = { isError: true, content: [{ type: 'text' as const, text: (e as Error).message }] };
   }
+  log(tool, out.isError === true, result);
+  return out;
 }
 
 /** An agent-triggered scan is bounded: about 87 days of testnet blocks per call. */
