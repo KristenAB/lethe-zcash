@@ -5,7 +5,7 @@ import { appendFileSync, chmodSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { IndexBook, quote, recover, chainTip, SetupRequiredError, requireNearDelivered, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
+import { IndexBook, recover, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
 
 const need = (k: string) => process.env[k] || (() => { throw new SetupRequiredError(k); })();
 /**
@@ -49,11 +49,9 @@ export function createServer(): McpServer {
     },
     (a) =>
       run('safe_quote', async () => {
-        const seed = need('ZSWAP_SEED');
-        if (a.recipient === undefined) await requireNearDelivered(a.destination_asset);
-        const { r } = book().reserve(seed, a.recipient === undefined ? { freshRecipient: true } : { recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true });
-        const q = (await quote({ amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: r.recipient!, refundTo: r.refundTo })) as { quote: Record<string, string>; quoteRequest: Record<string, string>; signature: string; correlationId: string };
-        book().attach(r.index, q);
+        const res = await safeQuote(need('ZSWAP_SEED'), book(), { amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true });
+        const r = res.r;
+        const q = res.q as { quote: Record<string, string>; quoteRequest: Record<string, string>; signature: string; correlationId: string };
         return { index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { fresh_recipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amount_out: q.quote.amountOutFormatted, refund_fee_zat: q.quote.refundFee, request_visibility: q.quoteRequest.confidentiality, signature: q.signature, correlation_id: q.correlationId };
       }),
   );

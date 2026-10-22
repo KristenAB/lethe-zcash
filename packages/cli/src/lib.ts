@@ -3,13 +3,19 @@ import { execFileSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { deriveNearRecipient } from './recipient.js';
+import { canonicalRecipient } from './decorrelate.js';
+import { deriveNearRecipient, requireNearDelivered } from './recipient.js';
 
 export const ONECLICK = process.env.ZSWAP_ONECLICK_URL ?? 'https://1click.chaindefuser.com';
 export const ZEC_ASSET = 'nep141:zec.omft.near';
 
 export class SetupRequiredError extends Error {
-  constructor(public readonly missing: string, detail?: string) {
+  constructor(
+    public readonly missing: string,
+    detail?: string,
+    /** for a request that failed on setup: whether the server saw it */
+    readonly outcome?: RequestOutcome,
+  ) {
     super(`Setup required: ${missing}${detail ? ` (${detail})` : ''}`);
   }
 }
@@ -51,7 +57,9 @@ export async function httpJson(service: string, url: string, init: RequestInit =
   } catch (e) {
     if (signal.aborted) throw late();
     const cause = (e as { cause?: { code?: string; message?: string } }).cause;
-    throw new HttpError(`${service} unreachable at ${url}: ${cause?.message || cause?.code || (e as Error).message}`, cause?.code && UNSENT_CODES.has(cause.code) ? 'unsent' : 'no-answer');
+    // refused connections, unknown hosts, and ports or URLs fetch rejects before connecting never left
+    const unsent = (cause?.code && UNSENT_CODES.has(cause.code)) || cause?.message === 'bad port' || /Invalid URL|Failed to parse URL/.test(`${(e as Error).message} ${cause?.message ?? ''}`);
+    throw new HttpError(`${service} unreachable at ${url}: ${cause?.message || cause?.code || (e as Error).message}`, unsent ? 'unsent' : 'no-answer');
   }
   let text: string;
   try {
@@ -70,10 +78,15 @@ export async function httpJson(service: string, url: string, init: RequestInit =
 }
 /** The first 200 characters of an answer, for an error message. */
 export const answerSnippet = (r: { body: unknown; text: string }) => (r.body !== undefined ? JSON.stringify(r.body) : r.text).replace(/\s+/g, ' ').trim().slice(0, 200);
-/** The destination recipient already received an earlier swap from this wallet: a second swap to it is linked. */
+/** The destination recipient was named in an earlier swap's quote request: a second swap to it is linked. */
 export class LinkedRecipientError extends Error {
-  constructor(readonly recipient: string, readonly earlierIndex: number) {
-    super(`refused: recipient ${recipient} already received swap #${earlierIndex} from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.`);
+  constructor(
+    readonly recipient: string,
+    readonly earlierIndex: number,
+    earlierOutcome?: RequestOutcome,
+  ) {
+    const note = earlierOutcome === 'refused' ? ' (1Click refused that quote, but it received the request)' : earlierOutcome === 'no-answer' ? ' (1Click never answered it, but the request may have reached 1Click)' : '';
+    super(`refused: recipient ${recipient} was named in the quote request of swap #${earlierIndex} from this wallet${note}. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.`);
   }
 }
 
@@ -158,14 +171,26 @@ export interface Reservation {
   linkedRecipient?: true;
   /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
   freshRecipient?: true;
+  /** the quote's destination asset: a recovery checks that token on this swap's NEAR recipient */
+  destinationAsset?: string;
   quote?: unknown;
+  /** the quote did not come back; `unsent` means the request provably never reached 1Click */
+  quoteError?: { outcome: RequestOutcome; message: string; at: string };
+  /** times a never-sent request was retried with this same reservation */
+  retries?: number;
 }
 export interface ReserveOptions {
   recipient?: string;
   allowLinkedRecipient?: boolean;
   /** use this swap's own NEAR implicit account (derived from the seed at the same index) as recipient */
   freshRecipient?: boolean;
+  destinationAsset?: string;
 }
+/** The quote request of this reservation provably never left this machine: 1Click never saw its fields. */
+const neverSent = (r: Reservation) => !r.quote && r.quoteError?.outcome === 'unsent';
+/** Whether a failed quote request could have reached 1Click. */
+export const requestOutcome = (e: unknown): RequestOutcome =>
+  e instanceof HttpError ? e.outcome : e instanceof SetupRequiredError ? (e.outcome ?? 'unsent') : e instanceof BlockedError ? 'unsent' : 'no-answer';
 const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteRequest?: { recipient?: string } } | undefined)?.quoteRequest?.recipient;
 export interface Book {
   next: number;
@@ -283,14 +308,29 @@ export class IndexBook {
           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
         );
       const b = this.bind(this.read(), seedFile);
+      const given = opts.recipient?.trim();
+      const canon = given === undefined ? undefined : canonicalRecipient(given);
+      const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+      // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+      const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+      if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+      // a retry of a request that provably never left takes over its reservation: same index, same
+      // refundTo, no index burned and no false "already used"
+      const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+      if (retry) {
+        delete retry.quoteError;
+        retry.retries = (retry.retries ?? 0) + 1;
+        if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
+        this.write(b);
+        return { r: retry, key: deriveRefund(seedFile, retry.index) };
+      }
       const index = b.next;
-      const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : opts.recipient;
-      const earlier = recipient === undefined ? undefined : b.reservations.find((x) => recipientOf(x) === recipient);
-      if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(recipient!, earlier.index);
+      const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
       const key = deriveRefund(seedFile, index);
       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
       if (recipient !== undefined) r.recipient = recipient;
       if (opts.freshRecipient) r.freshRecipient = true;
+      if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
       if (earlier) r.linkedRecipient = true;
       b.next = index + 1;
       b.reservations.push(r);
@@ -304,9 +344,45 @@ export class IndexBook {
       const r = b.reservations.find((x) => x.index === index);
       if (!r) throw new Error(`index ${index} is not reserved`);
       r.quote = quote;
+      delete r.quoteError;
       this.write(b);
     });
   }
+  /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
+  failed(index: number, error: unknown) {
+    this.locked(() => {
+      const b = this.read();
+      const r = b.reservations.find((x) => x.index === index);
+      if (!r) throw new Error(`index ${index} is not reserved`);
+      r.quoteError = { outcome: requestOutcome(error), message: String((error as Error)?.message ?? error).slice(0, 300), at: new Date().toISOString() };
+      this.write(b);
+    });
+  }
+}
+
+/**
+ * One swap quote the safe way, as the CLI, the MCP server and the examples do it: a fresh NEAR recipient
+ * is checked against 1Click's token list before any index is reserved; the index is written down before
+ * its refundTo goes out; the quote is attached to it, or its failure recorded (with whether 1Click could
+ * have seen the request, which the recipient guard needs).
+ */
+export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean }) {
+  if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+  const { r } = book.reserve(
+    seedFile,
+    input.recipient === undefined
+      ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+      : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+  );
+  let q: Record<string, unknown>;
+  try {
+    q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo });
+  } catch (e) {
+    book.failed(r.index, e);
+    throw e;
+  }
+  book.attach(r.index, q);
+  return { r, q };
 }
 
 export interface QuoteInput {

@@ -21,7 +21,7 @@
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, quote, recover, recoverRecipients, requireNearDelivered, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
+import { BlockedError, chainTip, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
 
 const paths = walletPaths();
 const seed = paths.seed;
@@ -48,10 +48,7 @@ try {
     const [zec, dest, given] = a;
     if (!zec || !dest) throw new Error('usage: zswap quote <zec> <destinationAsset> [recipient]');
     const zat = BigInt(Math.round(Number(zec) * 1e8));
-    if (given === undefined) await requireNearDelivered(dest); // checked before an index is reserved
-    const { r } = book.reserve(seed, given === undefined ? { freshRecipient: true } : { recipient: given, allowLinkedRecipient });
-    const q = await quote({ amountZat: zat, destinationAsset: dest, recipient: r.recipient!, refundTo: r.refundTo });
-    book.attach(r.index, q);
+    const { r, q } = await safeQuote(seed, book, { amountZat: zat, destinationAsset: dest, recipient: given, allowLinkedRecipient });
     const qq = q as { quote: Record<string, string>; quoteRequest: Record<string, unknown>; correlationId: string };
     out({ index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amountIn: qq.quote.amountInFormatted, amountOut: qq.quote.amountOutFormatted, refundFee: qq.quote.refundFee, confidentiality: qq.quoteRequest.confidentiality, correlationId: qq.correlationId });
   } else if (cmd === 'swap') {
@@ -88,7 +85,8 @@ try {
   } else if (cmd === 'report') {
     const quoted = book.readFor(seed).reservations.filter((r) => r.quote) as unknown as { quote: Parameters<typeof swapsFromQuotes>[0][number] }[];
     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
-  } else if (cmd === 'book') out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), reservedAt: r.reservedAt })));
+  } else if (cmd === 'book')
+    out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.destinationAsset ? { destinationAsset: r.destinationAsset } : {}), quoted: !!r.quote, ...(r.quoteError ? { quoteError: r.quoteError.outcome } : {}), reservedAt: r.reservedAt })));
   else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] | book');
 } catch (e) {
   console.error((e as Error).message);

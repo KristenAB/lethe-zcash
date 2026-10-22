@@ -10,7 +10,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { IndexBook, linkabilityReport, planBatch, quote, recoverRecipients, requireNearDelivered, swapsFromQuotes, walletPaths } from '@zswap/cli';
+import { IndexBook, linkabilityReport, planBatch, recoverRecipients, requireNearDelivered, safeQuote, swapsFromQuotes, walletPaths } from '@zswap/cli';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const WALLET = walletPaths(); // the same seed and index book as the CLI and the MCP server
@@ -45,9 +45,8 @@ async function main() {
       console.log(`  part ${part.part}: waiting ${Math.round(wait / 1000)} s`);
       await sleep(wait);
     }
-    const { r } = book.reserve(SEED, { freshRecipient: true });
-    const q = (await quote({ amountZat: BigInt(part.amountZat), destinationAsset: DEST, recipient: r.recipient!, refundTo: r.refundTo })) as any;
-    book.attach(r.index, q);
+    const { r, q: answer } = await safeQuote(SEED, book, { amountZat: BigInt(part.amountZat), destinationAsset: DEST });
+    const q = answer as any;
     st.quotes.push({ part: part.part, index: r.index, refundTo: r.refundTo, recipient: r.recipient, amountOut: q.quote.amountOutFormatted, confidentiality: q.quoteRequest.confidentiality, correlationId: q.correlationId, timestamp: q.timestamp, signature: q.signature, quoteRequest: q.quoteRequest });
     save();
     console.log(`  part ${part.part} (#${r.index}): ${Number(part.amountZat) / 1e8} ZEC → ${q.quote.amountOutFormatted} wNEAR; recipient ${r.recipient!.slice(0, 10)}…; refundTo ${r.refundTo.slice(0, 14)}…`);
