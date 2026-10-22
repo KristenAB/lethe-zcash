@@ -57,7 +57,7 @@ async function main() {
   console.log(`report: ${report.verdict}; score ${report.score}/100`);
 
   // 4. seed only: a fresh book path that does not exist
-  const restored = await recoverRecipients(SEED, new IndexBook(resolve(DEMO, 'no-such-book.json')), { gap: 10, lookup: true });
+  const restored = await recoverRecipients(SEED, new IndexBook(resolve(DEMO, 'no-such-book.json')), { gap: 10, lookup: true, probeAhead: true });
   const found = st.quotes.map((q: { index: number; recipient: string }) => ({ index: q.index, recipient: q.recipient, foundFromSeedAlone: restored.recipients.some((x) => x.index === q.index && x.account_id === q.recipient), state: restored.recipients.find((x) => x.index === q.index)?.state }));
   for (const f of found) console.log(`  ${f.foundFromSeedAlone ? '✓' : '✗'} #${f.index} re-derived from the seed alone; on NEAR mainnet: ${f.state?.exists ? 'exists' : 'not created (dry quote, nothing delivered)'}`);
   if (!found.every((f: { foundFromSeedAlone: boolean }) => f.foundFromSeedAlone)) throw new Error('seed-only recovery did not find every recipient');

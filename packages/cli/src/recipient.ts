@@ -127,33 +127,61 @@ export interface RecoveredRecipient extends NearRecipient {
   state?: NearAccountState;
 }
 
+/** The random pause between two accounts of a lookup: 0..ZSWAP_LOOKUP_JITTER_MS (default 1500 ms). */
+export function lookupJitterMs(): number {
+  const v = Number(process.env.ZSWAP_LOOKUP_JITTER_MS ?? 1500);
+  return Number.isFinite(v) && v >= 0 ? v : 1500;
+}
+const host = (u: string) => {
+  try {
+    return new URL(u).host;
+  } catch {
+    return u;
+  }
+};
 /**
- * Finds the per-swap NEAR recipients from the seed: indices 0..(last reserved + gap). With `lookup`,
- * each one is checked on NEAR mainnet (read-only: exists, any token the FT indexer lists, the swap's own
- * destination token) and a used account inside the lookahead extends it, like the Zcash refund scan.
- * Without the index book (a restored wallet) it still derives 0..gap-1.
+ * What a lookup gives away. Every account it checks reaches the NEAR RPC and FT-indexer operator from
+ * this IP within seconds, so the operator can cluster them as one wallet's; probing ahead also hands it
+ * the recipients of swaps that have not happened yet. The Zcash side does not leak this way: the refund
+ * scan trial-decrypts compact blocks locally.
  */
-export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; tokens?: string[] } = {}) {
+export function lookupWarning(opts: { probeAhead?: boolean; gap?: number } = {}): string {
+  const ahead = opts.probeAhead ? `, plus the next ${opts.gap ?? RECOVERY_GAP} unused recipients ahead of them (accounts of swaps that have not happened yet)` : '';
+  return `privacy: a NEAR lookup sends every recipient it checks${ahead} from this IP, seconds apart, to ${host(NEAR_RPC)} (NEAR RPC) and ${host(NEAR_FT_INDEXER)} (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.`;
+}
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Finds the per-swap NEAR recipients from the seed: indices 0..(last reserved + gap), derived locally.
+ * With `lookup`, the swaps in the book are checked on NEAR mainnet (read-only: exists, any token the FT
+ * indexer lists, the swap's own destination token), with a random pause between accounts. Only with
+ * `probeAhead` (a wallet restored from its seed, or `recover --lookup`) are the unused indices ahead
+ * checked too; a used account then extends the lookahead, like the Zcash refund scan, and the book
+ * never hands out an index the lookup looked at. See lookupWarning for what the operator learns.
+ */
+export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; probeAhead?: boolean; tokens?: string[] } = {}) {
   const gap = opts.gap ?? RECOVERY_GAP;
   if (!Number.isSafeInteger(gap) || gap < 0 || gap > 1000) throw new Error('gap must be a whole number up to 1000');
   const b = book.readFor(seedFile);
   const booked = new Map(b.reservations.map((r) => [r.index, r]));
   const out: RecoveredRecipient[] = [];
   let upTo = b.next + gap;
+  let asked = 0;
   for (let i = 0; i < upTo; i++) {
     const r: RecoveredRecipient = { ...deriveNearRecipient(seedFile, i), inBook: booked.has(i) };
-    if (opts.lookup) {
+    if (opts.lookup && (opts.probeAhead || booked.has(i))) {
+      if (asked++ > 0) await sleep(Math.floor(Math.random() * (lookupJitterMs() + 1)));
       // on chain: the swap's own destination token (from the book) and any asked for; the indexer covers the rest
       const own = nearContract(booked.get(i)?.destinationAsset);
       r.state = await nearAccountState(r.account_id, [...new Set([...(own ? [own] : []), ...(opts.tokens ?? [])])]);
-      if (used(r.state)) upTo = Math.max(upTo, i + 1 + gap);
+      if (opts.probeAhead && used(r.state)) upTo = Math.max(upTo, i + 1 + gap);
     }
     out.push(r);
   }
   const usedIdx = out.filter((r) => used(r.state)).map((r) => r.index);
-  // a lookup is a recovery: the book never hands out an index it looked at (see IndexBook.advance)
-  const next = opts.lookup ? book.advance(seedFile, Math.max(-1, ...usedIdx) + 1 + gap) : b.next;
-  return { gap, recipients: out, used: usedIdx, next };
+  // a probing lookup is a recovery: the book never hands out an index it looked at (see IndexBook.advance)
+  const next = opts.lookup && opts.probeAhead ? book.advance(seedFile, Math.max(-1, ...usedIdx) + 1 + gap) : b.next;
+  return { gap, recipients: out, used: usedIdx, checked: asked, next };
 }
 
 export interface SweepStep {

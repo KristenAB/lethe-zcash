@@ -8,8 +8,10 @@
 //                                                without a recipient, the swap's own NEAR implicit account (from the seed) receives;
 //                                                refuses (exit 4) a recipient an earlier swap already used;
 //                                                basic/advanced (1Click Confidential Intents) need ONECLICK_JWT
-//   zswap recipients [--gap N] [--lookup]       the per-swap NEAR recipients re-derived from the seed (works without the book);
-//                                                --lookup checks each on NEAR mainnet (read-only) and extends past used ones
+//   zswap recipients [--gap N] [--lookup [--probe-ahead]]  the per-swap NEAR recipients re-derived from the seed (works
+//                                                without the book); --lookup checks the booked ones on NEAR mainnet (read-only,
+//                                                random pauses); --probe-ahead also checks the next N unused ones and extends past
+//                                                used ones (a restored wallet). Either one tells the RPC operator (stderr warning)
 //   zswap sweep-plan [--to <i>=<account>]...    how to move funds out of them without re-linking the swaps (signs nothing)
 //   zswap near-key <index> <out-file>           write recipient i's near-cli credentials (0600, new file); never printed
 //   zswap plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S]
@@ -24,7 +26,7 @@
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverAll, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
+import { BlockedError, chainTip, lookupWarning, RECOVERY_GAP, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverAll, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
 
 const paths = walletPaths();
 const seed = paths.seed;
@@ -35,7 +37,7 @@ const opts: Record<string, string[]> = {};
 const positional: string[] = [];
 for (let i = 0; i < argv.length; i++) {
   const x = argv[i];
-  if (x === '--allow-linked-recipient' || x === '--lookup' || x === '--split' || x === '--new') flags.add(x);
+  if (x === '--allow-linked-recipient' || x === '--lookup' || x === '--probe-ahead' || x === '--split' || x === '--new') flags.add(x);
   else if (['--gap', '--to', '--round', '--window', '--min-gap', '--confidentiality'].includes(x)) (opts[x] ??= []).push(argv[++i] ?? '');
   else positional.push(x);
 }
@@ -62,8 +64,14 @@ try {
     const from = Number(a[0]);
     const to = a[1] ? Number(a[1]) : chainTip();
     if (!Number.isSafeInteger(from)) throw new Error('usage: zswap recover <fromHeight> [toHeight]');
+    if (flags.has('--lookup')) console.error(lookupWarning({ probeAhead: true, gap: gap ?? RECOVERY_GAP }));
     out(flags.has('--lookup') ? await recoverAll(seed, book, from, to, { gap }) : recover(seed, book, from, to, gap));
-  } else if (cmd === 'recipients') out(await recoverRecipients(seed, book, { gap, lookup: flags.has('--lookup') }));
+  } else if (cmd === 'recipients') {
+    const probeAhead = flags.has('--probe-ahead');
+    if (probeAhead && !flags.has('--lookup')) throw new Error('--probe-ahead goes with --lookup');
+    if (flags.has('--lookup')) console.error(lookupWarning({ probeAhead, gap: gap ?? RECOVERY_GAP }));
+    out(await recoverRecipients(seed, book, { gap, lookup: flags.has('--lookup'), probeAhead }));
+  }
   else if (cmd === 'sweep-plan') {
     const destinations: Record<number, string> = {};
     for (const t of opts['--to'] ?? []) {
@@ -72,6 +80,7 @@ try {
       destinations[Number(m[1])] = m[2];
     }
     const fresh = book.readFor(seed).reservations.filter((r) => r.freshRecipient).map((r) => r.index);
+    if (flags.has('--lookup')) console.error(lookupWarning());
     const { recipients } = await recoverRecipients(seed, book, { gap: 0, lookup: flags.has('--lookup') });
     out(sweepPlan(recipients.filter((r) => fresh.includes(r.index)), destinations));
   } else if (cmd === 'near-key') {
@@ -92,7 +101,7 @@ try {
     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
   } else if (cmd === 'book')
     out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.destinationAsset ? { destinationAsset: r.destinationAsset } : {}), quoted: !!r.quote, ...(r.quoteError ? { quoteError: r.quoteError.outcome } : {}), reservedAt: r.reservedAt })));
-  else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book');
+  else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup [--probe-ahead]] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book');
 } catch (e) {
   console.error((e as Error).message);
   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);

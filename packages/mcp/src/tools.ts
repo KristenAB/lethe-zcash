@@ -89,7 +89,7 @@ export function createServer(): McpServer {
     {
       title: 'Find refunds (testnet)',
       description:
-        'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, extended past any hit, so it also works for a wallet restored from its seed; reports which key found which payment. With lookup: true it also reads each per-swap NEAR recipient on NEAR mainnet, and finds on either chain extend the other lookahead. Afterwards the local index book never hands out an index the recovery looked at (it is created for a restored wallet). Sends nothing.',
+        'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, extended past any hit, so it also works for a wallet restored from its seed; reports which key found which payment. With lookup: true it also reads each per-swap NEAR recipient on NEAR mainnet, including the gap of unused ones ahead (a restored wallet needs them), and finds on either chain extend the other lookahead. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s. The Zcash scan does not leak this way (it decrypts locally). Afterwards the local index book never hands out an index the recovery looked at (it is created for a restored wallet). Sends nothing.',
       inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional() },
       annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
     },
@@ -104,18 +104,22 @@ export function createServer(): McpServer {
     'recipients',
     {
       title: 'Per-swap NEAR recipients (from the seed)',
-      description: 'Re-derives the fresh NEAR implicit account of every swap index 0..(last reserved + gap) from the wallet seed alone (no index book needed). With lookup: true, reads each on NEAR mainnet (exists, NEAR balance, every token the FastNEAR FT indexer lists, the swap’s own destination token) and extends the lookahead past any used one; the local index book then never hands out an index it looked at. Sends nothing; never returns a key.',
-      inputSchema: { gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional() },
+      description: 'Re-derives the fresh NEAR implicit account of every swap index 0..(last reserved + gap) from the wallet seed alone (no index book needed). With lookup: true, reads the swaps in the book on NEAR mainnet (exists, NEAR balance, every token the FastNEAR FT indexer lists, the swap’s own destination token), with random pauses. With probe_ahead: true (a restored wallet) it also reads the gap of unused accounts ahead, which hands the recipients of future swaps to the operator, and extends the lookahead past any used one; the local index book then never hands out an index it looked at. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s. Sends nothing; never returns a key.',
+      inputSchema: { gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional(), probe_ahead: z.boolean().optional() },
       annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
     },
-    (a) => run('recipients', () => recoverRecipients(need('ZSWAP_SEED'), book(), { gap: a.gap, lookup: a.lookup === true })),
+    (a) =>
+      run('recipients', () => {
+        if (a.probe_ahead && !a.lookup) throw new Error('probe_ahead goes with lookup: true');
+        return recoverRecipients(need('ZSWAP_SEED'), book(), { gap: a.gap, lookup: a.lookup === true, probeAhead: a.probe_ahead === true });
+      }),
   );
 
   server.registerTool(
     'sweep_plan',
     {
       title: 'Plan moving funds out of the per-swap recipients',
-      description: 'For every swap that used a fresh NEAR recipient: where its funds would go and what that reveals. Sweeping several recipients into one account re-links those swaps on chain; the plan says so, and names the gas top-up a token-only account needs as a link too. Signs and sends nothing. destinations maps a swap index to a destination account.',
+      description: 'For every swap that used a fresh NEAR recipient: where its funds would go and what that reveals. Sweeping several recipients into one account re-links those swaps on chain; the plan says so, and names the gas top-up a token-only account needs as a link too. Signs and sends nothing. destinations maps a swap index to a destination account. With lookup: true it reads those recipients on NEAR mainnet first. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s.',
       inputSchema: { destinations: z.record(z.string().regex(/^\d+$/), z.string().min(2)).optional(), lookup: z.boolean().optional() },
       annotations: { readOnlyHint: true },
     },

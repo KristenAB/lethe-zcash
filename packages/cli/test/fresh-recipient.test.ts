@@ -52,10 +52,10 @@ describe('fresh NEAR recipient per swap', () => {
     await expect(requireNearDelivered('nep141:eth.omft.near')).rejects.toThrow(/delivers it on eth/);
   });
 
-  it('recovery with lookup asks NEAR mainnet (read-only); a fresh wallet’s recipients do not exist yet', async () => {
+  it('recovery with lookup and probe-ahead asks NEAR mainnet (read-only); a fresh wallet’s recipients do not exist yet', async () => {
     const known = await nearAccountState('wrap.near');
     expect(known.exists).toBe(true);
-    const r = await recoverRecipients(seed, book, { gap: 1, lookup: true, tokens: ['wrap.near'] });
+    const r = await recoverRecipients(seed, book, { gap: 1, lookup: true, probeAhead: true, tokens: ['wrap.near'] });
     expect(r.recipients).toHaveLength(4);
     for (const x of r.recipients) expect(x.state).toMatchObject({ exists: false, amountYocto: '0', ft: { 'wrap.near': '0' } });
     expect(r.used).toEqual([]);

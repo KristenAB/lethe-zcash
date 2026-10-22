@@ -581,9 +581,9 @@ export async function recoverAll(seedFile: string, book: IndexBook, from: number
   const gap = opts.gap ?? RECOVERY_GAP;
   let before = -1;
   for (;;) {
-    const near = await recoverRecipients(seedFile, book, { gap, lookup: true, tokens: opts.tokens });
+    const near = await recoverRecipients(seedFile, book, { gap, lookup: true, probeAhead: true, tokens: opts.tokens });
     const zcash = recover(seedFile, book, from, to, gap);
-    if (zcash.next === before) return { ...zcash, near: { used: near.used, checked: near.recipients.length } };
+    if (zcash.next === before) return { ...zcash, near: { used: near.used, checked: near.checked } };
     before = zcash.next;
   }
 }
