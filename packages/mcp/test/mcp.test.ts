@@ -1,5 +1,6 @@
 // Real MCP client ↔ zswap-mcp (stdio) ↔ real 1Click API (dry quotes) and testnet lightwalletd.
 import { spawn } from 'node:child_process';
+import { createServer as httpServer } from 'node:http';
 import { chmodSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -158,5 +159,54 @@ describe('zswap-mcp', () => {
     expect(p.tradeOffs.length).toBe(3);
     const lazy = JSON.parse((await call(client, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', recipient: 'me.near', split: true })).text);
     expect(lazy.report.verdict).toBe('1 of 1 pairs linked by recipient, same minute');
+  });
+
+  it('an amount finer than 1 zat (1e-9 ZEC) or zero is refused before an index is reserved', async () => {
+    const before = JSON.parse((await call(client, 'book')).text).length;
+    const tiny = await call(client, 'safe_quote', { amount_zec: 1e-9, destination_asset: 'nep141:wrap.near', recipient: 'f'.repeat(64) });
+    expect(tiny.isError).toBe(true);
+    expect(tiny.text).toMatch(/8 decimal places/);
+    const zero = await call(client, 'safe_quote', { amount_zec: 0, destination_asset: 'nep141:wrap.near', recipient: 'f'.repeat(64) });
+    expect(zero.isError).toBe(true);
+    expect(JSON.parse((await call(client, 'book')).text)).toHaveLength(before);
+  });
+
+  it('sweep_plan is not advertised as read-only: with lookup it sends the recipients to a NEAR RPC operator (hosts auto-approve read-only tools)', async () => {
+    const { tools } = await client.listTools();
+    const sweep = tools.find((t) => t.name === 'sweep_plan')!;
+    expect(sweep.annotations?.readOnlyHint).not.toBe(true);
+    expect(sweep.annotations?.openWorldHint).toBe(true);
+    expect(sweep.description).toMatch(/Privacy: a lookup sends every NEAR account/);
+    // a local server on 127.0.0.1 stands in for the NEAR RPC and FT indexer and logs what it is asked
+    const asked: string[] = [];
+    const rpc = httpServer((req, res) => {
+      let body = '';
+      req.on('data', (d) => (body += d));
+      req.on('end', () => {
+        res.setHeader('content-type', 'application/json');
+        const ft = /^\/v1\/account\/([^/]+)\/ft$/.exec(req.url ?? '');
+        if (ft) {
+          asked.push(decodeURIComponent(ft[1]));
+          return res.end(JSON.stringify({ tokens: [] }));
+        }
+        const q = JSON.parse(body || '{}');
+        if (q.params?.request_type === 'view_account') return res.end(JSON.stringify({ jsonrpc: '2.0', id: q.id, error: { cause: { name: 'UNKNOWN_ACCOUNT' } } }));
+        return res.end(JSON.stringify({ jsonrpc: '2.0', id: q.id, result: { result: [...Buffer.from('"0"')] } }));
+      });
+    });
+    await new Promise<void>((r) => rpc.listen(0, '127.0.0.1', r));
+    const url = `http://127.0.0.1:${(rpc.address() as { port: number }).port}`;
+    newBook('b6.json');
+    const bookPath = join(dir, 'b6.json');
+    const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: bookPath, ZSWAP_NEAR_RPC: url, ZSWAP_NEAR_FT_INDEXER: url, ZSWAP_LOOKUP_JITTER_MS: '20' });
+    const a = JSON.parse((await call(c, 'safe_quote', { amount_zec: 0.1, destination_asset: 'nep141:wrap.near' })).text);
+    const plan = await call(c, 'sweep_plan', { lookup: true });
+    await c.close();
+    await new Promise((r) => rpc.close(r));
+    expect(plan.isError).toBeUndefined();
+    expect(JSON.parse(plan.text).steps.map((s: { from: string }) => s.from)).toEqual([a.recipient]);
+    // only the booked swap's recipient was sent, not the unused ones ahead
+    expect([...new Set(asked)]).toEqual([a.recipient]);
+    expect(JSON.parse(readFileSync(bookPath, 'utf8')).next).toBe(1);
   });
 });

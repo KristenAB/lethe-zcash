@@ -5,7 +5,7 @@ import { appendFileSync, chmodSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { IndexBook, recover, recoverAll, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
+import { IndexBook, recover, recoverAll, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch, zecNumberToZat } from '@zswap/cli';
 
 const need = (k: string) => process.env[k] || (() => { throw new SetupRequiredError(k); })();
 /**
@@ -71,7 +71,7 @@ export function createServer(): McpServer {
     },
     (a) =>
       run('safe_quote', async () => {
-        const res = await safeQuote(need('ZSWAP_SEED'), book(), { amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true, confidentiality: a.confidentiality });
+        const res = await safeQuote(need('ZSWAP_SEED'), book(), { amountZat: zecNumberToZat(a.amount_zec), destinationAsset: a.destination_asset, recipient: a.recipient, allowLinkedRecipient: a.allow_linked_recipient === true, confidentiality: a.confidentiality });
         const r = res.r;
         const q = res.q as { quote: Record<string, string>; quoteRequest: Record<string, string>; signature: string; correlationId: string };
         return { index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { fresh_recipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amount_out: q.quote.amountOutFormatted, refund_fee_zat: q.quote.refundFee, request_visibility: q.quoteRequest.confidentiality, signature: q.signature, correlation_id: q.correlationId };
@@ -121,7 +121,8 @@ export function createServer(): McpServer {
       title: 'Plan moving funds out of the per-swap recipients',
       description: 'For every swap that used a fresh NEAR recipient: where its funds would go and what that reveals. Sweeping several recipients into one account re-links those swaps on chain; the plan says so, and names the gas top-up a token-only account needs as a link too. Signs and sends nothing. destinations maps a swap index to a destination account. With lookup: true it reads those recipients on NEAR mainnet first. Privacy: a lookup sends every NEAR account it checks from this machine’s IP, seconds apart, to one NEAR RPC and FT-indexer operator (FastNEAR unless ZSWAP_NEAR_RPC / ZSWAP_NEAR_FT_INDEXER point at your own node or a proxy), which can cluster them as one wallet’s.',
       inputSchema: { destinations: z.record(z.string().regex(/^\d+$/), z.string().min(2)).optional(), lookup: z.boolean().optional() },
-      annotations: { readOnlyHint: true },
+      // not read-only: with lookup it hands the recipients to a third party, and hosts auto-approve read-only tools
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     (a) =>
       run('sweep_plan', async () => {
@@ -151,7 +152,7 @@ export function createServer(): McpServer {
     (a) =>
       run('plan_batch', () => {
         const start = Date.now();
-        const p = planBatch({ amountZat: BigInt(Math.round(a.amount_zec * 1e8)), destinationAsset: a.destination_asset, recipient: a.recipient, round: a.round, split: a.split, delay: a.window_minutes ? { windowS: Math.round(a.window_minutes * 60), minGapS: a.min_gap_seconds } : undefined, start, jwt: !!process.env.ONECLICK_JWT });
+        const p = planBatch({ amountZat: zecNumberToZat(a.amount_zec), destinationAsset: a.destination_asset, recipient: a.recipient, round: a.round, split: a.split, delay: a.window_minutes ? { windowS: Math.round(a.window_minutes * 60), minGapS: a.min_gap_seconds } : undefined, start, jwt: !!process.env.ONECLICK_JWT });
         return { ...p, swaps: p.swaps.map((s) => ({ ...s, amountZat: String(s.amountZat), at: new Date(Number(s.at)).toISOString() })) };
       }),
   );
