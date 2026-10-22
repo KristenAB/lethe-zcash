@@ -22,8 +22,9 @@ FVK_i  = (ak, nk, rivk_i)  →  its own IVK_i  →  its own address_i  →  refu
 - `ak, nk` (spending authority) are the account's, so the wallet can spend a refund.
 - `rivk_i` differs per index, so `IVK_i` and `address_i` are new: the addresses alone do not link
   `address_i` to `address_j` or to the account address.
-- The index is written to the wallet's index book **before** the address is shown, under an
-  exclusive lock, so two wallet processes never hand out the same index.
+- The index is written to the wallet's index book **before** the address is shown (fsynced),
+  under an exclusive lock whose stale-lock break is itself locked and re-checked, so two wallet
+  processes never hand out the same index.
 - Recovery scans with the account key and refund keys `0..(last reserved + 10)`, extending past any
   hit, so a wallet restored from its seed alone (no book) still finds its refunds: compact blocks
   from lightwalletd, trial decryption, no server told which keys or transactions it cares about (no
@@ -60,6 +61,7 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 | the account's ordinary key does not see them | the same scan: the account key found only the payment to the account address |
 | each swap can have its own recipient | pass 2: three real dry quotes, three NEAR implicit recipients from the seed, three refundTo (`deployments/pass2.json`) |
 | the seed alone finds the recipients | pass 2: the demo seed with no index book re-derived all three |
+| the Oct 22 fixes cut the client-side hints | pass 3: the same batch, parts in a random order at least 11 minutes apart, parameters drawn per request; only the shared token is left (`deployments/pass3.json`) |
 | keys never repeat and keep spending authority | 64 indices, Rust tests |
 
 ## Limits
@@ -79,6 +81,10 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
     delays are opt-in and planned, not executed for real swaps (the swap is BLOCKED).
   - *Provider-side*: the same `ONECLICK_JWT` on every quote, and the requesting IP, let 1Click link
     swaps privately.
+  - *NEAR lookups*: `--lookup` sends each recipient it checks from your IP to one NEAR RPC and
+    FT-indexer operator (FastNEAR by default), which can cluster them; probing ahead (a restored
+    wallet, `recover --lookup`) also names recipients of future swaps. Use your own node, a proxy or
+    Tor (`ZSWAP_NEAR_RPC`, `ZSWAP_NEAR_FT_INDEXER`). The Zcash scan decrypts locally and leaks nothing.
   - *Local ledgers*: the index book links every swap (it must, for recovery); keep it 0600 like the
     seed. The MCP call log keeps only time, tool, error flag and index (0600).
 - **Refund delivery is unproven.** 1Click accepted an Orchard-only unified address as `refundTo` in
@@ -95,6 +101,6 @@ No contract is involved. An earlier design with a NEAR contract was dropped as w
 | `ZSWAP_BOOK=/nonexistent zswap recover 4522708 4522730` (with the run's seed) | the same four payments, found from the seed alone |
 | `zswap quote …` twice with the same recipient | the second is refused, exit 4, no index used |
 | `zswap quote 0.1 nep141:wrap.near` twice | two dry quotes, two `refundTo`, two NEAR implicit recipients |
-| `ZSWAP_BOOK=/nonexistent zswap recipients --lookup` | the recipients re-derived from the seed, each looked up on NEAR mainnet |
+| `ZSWAP_BOOK=/nonexistent zswap recipients --lookup --probe-ahead` | the recipients re-derived from the seed, each looked up on NEAR mainnet, and a privacy warning on stderr |
 | `zswap sweep-plan --to 0=me.near --to 1=me.near` | a warning that the sweep re-links swaps #0 and #1 |
 | `zswap plan 0.35 nep141:wrap.near --split --window 180` | parts, send times, costs and the linkability report; nothing sent |
