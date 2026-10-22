@@ -15,7 +15,7 @@ const pass2 = JSON.parse(readFileSync(resolve(root, 'deployments/pass2.json'), '
 const decorrelate = resolve(root, 'packages/cli/dist/decorrelate.js');
 if (!existsSync(decorrelate)) throw new Error('Setup required: build the CLI first (pnpm --filter @zswap/cli build)');
 const { linkabilityReport, swapsFromQuotes } = await import(decorrelate);
-const brief = (r) => ({ sharedFields: r.sharedFields, score: r.score, pairs: r.pairs, verdict: r.verdict, links: r.links.map((l) => ({ field: l.field, strength: l.strength, pairs: l.pairs.length, why: l.why })) });
+const brief = (r) => ({ sharedFields: r.sharedFields, score: r.score, pairs: r.pairs, verdict: r.verdict, method: r.method, links: r.links.map((l) => ({ field: l.field, strength: l.strength, pairs: l.pairs.length, why: l.why })) });
 
 export function landingData() {
   return {
@@ -39,7 +39,7 @@ export function landingData() {
     pass2: {
       ranAt: pass2.ranAt,
       near: pass2.derivation.near,
-      parts: pass2.quotes.map((q) => ({ index: q.index, amountZat: q.quoteRequest.amount, amountOut: q.amountOut, timestamp: q.timestamp, recipient: q.recipient, refundTo: q.refundTo, foundFromSeedAlone: pass2.seedOnlyRecovery.found.find((f) => f.index === q.index)?.foundFromSeedAlone === true })),
+      parts: pass2.quotes.map((q) => ({ index: q.index, amountZat: q.quoteRequest.amount, amountOut: q.amountOut, timestamp: q.timestamp, recipient: q.recipient, refundTo: q.refundTo, confidentiality: q.confidentiality, signature: q.signature, foundFromSeedAlone: pass2.seedOnlyRecovery.found.find((f) => f.index === q.index)?.foundFromSeedAlone === true })),
       before: brief(linkabilityReport(swapsFromQuotes(run.quotes))),
       after: brief(linkabilityReport(swapsFromQuotes(pass2.quotes))),
     },

@@ -1,35 +1,39 @@
 // The dashboard on its real Vite dev server, reading deployments/*.json at runtime. Error, empty and
 // loading states are reached by answering the dashboard's own data requests differently (page.route);
-// everything else is the real server and the real files.
+// everything else is the real server and the real files. The hero replays pass 2; the first run is the
+// "before" section.
 import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { test, expect, expectNoHScroll, shot, logControls, DASH } from './fixtures';
-import { ROOT, run, pass2, seedOnly, before, after, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO } from './data';
+import { ROOT, run, pass2, seedOnly, before, after, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO, P, sentAt, partName } from './data';
 
 const Q = run.quotes;
 const widget = (page: Page) => page.getByRole('region', { name: 'Swap' });
-const river = (page: Page) => page.getByRole('list', { name: 'Refund addresses, one per swap' });
+const river = (page: Page) => page.getByRole('list', { name: 'One refund address and one recipient per swap' });
 const keyName = (label: string) => (label === 'account' ? 'the account key' : `key #${label.slice('refund-'.length)}`);
+/** A river row's button, by its accessible name: the text it shows (index, refund address, recipient). */
+const rowButton = (page: Page, i: number) => river(page).getByRole('button', { name: `#${P[i].index} ${P[i].refundTo} ${P[i].recipient}` });
 
 async function expectSwap(page: Page, i: number) {
-  const q = Q[i];
+  const q = P[i];
   const w = widget(page);
-  await expect(w.getByRole('group', { name: 'Choose a swap' }).getByRole('button', { name: `Swap ${i + 1}: ${q.what}` })).toHaveAttribute('aria-pressed', 'true');
-  await expect(w.locator('.refund-label b')).toHaveText(`key #${q.index}`);
-  await expect(w.locator('code.addr')).toHaveText(q.refundTo);
+  await expect(w.getByRole('group', { name: 'Choose a swap' }).getByRole('button', { name: `Swap ${i + 1}: ${partName(q)}` })).toHaveAttribute('aria-pressed', 'true');
+  await expect(w.locator('.refund-label b').first()).toHaveText(`key #${q.index}`);
+  await expect(w.locator('.refund-label b').nth(1)).toHaveText(`account #${q.index}`);
+  await expect(w.locator('code.addr').first()).toHaveText(q.refundTo);
+  await expect(w.locator('code.addr.rcpt')).toHaveText(q.recipient);
   await expect(w.locator('.leg-amt strong').first()).toHaveText(fmt(Number(q.quoteRequest.amount) / 1e8, 8));
   await expect(w.locator('.leg-amt strong').nth(1)).toHaveText(fmt(Number(q.amountOut)));
   const facts = w.locator('dl.facts');
-  await expect(facts.locator('dd').first().locator('code')).toHaveText(short(q.testnetAddress, 14, 6));
-  const refund = run.recovery.expect.find((e) => e.label === `refund-${q.index}`)!;
-  await expect(facts.getByRole('link')).toHaveAttribute('href', EXPLORER + refund.txid);
-  await expect(facts.getByRole('link')).toHaveAttribute('target', '_blank');
-  await expect(facts.locator('dd').nth(1)).toContainText(`${fmt(refund.value, 0)} zat`);
-  await expect(facts.locator('dd').nth(2)).toHaveText(`${refund.foundBy.map(keyName).join(', ')}${refund.ok ? ' only' : ''}`);
+  const found = pass2.seedOnlyRecovery.found.find((f) => f.index === q.index)!;
+  await expect(facts.locator('dd').nth(0)).toHaveText(`+${sentAt(q)} s`);
+  await expect(facts.locator('dd').nth(1)).toHaveText(found.foundFromSeedAlone ? 'found again, no index book' : 'not found');
+  await expect(facts.locator('dd').nth(2)).toHaveText(found.state?.exists ? 'exists' : 'not created (dry quote)');
   await expect(facts.locator('dd').nth(3)).toHaveText(q.confidentiality);
+  await expect(facts.locator('dd').nth(4).locator('code')).toHaveText(short(q.signature, 14, 4));
   const rows = river(page).locator('li');
-  for (let j = 0; j < Q.length; j++) {
+  for (let j = 0; j < P.length; j++) {
     await expect(rows.nth(j)).toHaveClass(j === i ? 'now' : 'gone');
     await expect(rows.nth(j).locator('.st')).toHaveText(j === i ? 'shown' : 'used once');
   }
@@ -55,17 +59,21 @@ test.describe('dashboard', () => {
       await route.continue();
     });
     await page.goto(`${DASH}/`);
-    const loading = page.getByRole('status').filter({ hasText: 'Loading the published run…' });
+    const loading = page.getByRole('status').filter({ hasText: 'Loading the published runs…' });
     await expect(loading).toBeVisible();
     await expect(loading).toHaveAttribute('aria-busy', 'true');
     await shot(page, info, 'dash-01-loading');
     release();
     await expect(loading).toBeHidden();
-    await expect(page.locator('.eyebrow')).toHaveText(`published run · ${day(run.ranAt)}`);
+    await expect(page.locator('.eyebrow')).toHaveText(`pass 2 · ${day(pass2.ranAt)}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every swap its own refund address and recipient.');
     await expectSwap(page, 0);
-    await expect(river(page).locator('li code')).toHaveText(Q.map((q) => q.refundTo));
-    await expect(page.locator('.note')).toHaveText('Real 1Click dry quotes: no deposit address was created and no funds moved.');
+    // under the headline: three refund addresses and three different recipients
+    await expect(river(page).locator('li code.rt')).toHaveText(P.map((q) => q.refundTo));
+    await expect(river(page).locator('li code.rc')).toHaveText(P.map((q) => q.recipient));
+    expect(new Set(P.map((q) => q.recipient)).size).toBe(3);
+    expect(P.map((q) => q.recipient.slice(0, 8))).toEqual(['66e730c4', '3e339489', '4afc1f2c']);
+    await expect(page.locator('.note')).toHaveText('Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.');
     await expectNoHScroll(page);
     await shot(page, info, 'dash-02-ready');
     await shot(page, info, 'dash-03-full', true);
@@ -75,15 +83,15 @@ test.describe('dashboard', () => {
     await page.goto(`${DASH}/`);
     const group = widget(page).getByRole('group', { name: 'Choose a swap' });
     for (const i of [1, 2, 0]) {
-      await group.getByRole('button', { name: `Swap ${i + 1}: ${Q[i].what}` }).click();
+      await group.getByRole('button', { name: `Swap ${i + 1}: ${partName(P[i])}` }).click();
       await expectSwap(page, i);
       await shot(page, info, `dash-04-swap${i + 1}`);
     }
     for (const i of [2, 1, 0]) {
-      await river(page).getByRole('button', { name: `Show swap ${i + 1}` }).click();
+      await rowButton(page, i).click();
       await expectSwap(page, i);
     }
-    await river(page).getByRole('button', { name: 'Show swap 3' }).click();
+    await rowButton(page, 2).click();
     await expectSwap(page, 2);
     await river(page).scrollIntoViewIfNeeded();
     await shot(page, info, 'dash-05-river-swap3');
@@ -94,23 +102,43 @@ test.describe('dashboard', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`${DASH}/`);
     await expectSwap(page, 0);
-    const swap2 = widget(page).getByRole('button', { name: `Swap 2: ${Q[1].what}` });
+    const swap2 = widget(page).getByRole('button', { name: `Swap 2: ${partName(P[1])}` });
     await swap2.focus();
     await page.keyboard.press('Enter');
     await expectSwap(page, 1);
-    expect(await widget(page).locator('code.addr').evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
+    // both the refund address and the recipient: no fade-in
+    expect(await widget(page).locator('code.addr').evaluateAll((es) => es.map((e) => getComputedStyle(e).animationName))).toEqual(['none', 'none']);
     expect(await river(page).locator('li').first().evaluate((e) => getComputedStyle(e).transitionDuration)).toBe('0s');
     await page.keyboard.press('Tab');
-    await expect(widget(page).getByRole('button', { name: `Swap 3: ${Q[2].what}` })).toBeFocused();
+    await expect(widget(page).getByRole('button', { name: `Swap 3: ${partName(P[2])}` })).toBeFocused();
     await page.keyboard.press('Space');
     await expectSwap(page, 2);
     await shot(page, info, 'dash-05b-reduced-motion-keyboard');
   });
 
-  test('link audit and "All three links, measured" (first run vs pass 2, per-swap NEAR recipients)', async ({ page }, info) => {
+  test('accessibility: each refund-address row is named by what it shows (index, refund address, recipient, state)', async ({ page }) => {
     await page.goto(`${DASH}/`);
-    const audit = page.getByRole('region', { name: 'Link audit' });
-    const rows = audit.locator('ul.rows li');
+    await expectSwap(page, 0);
+    const names = await river(page).getByRole('button').evaluateAll((bs) => bs.map((b) => [b.getAttribute('aria-label'), (b.textContent ?? '').replace(/\s+/g, ' ').trim()]));
+    expect(names).toEqual(P.map((q, i) => [null, `#${q.index} ${q.refundTo} ${q.recipient} ${i === 0 ? 'shown' : 'used once'}`]));
+    await expect(rowButton(page, 0)).toHaveAttribute('aria-current', 'true');
+    await rowButton(page, 1).click();
+    await expect(rowButton(page, 1)).toHaveAttribute('aria-current', 'true');
+    await expect(river(page).getByRole('button', { name: /used once$/ })).toHaveCount(2);
+  });
+
+  test('the first run as "before" and "All three links, measured" (first run vs pass 2, per-swap NEAR recipients)', async ({ page }, info) => {
+    await page.goto(`${DASH}/`);
+    const audit = page.getByRole('region', { name: 'Before: the first run' });
+    const firstRun = audit.getByRole('list', { name: 'First run swaps' }).locator('li');
+    await expect(firstRun).toHaveCount(Q.length);
+    for (let i = 0; i < Q.length; i++) {
+      await expect(firstRun.nth(i).locator('code').first()).toHaveText(short(Q[i].refundTo, 10, 6));
+      await expect(firstRun.nth(i).locator('code.links')).toHaveText(short(Q[i].quoteRequest.recipient, 8, 6));
+    }
+    await expect(audit).toContainText('The review recorded that as a defect');
+    await expect(page.locator('body')).not.toContainText('on purpose');
+    const rows = audit.getByRole('list', { name: 'Link audit' }).locator('li');
     await expect(rows).toHaveCount(4);
     await expect(rows.nth(0).locator('.v')).toHaveText('does not link');
     await expect(rows.nth(0).locator('.d')).toHaveText('3 different across 3, none is the account address');
@@ -147,6 +175,8 @@ test.describe('dashboard', () => {
     }
     expect(new Set(pass2.quotes.map((q) => q.recipient)).size).toBe(pass2.quotes.length);
     await expect(links.locator('.callout')).toContainText('Sweeping re-links.');
+    await expect(links.locator('.method')).toHaveText(`How the score is computed: ${after.method}`);
+    await expect(links).toContainText('largest first');
     await p2.first().scrollIntoViewIfNeeded();
     await shot(page, info, 'dash-08-pass2-recipients');
     await expectNoHScroll(page);
@@ -185,7 +215,7 @@ test.describe('dashboard', () => {
     await page.goto(`${DASH}/`);
     const alert = page.getByRole('alert');
     await expect(alert).toContainText('Could not load the published run.');
-    await expect(alert).toContainText('/testnet.json: HTTP 404');
+    await expect(alert).toContainText('testnet.json: HTTP 404');
     await expect(alert).toContainText('pnpm --filter @zswap/examples run-live');
     await expect(widget(page)).toHaveCount(0);
     await expectNoHScroll(page);
@@ -206,7 +236,9 @@ test.describe('dashboard', () => {
     guard.allow(404, /^\/(pass2|recovery-seed-only)\.json$/);
     await page.route(/\/(pass2|recovery-seed-only)\.json$/, (route) => route.fulfill({ status: 404, body: 'not found' }));
     await page.goto(`${DASH}/`);
-    await expectSwap(page, 0);
+    await expect(page.getByRole('status').filter({ hasText: 'No swap to replay.' })).toContainText('Pass 2 is not recorded');
+    await expect(widget(page)).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Before: the first run' })).toBeVisible();
     await expect(page.getByRole('status').filter({ hasText: 'No pass-2 run recorded' })).toContainText('deployments/pass2.json');
     await expect(page.getByRole('region', { name: 'All three links, measured' }).locator('.batch')).toHaveCount(1);
     await expect(page.getByRole('status').filter({ hasText: 'No seed-only recovery recorded' })).toBeVisible();
@@ -241,7 +273,7 @@ test.describe('dashboard', () => {
     }
     // explorer links open in a new tab, so the dashboard stays where it is
     const ex = await page.locator(`a[href^="${EXPLORER}"]`).evaluateAll((as) => as.map((a) => [a.getAttribute('target'), a.getAttribute('rel')]));
-    expect(ex.length).toBe(1 + run.recovery.expect.length);
+    expect(ex.length).toBe(run.recovery.expect.length);
     for (const [t, r] of ex) expect([t, r]).toEqual(['_blank', 'noreferrer']);
     await shot(page, info, 'dash-14-top');
   });

@@ -55,6 +55,11 @@
       .steps { display: flex; gap: 6px; }
       .steps button { font: 500 13px/1 var(--sans); color: var(--soft); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
       .steps button[aria-pressed='true'] { background: var(--river); border-color: var(--river); color: #fff; }
+      .ctl { display: flex; gap: 10px; align-items: center; }
+      .play { font: 500 13px/1 var(--sans); color: var(--ink); background: var(--mist); border: 1px solid transparent; border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+      .play:hover { border-color: var(--line); }
+      .credit { color: var(--faint); max-width: 36rem; margin: 18px auto 0; font-size: 14px; line-height: 1.55; }
+      .credit a { color: var(--soft); }
       .leg { padding: 16px 22px; }
       .leg + .leg { border-top: 1px solid var(--line); }
       .leg-label { font-size: 13px; color: var(--soft); }
@@ -65,12 +70,15 @@
       .refund-label { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--soft); }
       .refund-label b { font-weight: 500; color: var(--aqua-ink); }
       .addr { display: block; margin-top: 8px; font-family: var(--mono); font-size: 13px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; min-height: 4.5em; }
+      .addr.rcpt { min-height: 3em; }
+      .refund-label.second { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(11, 52, 64, 0.08); }
       .w-foot { padding: 0 22px 18px; font-size: 13px; color: var(--soft); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
       /* the river: addresses used once, fading downstream */
       .river { max-width: 440px; margin: 28px auto 0; padding: 0; list-style: none; text-align: left; }
       .river li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: baseline; padding: 6px 4px; font-size: 13px; color: var(--faint); transition: opacity 1.2s var(--ease), color 1.2s var(--ease); }
-      .river li code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+      .river li code { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+      .river li .codes { display: grid; gap: 2px; min-width: 0; }
       .river li .n { font-family: var(--mono); }
       .river li.now { color: var(--ink); }
       .river li.gone { opacity: 0.38; }
@@ -122,6 +130,8 @@
       .verdict { margin: 10px 0 0; font-size: 13.5px; color: var(--soft); }
       .muted { color: var(--faint); font-weight: 400; }
       .rows .d .cut { color: var(--aqua-ink); }
+      .rows .d .links { color: var(--link-ink); }
+      .method { font-size: 13.5px; color: var(--faint); margin: 14px 0 0; }
       .error { max-width: 440px; margin: 72px auto 0; padding: 18px 20px; border: 1px solid var(--link-ink); border-radius: 14px; color: var(--link-ink); text-align: left; font-size: 15px; }
 
       @media (max-width: 640px) {
@@ -162,9 +172,10 @@
         <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side</p>
         <h1>A new refund address and recipient for every swap.</h1>
         <p class="lede">Every swap out of Zcash through 1Click names a refund address and a recipient in a public request. Lethe gives each swap a refund address used once and its own NEAR account, both from one seed, and tells you what still links them.</p>
+        <p class="credit" id="credit">The one-time refund key for 1Click's <code>refundTo</code> builds on <a href="https://zakura.com/engineering/quantum-unlinkability">Zakura's quantum-unlinkability proposal</a> (Oct 19) and its draft crate <code>zakura-one-time-ivk</code>. Lethe adds a NEAR recipient per swap from the same seed, recovery from the seed alone on both chains, a locked index book that refuses a reused recipient, opt-in amount and timing decorrelation with a linkability report, and MCP tools.</p>
 
         <div id="widget-slot">
-          <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading the published run…</span></div></div>
+          <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading pass 2…</span></div></div>
         </div>
       </div>
 
@@ -186,19 +197,31 @@
       </section>
 
       <section id="audit" aria-labelledby="audit-h">
-        <h2 id="audit-h">What it forgets, and what it can't</h2>
-        <p class="sub">Every field of the three published requests, checked for what could link them.</p>
+        <h2 id="audit-h">Before: the first run</h2>
+        <p class="sub" id="before-sub">The first run's three requests, every field checked for what could link them.</p>
+        <ul class="rows" id="before-quotes" aria-label="First run swaps"></ul>
         <ul class="rows" id="audit-rows"></ul>
-        <p class="sub" style="font-size: 15px">That first run cut the first row only. Since then a swap with no recipient goes to its own NEAR account, and a reused recipient is refused unless you accept the link. A shared 1Click token and your IP are still yours to manage.</p>
+        <p class="sub" id="before-note" style="font-size: 15px"></p>
       </section>
 
       <section id="links" aria-labelledby="links-h">
         <h2 id="links-h">All three links, measured</h2>
         <p class="sub">The refund address was the easy link. The recipient, the amount and the timing are the others. Both batches are scored from their real 1Click requests by the report the CLI and MCP print.</p>
         <div class="batches" id="batches"></div>
+        <p class="method" id="score-method"></p>
         <ul class="rows" id="pass2-rows" aria-label="Pass 2 swaps"></ul>
         <p class="sub" id="pass2-note" style="font-size: 15px"></p>
         <p class="sub" style="font-size: 15px"><strong style="font-weight: 500; color: var(--ink)">Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that: leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.</p>
+      </section>
+
+      <section id="confidential" aria-labelledby="ci-h">
+        <h2 id="ci-h">Why not 1Click's Confidential Intents?</h2>
+        <p class="sub">1Click's own private mode (<code>confidentiality: basic</code> or <code>advanced</code>) keeps the quote request out of public view. It is worth using, and Lethe passes it through (<code>--confidentiality</code>). It does not replace a refund address and a recipient per swap:</p>
+        <ul class="rows">
+          <li><span class="k">It needs a partner account</span><span class="d">1Click answers a confidential dry quote with HTTP 401 "User authentication is required for confidential intent quotes". Without <code>ONECLICK_JWT</code>, Lethe says Setup required and reserves nothing.</span></li>
+          <li><span class="k">1Click and its solvers still see both fields</span><span class="d">The refund address and the recipient go to the provider in every mode, and the deposit, refund and delivery happen on public chains. A provider-side breach, a subpoena or a future quantum attacker reading those records links every swap that reused them.</span></li>
+          <li><span class="k">They compose</span><span class="d">A confidential request with a one-time refund address and its own recipient hides the request and leaves nothing to link even for the provider's own records.</span></li>
+        </ul>
       </section>
 
       <section id="recover" aria-labelledby="recover-h">
@@ -221,11 +244,11 @@
       <section id="try" aria-labelledby="run-h">
         <h2 id="run-h">Run it</h2>
         <p class="sub">Rust, a compact-block scanner, a CLI and an MCP server. The tests call the real 1Click API with dry quotes and scan Zcash testnet.</p>
-        <pre><code>pnpm install &amp;&amp; pnpm test
+        <pre><code>pnpm install &amp;&amp; pnpm build &amp;&amp; pnpm test
+pnpm --filter @zswap/cli zswap init                              # a seed and its index book in .demo/
 pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near        # its own refund address and NEAR recipient
 pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180
-ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recipients
-ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&gt;
+ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover &lt;from-height&gt; --lookup   # from the seed alone
 pnpm --filter @zswap/dashboard dev                                # the dashboard: http://localhost:5182</code></pre>
       </section>
     </main>
@@ -240,7 +263,7 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
     </footer>
 
     <!-- copied from deployments/*.json by sync-run.mjs; never edited by hand -->
-    <script type="application/json" id="run">{"ranAt":"2026-10-20T16:56:41.553Z","oneTimeIvk":{"crate":"zakura-one-time-ivk","version":"0.0.1-rc1","caution":"draft convention; must not be used to issue live addresses before review"},"account":{"mainnetAddress":"u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm","testnetAddress":"utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua"},"quotes":[{"index":0,"what":"0.1 ZEC → NEAR","amountZat":"10000000","amountOut":"24.421148626121563979648046","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr","testnetAddress":"utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:03.320Z","signature":"ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw"},{"index":1,"what":"0.05 ZEC → USDC (NEAR)","amountZat":"5000000","amountOut":"60.452032","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q","testnetAddress":"utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:06.579Z","signature":"ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC"},{"index":2,"what":"0.2 ZEC → NEAR","amountZat":"20000000","amountOut":"48.877605913228493507623616","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx","testnetAddress":"utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:09.916Z","signature":"ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8"}],"recovery":{"from":4522708,"blocks":20,"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]},"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","pass2":{"ranAt":"2026-10-21T19:25:22.419Z","near":"SLIP-0010 ed25519, m/44'/397'/1'/i' (implicit account id = hex public key)","parts":[{"index":5,"amountZat":"20000000","amountOut":"50.701120324635199193775","timestamp":"2026-10-21T19:20:34.167Z","recipient":"66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a","refundTo":"u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur","foundFromSeedAlone":true},{"index":6,"amountZat":"10000000","amountOut":"25.323968833443378562464","timestamp":"2026-10-21T19:22:52.176Z","recipient":"3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada","refundTo":"u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j","foundFromSeedAlone":true},{"index":7,"amountZat":"5000000","amountOut":"12.648185384760528041439","timestamp":"2026-10-21T19:25:12.180Z","recipient":"4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d","refundTo":"u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr","foundFromSeedAlone":true}],"before":{"sharedFields":2,"score":0,"pairs":3,"verdict":"3 of 3 pairs linked by recipient, same minute","links":[{"field":"recipient","strength":"strong","pairs":3,"why":"the same recipient is in both public requests and receives both on chain"},{"field":"same minute","strength":"strong","pairs":3,"why":"both requests went out within a minute of each other"},{"field":"client fingerprint","strength":"weak","pairs":3,"why":"the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"},{"field":"token","strength":"weak","pairs":1,"why":"the same destination token"}]},"after":{"sharedFields":0,"score":32,"pairs":3,"verdict":"no public field links any pair; 3 pair(s) share only weak hints","links":[{"field":"within 10 min","strength":"weak","pairs":3,"why":"both requests went out within ten minutes"},{"field":"token","strength":"weak","pairs":3,"why":"the same destination token"},{"field":"split pattern","strength":"weak","pairs":3,"why":"common denominations sent largest first, the order a greedy 1-2-5 split produces"},{"field":"client fingerprint","strength":"weak","pairs":3,"why":"the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"}]}},"seedOnly":{"ranAt":"2026-10-21T07:16:18Z","from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":14,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}]}}</script>
+    <script type="application/json" id="run">{"ranAt":"2026-10-20T16:56:41.553Z","oneTimeIvk":{"crate":"zakura-one-time-ivk","version":"0.0.1-rc1","caution":"draft convention; must not be used to issue live addresses before review"},"account":{"mainnetAddress":"u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm","testnetAddress":"utest1chcpv3u8phlplwputsyeundf924d5qktqj32au3xyv9l5g3lnk3cal56vk2gsx4gm80t8uwkzxe5ggmu2uxthjqjrr90sg3arg8q07ua"},"quotes":[{"index":0,"what":"0.1 ZEC → NEAR","amountZat":"10000000","amountOut":"24.421148626121563979648046","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr","testnetAddress":"utest1cwe0h47nsrr2yy43rzfvaxf2rpjzdhvxuugvuk73mdasn2c58hywc6fuxn3rj9sqagljsz74v2n8cy9hjq8e5jl2azsxc4vxrqs5kcxa","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:03.320Z","signature":"ed25519:3453NB7mLiwSuE3LJqbQe3TGDiN69dyB9AijAWhvfWh4Zv556cXnkv9JR3auKMM3MMFjiE4Qy4iQGztHioRCbHtw"},{"index":1,"what":"0.05 ZEC → USDC (NEAR)","amountZat":"5000000","amountOut":"60.452032","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q","testnetAddress":"utest1vcpqwhn3m8meaddjkkc4khzus8urlu0esj2l2cf3nrgeeu4h662e66p8te0y56w7pypd9fek4pqtxzzlvztlhpmy7zwlmagh6s54ajwv","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:06.579Z","signature":"ed25519:QfJ2eMqFSNvLbKYg2LAR3sv9hfbYHjfrkoduZpkScBmeKu1SoKM9UrTCMFQ6ZK5uA2253JDPaGDkktkQM7tr6FC"},{"index":2,"what":"0.2 ZEC → NEAR","amountZat":"20000000","amountOut":"48.877605913228493507623616","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx","testnetAddress":"utest1pqlsqt9na7vrm7w5e8sa3e6vvhllpkayrpe3he6tru3k06csk0gzmze4zqmay28sy0fcjuhs94n42846df0yzvfe6k97pz4rqsguqlzc","recipient":"798a2c5e37a4b79abd22e5a89de3c75cf2eff24ac962f4fd2971c1e4c5d87c72","confidentiality":"public","timestamp":"2026-10-20T16:50:09.916Z","signature":"ed25519:3snNjW2AfkSdCQFCZpW9vzdfYw2TYwkerCPTAMsqjTTrVr64J8vJt6bdvNFsgbsbewZ42rra6ik49q4dy4UpYJw8"}],"recovery":{"from":4522708,"blocks":20,"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]},"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","pass2":{"ranAt":"2026-10-21T19:25:22.419Z","near":"SLIP-0010 ed25519, m/44'/397'/1'/i' (implicit account id = hex public key)","parts":[{"index":5,"amountZat":"20000000","amountOut":"50.701120324635199193775","timestamp":"2026-10-21T19:20:34.167Z","recipient":"66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a","refundTo":"u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur","confidentiality":"public","signature":"ed25519:4NAEr3sDzkUFtgXBdQZZ4P9Vy85g1WERP6yUWYdNJGDfjQoJgWHrtj4CZqsj6hPn2fjRQ4ueT3ijd4mAwyXgSTw5","foundFromSeedAlone":true},{"index":6,"amountZat":"10000000","amountOut":"25.323968833443378562464","timestamp":"2026-10-21T19:22:52.176Z","recipient":"3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada","refundTo":"u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j","confidentiality":"public","signature":"ed25519:5qWi55WX9Qz9cy6XQv7rexCiGKVScrqNQzJtrvoH69QvgnaGEactr9HdeWQGkjxhAvU3x8MpbNLc4j76GTgxfViD","foundFromSeedAlone":true},{"index":7,"amountZat":"5000000","amountOut":"12.648185384760528041439","timestamp":"2026-10-21T19:25:12.180Z","recipient":"4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d","refundTo":"u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr","confidentiality":"public","signature":"ed25519:5VFdrS4ye7uKisWoGHZhANbdePEYJa4kwhkge4yTVkV6N6SVBuX7YmMwi6sg8cpTAB5x2fCBYHxpmVfN6bs8F3kb","foundFromSeedAlone":true}],"before":{"sharedFields":2,"score":0,"pairs":3,"verdict":"3 of 3 pairs linked by recipient, same minute","method":"score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.","links":[{"field":"recipient","strength":"strong","pairs":3,"why":"the same recipient is in both public requests and receives both on chain"},{"field":"same minute","strength":"strong","pairs":3,"why":"both requests went out within a minute of each other"},{"field":"client fingerprint","strength":"weak","pairs":3,"why":"the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"},{"field":"token","strength":"weak","pairs":1,"why":"the same destination token"}]},"after":{"sharedFields":0,"score":32,"pairs":3,"verdict":"no public field links any pair; 3 pair(s) share only weak hints","method":"score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.","links":[{"field":"within 10 min","strength":"weak","pairs":3,"why":"both requests went out within ten minutes"},{"field":"token","strength":"weak","pairs":3,"why":"the same destination token"},{"field":"split pattern","strength":"weak","pairs":3,"why":"common denominations sent largest first, the order a greedy 1-2-5 split produces"},{"field":"client fingerprint","strength":"weak","pairs":3,"why":"the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"}]}},"seedOnly":{"ranAt":"2026-10-21T07:16:18Z","from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":14,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}]}}</script>
     <script>
       (() => {
         const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
@@ -268,81 +291,122 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
         const ranOn = new Date(run.ranAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // the widget: one real dry quote at a time
-        const steps = el('div', { class: 'steps', role: 'group', 'aria-label': 'Swap' });
-        const btns = quotes.map((q, i) => el('button', { type: 'button', 'aria-pressed': 'false', 'aria-label': `Swap ${i + 1}: ${q.what}` }, String(i + 1)));
-        btns.forEach((b) => steps.append(b));
-        const sendAmt = el('strong'), sendUnit = el('span');
-        const outAmt = el('strong'), outUnit = el('span');
-        const label = el('b');
-        const addr = el('code', { class: 'addr' });
-        const foot = el('div', { class: 'w-foot' });
-        const widget = el(
-          'div',
-          { class: 'widget', role: 'region', 'aria-label': 'Swap widget: published dry quotes' },
-          el('div', { class: 'w-head' }, el('span', {}, `Dry quote · ${ranOn}`), steps),
-          el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'You send'), el('div', { class: 'leg-amt' }, sendAmt, sendUnit)),
-          el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'Quoted by 1Click'), el('div', { class: 'leg-amt' }, outAmt, outUnit)),
-          el('div', { class: 'refund', 'aria-live': 'polite' }, el('div', { class: 'refund-label' }, el('span', {}, 'refundTo · used once'), label), addr),
-          foot,
-        );
-        const river = el('ol', { class: 'river', 'aria-label': 'Refund addresses, one per swap' });
-        const rows = quotes.map((q, i) => {
-          const li = el('li', {}, el('span', { class: 'n' }, `#${q.index}`), el('code', { title: q.refundTo }, q.refundTo), el('span', { class: 'st' }));
-          river.append(li);
-          return li;
-        });
-        const note = el('p', { class: 'note' }, 'A replay of the three real 1Click dry quotes from the published run: no deposit address was created and no funds moved.');
-        $('widget-slot').replaceChildren(widget, river, note);
-
-        let at = -1, timer = null, pending = null;
-        const show = (i, animate) => {
-          // a fade still running from an earlier click must not land its address under this swap's key
-          clearTimeout(pending);
-          pending = null;
-          const q = quotes[i];
-          const [from, to] = q.what.split(' → ');
-          const [, unitIn] = from.split(' ');
-          sendAmt.textContent = fmt(Number(q.amountZat) / 1e8, 8);
-          sendUnit.textContent = unitIn || 'ZEC';
-          outAmt.textContent = fmt(Number(q.amountOut));
-          outUnit.textContent = to;
-          label.textContent = `key #${q.index}`;
-          foot.replaceChildren(el('span', {}, `request: ${q.confidentiality}`), el('span', { class: 'mono', title: q.signature }, short(q.signature, 16, 4)));
-          const put = () => {
-            addr.textContent = q.refundTo;
-            addr.classList.remove('leave');
-            if (animate) {
-              addr.classList.remove('arrive');
-              void addr.offsetWidth;
-              addr.classList.add('arrive');
-            }
-          };
-          if (animate && at !== -1) {
-            addr.classList.remove('arrive');
-            addr.classList.add('leave');
-            pending = setTimeout(put, 650);
-          } else put();
-          btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
-          rows.forEach((r, j) => {
-            r.className = j === i ? 'now' : j < i ? 'gone' : 'ahead';
-            r.querySelector('.st').textContent = j === i ? 'in use' : j < i ? 'used, forgotten' : '';
+        // the hero widget: pass 2, one real dry quote at a time, each part with its own refund address
+        // and its own NEAR recipient
+        const p2 = run.pass2;
+        const parts = (p2 && p2.parts) || [];
+        const slot = $('widget-slot');
+        if (!parts.length) {
+          slot.replaceChildren(el('div', { class: 'error', role: 'status' }, 'No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2, then node packages/landing/sync-run.mjs.'));
+        } else {
+          const p0 = Math.min(...parts.map((q) => Date.parse(q.timestamp)));
+          const what = (q) => `${fmt(Number(q.amountZat) / 1e8, 8)} ZEC → wNEAR`;
+          const steps = el('div', { class: 'steps', role: 'group', 'aria-label': 'Swap' });
+          const btns = parts.map((q, i) => el('button', { type: 'button', 'aria-pressed': 'false', 'aria-label': `Swap ${i + 1}: ${what(q)}` }, String(i + 1)));
+          btns.forEach((b) => steps.append(b));
+          const play = el('button', { type: 'button', class: 'play' });
+          const sendAmt = el('strong'), outAmt = el('strong');
+          const label = el('b'), rlabel = el('b');
+          const addr = el('code', { class: 'addr' });
+          const raddr = el('code', { class: 'addr rcpt' });
+          const foot = el('div', { class: 'w-foot' });
+          // announced only once the visitor picks a swap: the autoplaying replay stays quiet (WCAG 2.2.2)
+          const keys = el(
+            'div',
+            { class: 'refund', 'aria-live': 'off' },
+            el('div', { class: 'refund-label' }, el('span', {}, 'refundTo · used once'), label),
+            addr,
+            el('div', { class: 'refund-label second' }, el('span', {}, 'recipient · its own NEAR account'), rlabel),
+            raddr,
+          );
+          const widget = el(
+            'div',
+            { class: 'widget', role: 'region', 'aria-label': 'Swap widget: pass 2 dry quotes' },
+            el('div', { class: 'w-head' }, el('span', {}, `Pass 2 · ${new Date(p2.ranAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}`), el('div', { class: 'ctl' }, steps, play)),
+            el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'You send'), el('div', { class: 'leg-amt' }, sendAmt, el('span', {}, 'ZEC'))),
+            el('div', { class: 'leg' }, el('span', { class: 'leg-label' }, 'Quoted by 1Click'), el('div', { class: 'leg-amt' }, outAmt, el('span', {}, 'wNEAR'))),
+            keys,
+            foot,
+          );
+          const river = el('ol', { class: 'river', 'aria-label': 'One refund address and one recipient per swap' });
+          const rows = parts.map((q) => {
+            const li = el('li', {}, el('span', { class: 'n' }, `#${q.index}`), el('span', { class: 'codes' }, el('code', { class: 'rt', title: q.refundTo }, q.refundTo), el('code', { class: 'rc', title: q.recipient }, q.recipient)), el('span', { class: 'st' }));
+            river.append(li);
+            return li;
           });
-          at = i;
-        };
-        const stop = () => {
-          clearInterval(timer);
-          timer = null;
-        };
-        btns.forEach((b, i) => b.addEventListener('click', () => {
-          stop();
-          show(i, !reduce);
-        }));
-        show(0, false);
-        if (!reduce && quotes.length > 1) {
-          timer = setInterval(() => show((at + 1) % quotes.length, true), 4200);
-          widget.addEventListener('mouseenter', stop);
-          widget.addEventListener('focusin', stop);
+          const total = parts.reduce((t, q) => t + Number(q.amountZat), 0) / 1e8;
+          const note = el('p', { class: 'note' }, `A replay of pass 2: ${fmt(total, 8)} ZEC split into ${parts.length} parts, ${parts.length} real 1Click dry quotes, each with its own one-time refund address and its own NEAR implicit recipient. No deposit address was created and no funds moved.`);
+          slot.replaceChildren(widget, river, note);
+
+          let at = -1, timer = null, pending = null;
+          const show = (i, animate) => {
+            // a fade still running from an earlier click must not land its addresses under this swap's key
+            clearTimeout(pending);
+            pending = null;
+            const q = parts[i];
+            sendAmt.textContent = fmt(Number(q.amountZat) / 1e8, 8);
+            outAmt.textContent = fmt(Number(q.amountOut));
+            label.textContent = `key #${q.index}`;
+            rlabel.textContent = `account #${q.index}`;
+            foot.replaceChildren(el('span', {}, `sent at +${Math.round((Date.parse(q.timestamp) - p0) / 1000)} s · request: ${q.confidentiality}`), el('span', { class: 'mono', title: q.signature }, short(q.signature, 16, 4)));
+            const put = () => {
+              addr.textContent = q.refundTo;
+              raddr.textContent = q.recipient;
+              for (const a of [addr, raddr]) {
+                a.classList.remove('leave');
+                if (animate) {
+                  a.classList.remove('arrive');
+                  void a.offsetWidth;
+                  a.classList.add('arrive');
+                }
+              }
+            };
+            if (animate && at !== -1) {
+              for (const a of [addr, raddr]) {
+                a.classList.remove('arrive');
+                a.classList.add('leave');
+              }
+              pending = setTimeout(put, 650);
+            } else put();
+            btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+            rows.forEach((r, j) => {
+              r.className = j === i ? 'now' : j < i ? 'gone' : 'ahead';
+              r.querySelector('.st').textContent = j === i ? 'in use' : j < i ? 'used, forgotten' : '';
+            });
+            at = i;
+          };
+          const playing = (on) => {
+            play.textContent = on ? 'Pause' : 'Play';
+            play.setAttribute('aria-label', on ? 'Pause replay' : 'Play replay');
+          };
+          const stop = () => {
+            clearInterval(timer);
+            timer = null;
+            playing(false);
+          };
+          const start = () => {
+            clearInterval(timer);
+            timer = setInterval(() => show((at + 1) % parts.length, !reduce), 4200);
+            playing(true);
+          };
+          btns.forEach((b, i) =>
+            b.addEventListener('click', () => {
+              stop();
+              keys.setAttribute('aria-live', 'polite');
+              show(i, !reduce);
+            }),
+          );
+          play.addEventListener('click', () => (timer ? stop() : start()));
+          show(0, false);
+          playing(false);
+          if (parts.length < 2) play.hidden = true;
+          else if (!reduce) {
+            start();
+            widget.addEventListener('mouseenter', stop);
+            widget.addEventListener('focusin', (e) => {
+              if (e.target !== play) stop();
+            });
+          }
         }
 
         // two wallets
@@ -351,11 +415,23 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
           $('onetime').append(el('li', { title: q.refundTo }, short(q.refundTo, 14, 8)));
         }
 
-        // link audit, computed from the published requests
+        // before: the first run, with its link audit computed from its requests
         const distinct = (xs) => new Set(xs).size;
         const n = quotes.length;
         const times = quotes.map((q) => Date.parse(q.timestamp));
         const spread = (Math.max(...times) - Math.min(...times)) / 1000;
+        const sharedRecipient = distinct(quotes.map((q) => q.recipient)) < n;
+        $('before-sub').textContent = `The first run (${ranOn}): three real dry quotes, each with its own one-time refund address. Every field of the three requests, checked for what could link them.`;
+        for (const q of quotes)
+          $('before-quotes').append(
+            el(
+              'li',
+              {},
+              el('span', { class: 'k' }, `#${q.index} · ${q.what}`),
+              el('span', { class: 'v' }, fmt(Number(q.amountOut))),
+              el('span', { class: 'd' }, 'refundTo ', el('code', { title: q.refundTo }, short(q.refundTo, 10, 6)), ' · recipient ', el('code', { class: quotes.filter((x) => x.recipient === q.recipient).length > 1 ? 'links' : '', title: q.recipient }, short(q.recipient, 8, 6))),
+            ),
+          );
         const audit = [
           ['refundTo', `${distinct(quotes.map((q) => q.refundTo))} different across ${n}`, distinct(quotes.map((q) => q.refundTo)) === n ? 'does not link' : 'links swaps'],
           ['recipient', `${distinct(quotes.map((q) => q.recipient))} across ${n}`, distinct(quotes.map((q) => q.recipient)) === n ? 'does not link' : `links ${n - distinct(quotes.map((q) => q.recipient)) + 1} swaps`],
@@ -364,10 +440,12 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
         ];
         for (const [k, v, verdict] of audit)
           $('audit-rows').append(el('li', {}, el('span', { class: 'k' }, k), el('span', { class: `v ${verdict === 'does not link' ? 'cut' : 'links'}` }, verdict), el('span', { class: 'd' }, v)));
+        $('before-note').textContent = sharedRecipient
+          ? `The first run cut the first row only: all ${n} quotes named one NEAR recipient (${short(quotes[0].recipient, 8, 6)}), so they stay linked through it. The review recorded that as a defect. Since then a swap with no recipient goes to its own NEAR account (pass 2, at the top), and a reused recipient is refused unless you accept the link. A shared 1Click token and your IP are still yours to manage.`
+          : 'A shared 1Click token and your IP are still yours to manage.';
 
         // all three links: two batches scored at sync time by the CLI's linkabilityReport
-        const p2 = run.pass2;
-        const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'partner token'];
+        const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'split pattern', 'client fingerprint', 'partner token'];
         const day = (s) => new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
         const batch = (title, when, r) =>
           el(
@@ -388,7 +466,9 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
             $('pass2-rows').append(
               el('li', {}, el('span', { class: 'k' }, `${fmt(Number(q.amountZat) / 1e8, 8)} ZEC `, el('span', { class: 'muted' }, `at +${Math.round((Date.parse(q.timestamp) - t0) / 1000)} s`)), el('span', { class: 'v' }, `→ ${fmt(Number(q.amountOut))} wNEAR`), el('span', { class: 'd' }, 'recipient ', el('code', { title: q.recipient }, short(q.recipient, 10, 6)), ' · refundTo ', el('code', { title: q.refundTo }, short(q.refundTo, 10, 6)), ' · ', el('span', { class: q.foundFromSeedAlone ? 'cut' : '' }, q.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed'))),
             );
-          $('pass2-note').textContent = `${p2.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account (${p2.near}). The NEAR accounts do not exist on chain: dry quotes deliver nothing.`;
+          $('score-method').textContent = `How the score is computed: ${p2.after.method}`;
+          const weak = p2.after.links.filter((l) => l.strength === 'weak').map((l) => l.field);
+          $('pass2-note').textContent = `${p2.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account (${p2.near}). No public field links them; ${weak.length} weak hints are left: ${weak.join(', ')}. The parts went out largest first and with Lethe's fixed request parameters, both since fixed (random order, parameters drawn per quote). The NEAR accounts do not exist on chain: dry quotes deliver nothing.`;
         } else $('batches').append(el('p', { class: 'sub' }, 'No pass-2 run recorded yet.'));
 
         // recovery

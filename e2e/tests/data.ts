@@ -29,10 +29,10 @@ export const pass2 = json('pass2.json') as {
   ranAt: string;
   quotes: (Quote & { recipient: string })[];
   plan: { parts: unknown[] };
-  seedOnlyRecovery: { found: { index: number; foundFromSeedAlone: boolean }[] };
+  seedOnlyRecovery: { found: { index: number; foundFromSeedAlone: boolean; state?: { exists: boolean } }[] };
 };
 
-type Report = { sharedFields: number; score: number; pairs: number; verdict: string; links: { field: string; strength: string; pairs: unknown[] }[] };
+type Report = { sharedFields: number; score: number; pairs: number; verdict: string; method: string; links: { field: string; strength: string; pairs: unknown[] }[] };
 const dist = `${ROOT}packages/cli/dist/decorrelate.js`;
 if (!existsSync(dist)) throw new Error('Setup required: build the CLI first (pnpm --filter @zswap/cli build)');
 const { linkabilityReport, swapsFromQuotes } = (await import(dist)) as {
@@ -41,7 +41,7 @@ const { linkabilityReport, swapsFromQuotes } = (await import(dist)) as {
 };
 export const before = linkabilityReport(swapsFromQuotes(run.quotes));
 export const after = linkabilityReport(swapsFromQuotes(pass2.quotes));
-export const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'partner token'];
+export const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'split pattern', 'client fingerprint', 'partner token'];
 
 /** "clear" or "<strength> · <pairs>/<all pairs>", as both pages print a field. */
 export const fieldText = (r: Report, f: string) => {
@@ -54,3 +54,8 @@ export const day = (s: string) => new Date(s).toLocaleDateString('en-US', { day:
 export const short = (s: string, a = 12, b = 8) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
 export const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
 export const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
+export const ZAKURA = 'https://zakura.com/engineering/quantum-unlinkability';
+/** The hero replays pass 2: one swap per part, by send time. */
+export const P = pass2.quotes;
+export const sentAt = (q: { timestamp: string }) => Math.round((Date.parse(q.timestamp) - Math.min(...P.map((x) => Date.parse(x.timestamp)))) / 1000);
+export const partName = (q: { quoteRequest: { amount: string } }) => `${fmt(Number(q.quoteRequest.amount) / 1e8, 8)} ZEC → wNEAR`;

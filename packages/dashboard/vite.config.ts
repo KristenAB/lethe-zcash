@@ -44,6 +44,8 @@ function realPathGuard(): Plugin {
 }
 
 export default defineConfig({
+  // relative asset and data paths: the static build (pnpm build:site) works under any base path
+  base: './',
   plugins: [realPathGuard(), react()],
   // The published run is fetched at runtime (/testnet.json, /recovery-seed-only.json, /pass2.json): public data.
   publicDir: resolve(ROOT, 'deployments'),

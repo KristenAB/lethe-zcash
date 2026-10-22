@@ -26,7 +26,17 @@ type Run = {
   txs: Record<string, string>;
 };
 type SeedOnly = { ranAt: string; from: number; to: number; blocks: number; gap: number; keysScanned: string[]; hits: { key: string; txid: string; height: number; value: number }[] };
-type Pass2Quote = { part: number; index: number; refundTo: string; recipient: string; amountOut: string; timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string } };
+type Pass2Quote = {
+  part: number;
+  index: number;
+  refundTo: string;
+  recipient: string;
+  amountOut: string;
+  confidentiality: string;
+  signature: string;
+  timestamp: string;
+  quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string };
+};
 type Pass2 = {
   ranAt: string;
   derivation: { near: string };
@@ -55,10 +65,11 @@ function useRun(): Load {
     let live = true;
     (async () => {
       try {
-        const run = await getJson<Run>('/testnet.json');
-        if (!Array.isArray(run.quotes)) throw new Error('/testnet.json has no quotes array');
-        const seedOnly = await getJson<SeedOnly>('/recovery-seed-only.json').catch(() => null);
-        const pass2 = await getJson<Pass2>('/pass2.json').catch(() => null);
+        // relative paths, so a static build works under any base path (e.g. GitHub Pages)
+        const run = await getJson<Run>('testnet.json');
+        if (!Array.isArray(run.quotes)) throw new Error('testnet.json has no quotes array');
+        const seedOnly = await getJson<SeedOnly>('recovery-seed-only.json').catch(() => null);
+        const pass2 = await getJson<Pass2>('pass2.json').catch(() => null);
         if (live) setLoad({ state: 'ready', run, seedOnly, pass2: pass2 && Array.isArray(pass2.quotes) ? pass2 : null });
       } catch (e) {
         if (live) setLoad({ state: 'error', message: (e as Error).message });
@@ -81,18 +92,20 @@ function Mark() {
   );
 }
 
-function Swap({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => void }) {
-  const q = run.quotes[at];
-  const [from, to] = q.what.split(' → ');
-  const unitIn = from.split(' ')[1] ?? 'ZEC';
-  const refund = run.recovery.expect.find((e) => e.label === `refund-${q.index}`);
+const zec = (amount: string) => num(Number(amount) / 1e8, 8);
+
+/** The hero widget: one pass-2 part at a time, its own one-time refundTo and its own NEAR recipient. */
+function Swap({ p2, at, setAt }: { p2: Pass2; at: number; setAt: (i: number) => void }) {
+  const q = p2.quotes[at];
+  const t0 = Math.min(...p2.quotes.map((x) => Date.parse(x.timestamp)));
+  const found = p2.seedOnlyRecovery.found.find((f) => f.index === q.index);
   return (
     <div className="widget" role="region" aria-label="Swap">
       <div className="w-head">
-        <span>Dry quote · {day(q.timestamp)}</span>
+        <span>Pass 2 · {day(p2.ranAt)}</span>
         <div className="steps" role="group" aria-label="Choose a swap">
-          {run.quotes.map((x, i) => (
-            <button key={x.index} type="button" aria-pressed={i === at} aria-label={`Swap ${i + 1}: ${x.what}`} onClick={() => setAt(i)}>
+          {p2.quotes.map((x, i) => (
+            <button key={x.index} type="button" aria-pressed={i === at} aria-label={`Swap ${i + 1}: ${zec(x.quoteRequest.amount)} ZEC → wNEAR`} onClick={() => setAt(i)}>
               {i + 1}
             </button>
           ))}
@@ -101,15 +114,15 @@ function Swap({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => 
       <div className="leg">
         <span className="leg-label">You send</span>
         <div className="leg-amt">
-          <strong>{num(Number(q.quoteRequest.amount) / 1e8, 8)}</strong>
-          <span>{unitIn}</span>
+          <strong>{zec(q.quoteRequest.amount)}</strong>
+          <span>ZEC</span>
         </div>
       </div>
       <div className="leg">
         <span className="leg-label">Quoted by 1Click</span>
         <div className="leg-amt">
           <strong>{num(Number(q.amountOut))}</strong>
-          <span>{to}</span>
+          <span>wNEAR</span>
         </div>
       </div>
       <div className="refund" aria-live="polite">
@@ -120,32 +133,26 @@ function Swap({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => 
         <code key={q.refundTo} className="addr arrive">
           {q.refundTo}
         </code>
+        <div className="refund-label second">
+          <span>recipient · its own NEAR account</span>
+          <b>account #{q.index}</b>
+        </div>
+        <code key={q.recipient} className="addr rcpt arrive">
+          {q.recipient}
+        </code>
       </div>
       <dl className="facts">
         <div>
-          <dt>Testnet twin</dt>
-          <dd>
-            <code title={q.testnetAddress}>{short(q.testnetAddress, 14, 6)}</code>
-          </dd>
+          <dt>Sent at</dt>
+          <dd>+{Math.round((Date.parse(q.timestamp) - t0) / 1000)} s</dd>
         </div>
         <div>
-          <dt>Stand-in refund</dt>
-          <dd>
-            {refund && refund.value !== null ? (
-              <>
-                {num(refund.value, 0)} zat ·{' '}
-                <a href={EXPLORER + refund.txid} target="_blank" rel="noreferrer">
-                  <code>{short(refund.txid, 8, 4)}</code>
-                </a>
-              </>
-            ) : (
-              'not found'
-            )}
-          </dd>
+          <dt>Recipient from the seed alone</dt>
+          <dd className={found?.foundFromSeedAlone ? 'cut' : 'links'}>{found?.foundFromSeedAlone ? 'found again, no index book' : 'not found'}</dd>
         </div>
         <div>
-          <dt>Found by</dt>
-          <dd className={refund?.ok ? 'cut' : 'links'}>{refund ? refund.foundBy.map(keyName).join(', ') || 'no key' : '—'}{refund?.ok ? ' only' : ''}</dd>
+          <dt>Recipient on NEAR</dt>
+          <dd>{found?.state?.exists ? 'exists' : 'not created (dry quote)'}</dd>
         </div>
         <div>
           <dt>Request</dt>
@@ -162,14 +169,22 @@ function Swap({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => 
   );
 }
 
-function River({ run, at, setAt }: { run: Run; at: number; setAt: (i: number) => void }) {
+function River({ p2, at, setAt }: { p2: Pass2; at: number; setAt: (i: number) => void }) {
   return (
-    <ol className="river" aria-label="Refund addresses, one per swap">
-      {run.quotes.map((q, i) => (
+    <ol className="river" aria-label="One refund address and one recipient per swap">
+      {p2.quotes.map((q, i) => (
         <li key={q.index} className={i === at ? 'now' : 'gone'}>
-          <button type="button" onClick={() => setAt(i)} aria-label={`Show swap ${i + 1}`}>
-            <span className="n">#{q.index}</span>
-            <code title={q.refundTo}>{q.refundTo}</code>
+          {/* named by what it shows: index, refund address, recipient and state (no hiding aria-label) */}
+          <button type="button" onClick={() => setAt(i)} aria-current={i === at ? 'true' : undefined}>
+            <span className="n">#{q.index}</span>{' '}
+            <span className="codes">
+              <code className="rt" title={q.refundTo}>
+                {q.refundTo}
+              </code>{' '}
+              <code className="rc" title={q.recipient}>
+                {q.recipient}
+              </code>
+            </span>{' '}
             <span className="st">{i === at ? 'shown' : 'used once'}</span>
           </button>
         </li>
@@ -195,9 +210,27 @@ function Audit({ run }: { run: Run }) {
   ];
   return (
     <section aria-labelledby="audit-h">
-      <h2 id="audit-h">Link audit</h2>
-      <p className="sub">Each field of the {n} published requests, checked for what could tie them together. Computed here from the run record.</p>
-      <ul className="rows">
+      <h2 id="audit-h">Before: the first run</h2>
+      <p className="sub">
+        The first run ({day(run.ranAt)}): {n} real dry quotes, each with its own one-time refund address. Each field of the {n} requests, checked for what could tie them together, computed here from the run record.
+      </p>
+      <ul className="rows" aria-label="First run swaps">
+        {qs.map((q) => (
+          <li key={q.index}>
+            <span className="k">
+              #{q.index} · {q.what}
+            </span>
+            <span className="v">{num(Number(q.amountOut))}</span>
+            <span className="d">
+              refundTo <code title={q.refundTo}>{short(q.refundTo, 10, 6)}</code> · recipient{' '}
+              <code className={qs.filter((x) => x.quoteRequest.recipient === q.quoteRequest.recipient).length > 1 ? 'links' : ''} title={q.quoteRequest.recipient}>
+                {short(q.quoteRequest.recipient, 8, 6)}
+              </code>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <ul className="rows" aria-label="Link audit">
         {rows.map((r) => (
           <li key={r.field}>
             <span className="k">{r.field}</span>
@@ -207,14 +240,16 @@ function Audit({ run }: { run: Run }) {
         ))}
       </ul>
       <p className="sub small">
-        This first run cut only the refundTo link and used one recipient on purpose. Since pass 2 a swap with no recipient goes to its own NEAR account (below), and a reused recipient is refused unless the caller accepts the link.
+        {recipients < n
+          ? `This first run cut only the refundTo link: all ${n} quotes named one NEAR recipient (${short(qs[0].quoteRequest.recipient, 8, 6)}), so they stay linked through it. The review recorded that as a defect. Since pass 2 (at the top) a swap with no recipient goes to its own NEAR account, and a reused recipient is refused unless the caller accepts the link.`
+          : 'Each quote named its own recipient.'}
       </p>
     </section>
   );
 }
 
 type Report = ReturnType<typeof linkabilityReport>;
-const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'partner token'] as const;
+const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'split pattern', 'client fingerprint', 'partner token'] as const;
 
 function Batch({ title, when, r }: { title: string; when: string; r: Report }) {
   return (
@@ -262,6 +297,7 @@ function Links({ run, pass2 }: { run: Run; pass2: Pass2 | null }) {
           </p>
         )}
       </div>
+      <p className="method">How the score is computed: {before.method}</p>
       {pass2 && (
         <>
           <ul className="rows" aria-label="Pass 2 swaps">
@@ -282,7 +318,7 @@ function Links({ run, pass2 }: { run: Run; pass2: Pass2 | null }) {
             })}
           </ul>
           <p className="sub small">
-            {pass2.plan.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account ({pass2.derivation.near}). The weak hints left are the shared token and the ten-minute window. The NEAR accounts do not exist on chain: dry quotes deliver nothing.
+            {pass2.plan.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account ({pass2.derivation.near}). No public field links them; the weak hints left are {after!.links.filter((l) => l.strength === 'weak').map((l) => l.field).join(', ')}. The parts went out largest first and with Lethe's fixed request parameters, both since fixed (random order, parameters drawn per quote). The NEAR accounts do not exist on chain: dry quotes deliver nothing.
           </p>
           <div className="callout">
             <strong>Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that; leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.
@@ -391,11 +427,11 @@ export function App() {
       </header>
       <main id="main">
         <div className="hero">
-          <p className="eyebrow">{load.state === 'ready' ? `published run · ${day(load.run.ranAt)}` : 'published run'}</p>
+          <p className="eyebrow">{load.state === 'ready' && load.pass2 ? `pass 2 · ${day(load.pass2.ranAt)}` : 'published runs'}</p>
           <h1>Every swap its own refund address and recipient.</h1>
           {load.state === 'loading' && (
             <div className="widget skeleton" aria-busy="true" role="status">
-              <span>Loading the published run…</span>
+              <span>Loading the published runs…</span>
             </div>
           )}
           {load.state === 'error' && (
@@ -408,12 +444,17 @@ export function App() {
               <strong>No swaps yet.</strong> Quote one with <code>zswap quote 0.1 nep141:wrap.near &lt;near-account&gt;</code>.
             </div>
           )}
-          {load.state === 'ready' && load.run.quotes.length > 0 && (
+          {load.state === 'ready' && load.run.quotes.length > 0 && load.pass2 && load.pass2.quotes.length > 0 && (
             <>
-              <Swap run={load.run} at={Math.min(at, load.run.quotes.length - 1)} setAt={setAt} />
-              <River run={load.run} at={Math.min(at, load.run.quotes.length - 1)} setAt={setAt} />
-              <p className="note">Real 1Click dry quotes: no deposit address was created and no funds moved.</p>
+              <Swap p2={load.pass2} at={Math.min(at, load.pass2.quotes.length - 1)} setAt={setAt} />
+              <River p2={load.pass2} at={Math.min(at, load.pass2.quotes.length - 1)} setAt={setAt} />
+              <p className="note">Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.</p>
             </>
+          )}
+          {load.state === 'ready' && load.run.quotes.length > 0 && !(load.pass2 && load.pass2.quotes.length > 0) && (
+            <div className="error empty-state" role="status">
+              <strong>No swap to replay.</strong> Pass 2 is not recorded (<code>deployments/pass2.json</code>); the first run is below.
+            </div>
           )}
         </div>
         {load.state === 'ready' && load.run.quotes.length > 0 && (
