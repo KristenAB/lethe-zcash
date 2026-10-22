@@ -392,7 +392,7 @@ ZSWAP_BOOK=/nonexistent pnpm --filter @zswap/cli zswap recover &lt;from-height&g
           const who = e.label === 'account' ? 'the account address' : `one-time address #${e.label.slice(7)}`;
           const by = e.foundBy.map((k) => (k === 'account' ? 'the account key' : `key #${k.slice(7)}`)).join(', ') || 'no key';
           $('recover-rows').append(
-            el('li', {}, el('span', { class: 'k' }, who), el('span', { class: 'v' }, e.value === null ? '—' : `${fmt(e.value, 0)} zat`), el('span', { class: 'd' }, 'found by ', el('strong', {}, by), ' only · ', el('a', { href: EXPLORER + e.txid }, el('code', {}, short(e.txid, 10, 6))), e.height ? ` · block ${fmt(e.height, 0)}` : '')),
+            el('li', {}, el('span', { class: 'k' }, who), el('span', { class: 'v' }, e.value === null ? '—' : `${fmt(e.value, 0)} zat`), el('span', { class: 'd' }, 'found by ', el('strong', {}, by), e.ok ? ' only · ' : ' · ', el('a', { href: EXPLORER + e.txid }, el('code', {}, short(e.txid, 10, 6))), e.height ? ` · block ${fmt(e.height, 0)}` : '')),
           );
         }
         const s = run.seedOnly;
