@@ -397,6 +397,14 @@ h2 {
   gap: 16px;
   margin-top: 28px;
 }
+.batches.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.rows-h {
+  margin: 32px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+}
 .batch {
   min-width: 0;
   padding: 18px 18px 16px;
@@ -513,7 +521,8 @@ footer nav {
   .rows li {
     grid-template-columns: 1fr;
   }
-  .batches {
+  .batches,
+  .batches.three {
     grid-template-columns: 1fr;
   }
   .rows .v {

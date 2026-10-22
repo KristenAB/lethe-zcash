@@ -45,9 +45,10 @@ describe('dashboard dev server file access', () => {
     expect(await get(resolve(ROOT, 'packages/cli/src/lib.ts'))).toBe(403);
     expect(await get(resolve(ROOT, 'packages/cli/src/recipient.ts'))).toBe(403);
   });
-  it('serves the one pure module the dashboard imports (the linkability report), and the pass-2 run', async () => {
+  it('serves the one pure module the dashboard imports (the linkability report), and the pass-2 and pass-3 runs', async () => {
     expect(await get(resolve(ROOT, 'packages/cli/src/decorrelate.ts'))).toBe(200);
     expect(await get(resolve(ROOT, 'deployments/pass2.json'))).toBe(200);
+    expect(await get(resolve(ROOT, 'deployments/pass3.json'))).toBe(200);
   });
   it('refuses denied files reached through a symlink inside node_modules (checked by real path)', async () => {
     expect(await get(resolve(linkToCli, 'lib.ts'))).toBe(403);

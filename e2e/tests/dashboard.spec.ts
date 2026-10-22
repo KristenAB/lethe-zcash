@@ -6,7 +6,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { test, expect, expectNoHScroll, shot, logControls, DASH } from './fixtures';
-import { ROOT, run, pass2, seedOnly, before, after, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO, P, sentAt, partName } from './data';
+import { ROOT, run, pass2, seedOnly, before, after, pass3, third, paramsText, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO, P, sentAt, partName } from './data';
 
 const Q = run.quotes;
 const widget = (page: Page) => page.getByRole('region', { name: 'Swap' });
@@ -319,5 +319,42 @@ test.describe('dashboard', () => {
     );
     expect(served).toEqual([200, 200, 200, 200]);
     info.annotations.push({ type: 'checked', description: `${statuses.length} denied requests (${demo.length} .demo files), 4 served` });
+  });
+
+  test('pass 3: the same batch with the Oct 22 code, scored on the same model, each request with its own parameters', async ({ page }, info) => {
+    await page.goto(`${DASH}/`);
+    const links = page.getByRole('region', { name: 'All three links, measured' });
+    // what pass 3 was run to show: no public field and no client-side hint links a pair
+    expect(third.sharedFields).toBe(0);
+    for (const gone of ['split pattern', 'client fingerprint', 'within 10 min', 'same minute']) expect(third.links.map((l) => l.field)).not.toContain(gone);
+    expect(third.score).toBeGreaterThan(after.score);
+    const b = links.locator('.batch').filter({ has: page.getByRole('heading', { name: 'Pass 3' }) });
+    await expect(b.locator('.when')).toHaveText(day(pass3.ranAt));
+    await expect(b.locator('.score strong')).toHaveText('0');
+    await expect(b.locator('.score')).toContainText(`score ${third.score}/100`);
+    await expect(b.getByRole('list', { name: 'Pass 3: fields' }).locator('li b')).toHaveText(FIELDS.map((f) => fieldText(third, f)));
+    await expect(b.locator('.verdict')).toHaveText(`${third.verdict}.`);
+    await expect(links.locator('.batch')).toHaveCount(3);
+    await b.scrollIntoViewIfNeeded();
+    await shot(page, info, 'dash-08b-pass3-batch');
+    const rows = links.getByRole('list', { name: 'Pass 3 swaps' }).locator('li');
+    await expect(rows).toHaveCount(pass3.quotes.length);
+    for (let i = 0; i < pass3.quotes.length; i++) {
+      const q = pass3.quotes[i];
+      await expect(rows.nth(i)).toContainText(`${fmt(Number(q.quoteRequest.amount) / 1e8, 8)} ZEC`);
+      await expect(rows.nth(i).locator('code').first()).toHaveText(short(q.recipient, 10, 6));
+      await expect(rows.nth(i).locator('code').nth(1)).toHaveText(short(q.refundTo, 10, 6));
+      await expect(rows.nth(i)).toContainText(paramsText(q));
+      const f = pass3.seedOnlyRecovery.found.find((x) => x.index === q.index)!;
+      await expect(rows.nth(i)).toContainText(f.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed');
+    }
+    // a part outside the seed-only lookahead is shown as not found, with the reason (the recovery window)
+    if (pass3.seedOnlyRecovery.windowNote) await expect(links).toContainText(pass3.seedOnlyRecovery.windowNote);
+    expect(new Set(pass3.quotes.map((q) => paramsText(q))).size).toBe(pass3.quotes.length);
+    expect(new Set(pass3.quotes.map((q) => q.recipient)).size).toBe(pass3.quotes.length);
+    await expect(links).toContainText(`Score ${before.score} → ${after.score} → ${third.score} on the same model.`);
+    await rows.first().scrollIntoViewIfNeeded();
+    await shot(page, info, 'dash-08c-pass3-parts');
+    await expectNoHScroll(page);
   });
 });

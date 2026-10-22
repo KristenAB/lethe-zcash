@@ -32,6 +32,14 @@ export const pass2 = json('pass2.json') as {
   seedOnlyRecovery: { found: { index: number; foundFromSeedAlone: boolean; state?: { exists: boolean } }[] };
 };
 
+/** Pass 3: the pass-2 batch with the Oct 22 code (deployments/pass3.json). */
+export const pass3 = json('pass3.json') as {
+  ranAt: string;
+  quotes: (Quote & { recipient: string; quoteRequest: { slippageTolerance: number; quoteWaitingTimeMs: number; deadline: string } })[];
+  plan: { windowS: number; minGapS: number };
+  seedOnlyRecovery: { found: { index: number; foundFromSeedAlone: boolean }[]; windowNote?: string };
+};
+
 type Report = { sharedFields: number; score: number; pairs: number; verdict: string; method: string; links: { field: string; strength: string; pairs: unknown[] }[] };
 const dist = `${ROOT}packages/cli/dist/decorrelate.js`;
 if (!existsSync(dist)) throw new Error('Setup required: build the CLI first (pnpm --filter @zswap/cli build)');
@@ -41,6 +49,10 @@ const { linkabilityReport, swapsFromQuotes } = (await import(dist)) as {
 };
 export const before = linkabilityReport(swapsFromQuotes(run.quotes));
 export const after = linkabilityReport(swapsFromQuotes(pass2.quotes));
+export const third = linkabilityReport(swapsFromQuotes(pass3.quotes));
+/** "slippage 88 bps, wait 3.233 s, deadline +97 min", as both pages print a pass-3 request's own parameters. */
+export const paramsText = (q: (typeof pass3.quotes)[number]) =>
+  `slippage ${q.quoteRequest.slippageTolerance} bps, wait ${fmt(q.quoteRequest.quoteWaitingTimeMs / 1000, 3)} s, deadline +${Math.round((Date.parse(q.quoteRequest.deadline) - Date.parse(q.timestamp)) / 60_000)} min`;
 export const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'split pattern', 'client fingerprint', 'partner token'];
 
 /** "clear" or "<strength> · <pairs>/<all pairs>", as both pages print a field. */

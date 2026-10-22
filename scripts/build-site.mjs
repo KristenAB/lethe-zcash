@@ -2,7 +2,7 @@
 // Builds the static site for hosting (GitHub Pages or any static host) into site/:
 //   site/index.html   the landing (its run data is embedded, synced from deployments/ by sync-run.mjs)
 //   site/app/         the dashboard (vite build, base './'; it fetches the published run from
-//                     testnet.json, pass2.json and recovery-seed-only.json next to it)
+//                     testnet.json, pass2.json, pass3.json and recovery-seed-only.json next to it)
 // Only the landing, the dashboard build and deployments/*.json go in; the build fails if anything from
 // .demo/ (the wallet) or a file named like a seed or key would be published.
 import { execFileSync } from 'node:child_process';
@@ -29,6 +29,6 @@ const files = (d) => readdirSync(d).flatMap((n) => (statSync(join(d, n)).isDirec
 const published = files(site).map((f) => relative(site, f));
 const bad = published.filter((f) => /(^|\/)\.demo(\/|$)|(^|\/)(seed|index-book\.json|.*-state\.json|near-recipient\.json)$|\.(env|pem|key|dat)$/.test(f));
 if (bad.length) throw new Error(`refusing to publish wallet files: ${bad.join(', ')}`);
-for (const f of ['index.html', 'app/index.html', 'app/testnet.json', 'app/pass2.json', 'app/recovery-seed-only.json'])
+for (const f of ['index.html', 'app/index.html', 'app/testnet.json', 'app/pass2.json', 'app/pass3.json', 'app/recovery-seed-only.json'])
   if (!existsSync(resolve(site, f))) throw new Error(`site/${f} is missing`);
 console.log(`site/: ${published.length} files (landing at /, dashboard at /app/)`);

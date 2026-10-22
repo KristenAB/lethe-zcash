@@ -11,6 +11,9 @@ const root = resolve(here, '../..');
 const run = JSON.parse(readFileSync(resolve(root, 'deployments/testnet.json'), 'utf8'));
 const seedOnly = JSON.parse(readFileSync(resolve(root, 'deployments/recovery-seed-only.json'), 'utf8'));
 const pass2 = JSON.parse(readFileSync(resolve(root, 'deployments/pass2.json'), 'utf8'));
+// pass 3 (Oct 22 code on a live batch) is shown when it has been run
+const pass3File = resolve(root, 'deployments/pass3.json');
+const pass3 = existsSync(pass3File) ? JSON.parse(readFileSync(pass3File, 'utf8')) : null;
 // the linkability report is computed with the CLI's own pure function (built: packages/cli/dist)
 const decorrelate = resolve(root, 'packages/cli/dist/decorrelate.js');
 if (!existsSync(decorrelate)) throw new Error('Setup required: build the CLI first (pnpm --filter @zswap/cli build)');
@@ -42,6 +45,26 @@ export function landingData() {
       parts: pass2.quotes.map((q) => ({ index: q.index, amountZat: q.quoteRequest.amount, amountOut: q.amountOut, timestamp: q.timestamp, recipient: q.recipient, refundTo: q.refundTo, confidentiality: q.confidentiality, signature: q.signature, foundFromSeedAlone: pass2.seedOnlyRecovery.found.find((f) => f.index === q.index)?.foundFromSeedAlone === true })),
       before: brief(linkabilityReport(swapsFromQuotes(run.quotes))),
       after: brief(linkabilityReport(swapsFromQuotes(pass2.quotes))),
+    },
+    pass3: pass3 && {
+      ranAt: pass3.ranAt,
+      windowS: pass3.plan.windowS,
+      minGapS: pass3.plan.minGapS,
+      parts: pass3.quotes.map((q) => ({
+        index: q.index,
+        amountZat: q.quoteRequest.amount,
+        amountOut: q.amountOut,
+        timestamp: q.timestamp,
+        recipient: q.recipient,
+        refundTo: q.refundTo,
+        confidentiality: q.confidentiality,
+        slippageBps: q.quoteRequest.slippageTolerance,
+        waitMs: q.quoteRequest.quoteWaitingTimeMs,
+        deadlineMin: Math.round((Date.parse(q.quoteRequest.deadline) - Date.parse(q.timestamp)) / 60_000),
+        foundFromSeedAlone: pass3.seedOnlyRecovery.found.find((f) => f.index === q.index)?.foundFromSeedAlone === true,
+      })),
+      report: brief(linkabilityReport(swapsFromQuotes(pass3.quotes))),
+      windowNote: pass3.seedOnlyRecovery.windowNote ?? null,
     },
     seedOnly: { ranAt: seedOnly.ranAt, from: seedOnly.from, to: seedOnly.to, blocks: seedOnly.blocks, gap: seedOnly.gap, keysScanned: seedOnly.keysScanned.length, hits: seedOnly.hits },
   };

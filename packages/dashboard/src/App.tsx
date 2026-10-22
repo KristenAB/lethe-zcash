@@ -35,7 +35,7 @@ type Pass2Quote = {
   confidentiality: string;
   signature: string;
   timestamp: string;
-  quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string };
+  quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string; slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string };
 };
 type Pass2 = {
   ranAt: string;
@@ -44,7 +44,9 @@ type Pass2 = {
   quotes: Pass2Quote[];
   seedOnlyRecovery: { gap: number; derived: number; found: { index: number; recipient: string; foundFromSeedAlone: boolean; state?: { exists: boolean } }[] };
 };
-type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null; pass2: Pass2 | null };
+/** deployments/pass3.json: the pass-2 batch run again with the Oct 22 code. */
+type Pass3 = Pass2 & { plan: { windowS: number; minGapS: number }; seedOnlyRecovery: { windowNote?: string } };
+type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null; pass2: Pass2 | null; pass3: Pass3 | null };
 
 const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
 const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
@@ -70,7 +72,8 @@ function useRun(): Load {
         if (!Array.isArray(run.quotes)) throw new Error('testnet.json has no quotes array');
         const seedOnly = await getJson<SeedOnly>('recovery-seed-only.json').catch(() => null);
         const pass2 = await getJson<Pass2>('pass2.json').catch(() => null);
-        if (live) setLoad({ state: 'ready', run, seedOnly, pass2: pass2 && Array.isArray(pass2.quotes) ? pass2 : null });
+        const pass3 = await getJson<Pass3>('pass3.json').catch(() => null);
+        if (live) setLoad({ state: 'ready', run, seedOnly, pass2: pass2 && Array.isArray(pass2.quotes) ? pass2 : null, pass3: pass3 && Array.isArray(pass3.quotes) ? pass3 : null });
       } catch (e) {
         if (live) setLoad({ state: 'error', message: (e as Error).message });
       }
@@ -279,18 +282,50 @@ function Batch({ title, when, r }: { title: string; when: string; r: Report }) {
   );
 }
 
-function Links({ run, pass2 }: { run: Run; pass2: Pass2 | null }) {
+function PartRows({ p, label, params }: { p: Pass2; label: string; params?: boolean }) {
+  const t0 = Math.min(...p.quotes.map((q) => Date.parse(q.timestamp)));
+  return (
+    <ul className="rows" aria-label={label}>
+      {p.quotes.map((q) => {
+        const f = p.seedOnlyRecovery.found.find((x) => x.index === q.index);
+        return (
+          <li key={q.index}>
+            <span className="k">
+              {num(Number(q.quoteRequest.amount) / 1e8, 8)} ZEC <span className="muted">at +{Math.round((Date.parse(q.timestamp) - t0) / 1000)} s</span>
+            </span>
+            <span className="v">→ {num(Number(q.amountOut))} wNEAR</span>
+            <span className="d">
+              recipient <code title={q.recipient}>{short(q.recipient, 10, 6)}</code> · refundTo <code title={q.refundTo}>{short(q.refundTo, 10, 6)}</code> ·{' '}
+              {params && q.quoteRequest.deadline && (
+                <>
+                  slippage {q.quoteRequest.slippageTolerance} bps, wait {num((q.quoteRequest.quoteWaitingTimeMs ?? 0) / 1000, 3)} s, deadline +{Math.round((Date.parse(q.quoteRequest.deadline) - Date.parse(q.timestamp)) / 60_000)} min ·{' '}
+                </>
+              )}
+              <span className={f?.foundFromSeedAlone ? 'cut' : 'links'}>{f?.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed'}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Links({ run, pass2, pass3 }: { run: Run; pass2: Pass2 | null; pass3: Pass3 | null }) {
   const before = linkabilityReport(swapsFromQuotes(run.quotes as unknown as Parameters<typeof swapsFromQuotes>[0]));
   const after = pass2 ? linkabilityReport(swapsFromQuotes(pass2.quotes)) : null;
-  const t0 = pass2 ? Math.min(...pass2.quotes.map((q) => Date.parse(q.timestamp))) : 0;
+  const third = pass2 && pass3 ? linkabilityReport(swapsFromQuotes(pass3.quotes)) : null;
+  const weak3 = third ? third.links.filter((l) => l.strength === 'weak').map((l) => l.field) : [];
   return (
     <section aria-labelledby="links-h">
       <h2 id="links-h">All three links, measured</h2>
       <p className="sub">The refund address was the easy link. The recipient, the amount and the timing are the others. Each batch below is scored from its real 1Click requests by the same report the CLI and MCP print.</p>
-      <div className="batches">
+      <div className={third ? 'batches three' : 'batches'}>
         <Batch title="First run" when={day(run.ranAt)} r={before} />
         {after && pass2 ? (
-          <Batch title="Pass 2" when={day(pass2.ranAt)} r={after} />
+          <>
+            <Batch title="Pass 2" when={day(pass2.ranAt)} r={after} />
+            {third && pass3 && <Batch title="Pass 3" when={day(pass3.ranAt)} r={third} />}
+          </>
         ) : (
           <p className="empty" role="status">
             No pass-2 run recorded (<code>deployments/pass2.json</code> is missing; <code>pnpm --filter @zswap/examples run-pass2</code>).
@@ -300,26 +335,22 @@ function Links({ run, pass2 }: { run: Run; pass2: Pass2 | null }) {
       <p className="method">How the score is computed: {before.method}</p>
       {pass2 && (
         <>
-          <ul className="rows" aria-label="Pass 2 swaps">
-            {pass2.quotes.map((q) => {
-              const f = pass2.seedOnlyRecovery.found.find((x) => x.index === q.index);
-              return (
-                <li key={q.index}>
-                  <span className="k">
-                    {num(Number(q.quoteRequest.amount) / 1e8, 8)} ZEC <span className="muted">at +{Math.round((Date.parse(q.timestamp) - t0) / 1000)} s</span>
-                  </span>
-                  <span className="v">→ {num(Number(q.amountOut))} wNEAR</span>
-                  <span className="d">
-                    recipient <code title={q.recipient}>{short(q.recipient, 10, 6)}</code> · refundTo <code title={q.refundTo}>{short(q.refundTo, 10, 6)}</code> ·{' '}
-                    <span className={f?.foundFromSeedAlone ? 'cut' : 'links'}>{f?.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed'}</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <h3 className="rows-h">Pass 2 parts</h3>
+          <PartRows p={pass2} label="Pass 2 swaps" />
           <p className="sub small">
-            {pass2.plan.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account ({pass2.derivation.near}). No public field links them; the weak hints left are {after!.links.filter((l) => l.strength === 'weak').map((l) => l.field).join(', ')}. The parts went out largest first and with Lethe's fixed request parameters, both since fixed (random order, parameters drawn per quote). The NEAR accounts do not exist on chain: dry quotes deliver nothing.
+            {pass2.plan.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account ({pass2.derivation.near}). No public field links them; the weak hints left are {after!.links.filter((l) => l.strength === 'weak').map((l) => l.field).join(', ')}. The parts went out largest first and with Lethe's fixed request parameters, both fixed since{third ? ': pass 3 below' : ' (random order, parameters drawn per quote)'}. The NEAR accounts do not exist on chain: dry quotes deliver nothing.
           </p>
+          {third && pass3 && (
+            <>
+              <h3 className="rows-h">Pass 3 parts</h3>
+              <PartRows p={pass3} label="Pass 3 swaps" params />
+              <p className="sub small">
+                The same {num(pass3.quotes.reduce((t, q) => t + Number(q.quoteRequest.amount), 0) / 1e8, 8)} ZEC batch with the Oct 22 code: the parts went out in a random order, at least {Math.round(pass3.plan.minGapS / 60)} minutes apart in a {Math.round(pass3.plan.windowS / 60)}-minute window, and each request drew its own slippage, solver wait and deadline. Score {before.score} → {after!.score} → {third.score} on the same model.{' '}
+                {weak3.length ? `Left: ${weak3.join(', ')}${weak3.length === 1 && weak3[0] === 'token' ? ' (every swap to wNEAR shares it)' : ''}.` : 'No hint is left.'} Real 1Click dry quotes, request public; nothing was delivered.
+                {pass3.seedOnlyRecovery.windowNote && <> {pass3.seedOnlyRecovery.windowNote}</>}
+              </p>
+            </>
+          )}
           <div className="callout">
             <strong>Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that; leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.
           </div>
@@ -460,7 +491,7 @@ export function App() {
         {load.state === 'ready' && load.run.quotes.length > 0 && (
           <>
             <Audit run={load.run} />
-            <Links run={load.run} pass2={load.pass2} />
+            <Links run={load.run} pass2={load.pass2} pass3={load.pass3} />
             <Recovery run={load.run} seedOnly={load.seedOnly} />
             <NotDone run={load.run} />
           </>
