@@ -90,7 +90,8 @@ Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
 pnpm install
-pnpm test                         # 11 Rust (+ doc) + 30 cli + 8 mcp + 5 dashboard = 54, live 1Click, testnet and NEAR RPC (TESTING.md)
+pnpm test                         # 11 Rust (+ doc) + 30 cli + 8 mcp + 6 dashboard = 55, live 1Click, testnet and NEAR RPC (TESTING.md)
+pnpm test:e2e                     # 40 browser tests in Google Chrome, desktop + mobile (TESTING.md)
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near             # own refund address + own NEAR recipient
 pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180   # plan + linkability report, sends nothing
