@@ -428,6 +428,8 @@ export class IndexBook {
  * have seen the request, which the recipient guard needs).
  */
 export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+  // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+  if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);

@@ -26,7 +26,7 @@
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, lookupWarning, RECOVERY_GAP, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverAll, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
+import { BlockedError, chainTip, lookupWarning, parseZec, RECOVERY_GAP, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverAll, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
 
 const paths = walletPaths();
 const seed = paths.seed;
@@ -52,7 +52,7 @@ try {
   else if (cmd === 'quote') {
     const [zec, dest, given] = a;
     if (!zec || !dest) throw new Error('usage: zswap quote <zec> <destinationAsset> [recipient]');
-    const zat = BigInt(Math.round(Number(zec) * 1e8));
+    const zat = parseZec(zec);
     const confidentiality = opts['--confidentiality']?.[0] as Confidentiality | undefined;
     if (confidentiality !== undefined && !CONFIDENTIALITY.includes(confidentiality)) throw new Error('--confidentiality public|basic|advanced');
     const { r, q } = await safeQuote(seed, book, { amountZat: zat, destinationAsset: dest, recipient: given, allowLinkedRecipient, confidentiality });
@@ -94,7 +94,7 @@ try {
     if (round !== undefined && round !== 'down' && round !== 'nearest') throw new Error('--round down|nearest');
     const windowMin = opts['--window'] ? Number(opts['--window'][0]) : undefined;
     const now = Date.now();
-    const p = planBatch({ amountZat: BigInt(Math.round(Number(zec) * 1e8)), destinationAsset: dest, recipient, round, split: flags.has('--split'), delay: windowMin === undefined ? undefined : { windowS: windowMin * 60, minGapS: opts['--min-gap'] ? Number(opts['--min-gap'][0]) : undefined }, start: now, jwt: !!process.env.ONECLICK_JWT });
+    const p = planBatch({ amountZat: parseZec(zec), destinationAsset: dest, recipient, round, split: flags.has('--split'), delay: windowMin === undefined ? undefined : { windowS: windowMin * 60, minGapS: opts['--min-gap'] ? Number(opts['--min-gap'][0]) : undefined }, start: now, jwt: !!process.env.ONECLICK_JWT });
     out({ ...p, swaps: p.swaps.map((s) => ({ ...s, at: new Date(Number(s.at)).toISOString() })) });
   } else if (cmd === 'report') {
     const quoted = book.readFor(seed).reservations.filter((r) => r.quote) as unknown as { quote: Parameters<typeof swapsFromQuotes>[0][number] }[];

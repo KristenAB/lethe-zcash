@@ -13,6 +13,24 @@ const zec = (z: bigint) => {
   const t = `${s.slice(0, -8)}.${s.slice(-8)}`.replace(/\.?0+$/, '');
   return `${z < 0n ? '-' : ''}${t} ZEC`;
 };
+/**
+ * A ZEC amount typed by a person, read exactly: digits with at most 8 decimal places (1 zat), more than
+ * 0. No floating point (0.29 * 1e8 is 28999999.999999996).
+ */
+export function parseZec(zec: string): bigint {
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(zec.trim());
+  if (!m) throw new Error(`amount must be a positive ZEC amount like 0.1 (got ${JSON.stringify(zec)})`);
+  if ((m[2] ?? '').length > 8) throw new Error(`amount ${zec} has more than 8 decimal places (1 zat = 0.00000001 ZEC)`);
+  const zat = BigInt(m[1]) * ZAT_PER_ZEC + BigInt((m[2] ?? '').padEnd(8, '0'));
+  if (zat <= 0n) throw new Error(`amount must be more than 0 ZEC (got ${zec})`);
+  return zat;
+}
+/** The same check for an amount given as a number (MCP): a whole number of zat, more than 0. */
+export function zecNumberToZat(zec: number): bigint {
+  if (!Number.isFinite(zec)) throw new Error('amount must be a number of ZEC');
+  return parseZec(zec.toFixed(10).replace(/0+$/, '').replace(/\.$/, ''));
+}
+
 export const isCommonAmount = (z: bigint, denoms: readonly bigint[] = DENOMINATIONS_ZAT) => denoms.includes(z);
 /** A 1-2-5 value at any power of ten from 0.01 ZEC (0.01, 0.02, 0.05, 0.1, …, 1, 2, 5, 10, …). */
 export function isRound125(z: bigint): boolean {
