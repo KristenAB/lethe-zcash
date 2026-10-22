@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { canonicalRecipient } from './decorrelate.js';
+import { canonicalRecipient, cryptoRng, type Rng } from './decorrelate.js';
 import { deriveNearRecipient, requireNearDelivered } from './recipient.js';
 
 export const ONECLICK = process.env.ZSWAP_ONECLICK_URL ?? 'https://1click.chaindefuser.com';
@@ -408,13 +408,25 @@ export interface QuoteInput {
   confidentiality?: Confidentiality;
 }
 
-/** A 1Click quote with `refundTo` set to a one-time address. dry=false creates a live deposit address. */
-export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
-  if (q.dry === false) throw new BlockedError('BLOCKED: a live (dry=false) quote creates a mainnet deposit address; it needs mainnet ZEC and Nick’s OK, and zakura-one-time-ivk is not yet reviewed for live addresses');
-  const body = {
+/** The deadline is 40 to 120 minutes after the request, to the second, chosen per quote. */
+export const DEADLINE_RANGE_S = [40 * 60, 120 * 60] as const;
+/** The solver wait is 2 to 4 seconds, to the millisecond, chosen per quote. */
+export const WAIT_RANGE_MS = [2000, 4000] as const;
+const between = (lo: number, hi: number, rng: Rng) => lo + Math.floor(rng() * (hi - lo + 1));
+
+/**
+ * The quote request. Every field in it is public, so the client's own parameters must not be the same on
+ * every request: a fixed slippage, solver wait and deadline offset would mark all of a wallet's quotes as
+ * one client's. They are drawn per quote: slippage between 60% of the caller's tolerance and the
+ * tolerance (never more than asked), the solver wait in WAIT_RANGE_MS, the deadline in DEADLINE_RANGE_S.
+ */
+export function quoteBody(q: QuoteInput, now = Date.now(), rng: Rng = cryptoRng) {
+  const tolerance = q.slippageBps ?? 100;
+  if (!Number.isInteger(tolerance) || tolerance < 1) throw new Error('slippage tolerance must be a whole number of basis points');
+  return {
     dry: true,
     swapType: 'EXACT_INPUT',
-    slippageTolerance: q.slippageBps ?? 100,
+    slippageTolerance: between(Math.ceil(tolerance * 0.6), tolerance, rng),
     originAsset: ZEC_ASSET,
     depositType: 'ORIGIN_CHAIN',
     destinationAsset: q.destinationAsset,
@@ -423,10 +435,16 @@ export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
     refundType: 'ORIGIN_CHAIN',
     recipient: q.recipient,
     recipientType: 'DESTINATION_CHAIN',
-    deadline: new Date(Date.now() + 3_600_000).toISOString(),
-    quoteWaitingTimeMs: 3000,
+    deadline: new Date(now + between(...DEADLINE_RANGE_S, rng) * 1000).toISOString(),
+    quoteWaitingTimeMs: between(...WAIT_RANGE_MS, rng),
     ...(q.confidentiality ? { confidentiality: q.confidentiality } : {}),
   };
+}
+
+/** A 1Click quote with `refundTo` set to a one-time address. dry=false creates a live deposit address. */
+export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
+  if (q.dry === false) throw new BlockedError('BLOCKED: a live (dry=false) quote creates a mainnet deposit address; it needs mainnet ZEC and Nick’s OK, and zakura-one-time-ivk is not yet reviewed for live addresses');
+  const body = quoteBody(q);
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (process.env.ONECLICK_JWT) headers.authorization = `Bearer ${process.env.ONECLICK_JWT}`;
   const r = await httpJson('1Click', `${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });

@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { accountKey, BlockedError, chainTip, deriveRefund, IndexBook, initSeed, quote, scanRange } from '../src/lib.js';
+import { accountKey, BlockedError, chainTip, deriveRefund, IndexBook, initSeed, linkabilityReport, quote, quoteBody, requestFingerprint, scanRange, swapsFromQuotes } from '../src/lib.js';
 
 const fx = JSON.parse(readFileSync(resolve(__dirname, '../../../fixtures/testnet.json'), 'utf8'));
 const dir = mkdtempSync(join(tmpdir(), 'zswap-'));
@@ -38,6 +38,32 @@ describe('1Click (mainnet API, dry quotes)', () => {
     expect(BigInt(q.quote.amountOut)).toBeGreaterThan(0n);
     expect(q.signature).toMatch(/^ed25519:/);
     expect(q.quoteRequest.confidentiality).toBe('public');
+  });
+
+  it('two real quotes no longer share Lethe’s request parameters (no client fingerprint in the report)', async () => {
+    const qs = [];
+    for (const i of [2, 3]) qs.push((await quote({ amountZat: 10_000_000n * BigInt(i), destinationAsset: 'nep141:wrap.near', recipient: String(i).repeat(64), refundTo: deriveRefund(seed, i).mainnet.address })) as Parameters<typeof swapsFromQuotes>[0][number] & { quoteRequest: { slippageTolerance: number } });
+    for (const q of qs) expect(q.quoteRequest.slippageTolerance).toBeGreaterThanOrEqual(60);
+    expect(requestFingerprint(qs[0])).not.toBe(requestFingerprint(qs[1]));
+    expect(linkabilityReport(swapsFromQuotes(qs)).links.map((l) => l.field)).not.toContain('client fingerprint');
+  });
+
+  it('request parameters are drawn per quote, inside the caller’s slippage tolerance', () => {
+    const input = { amountZat: 1n, destinationAsset: 'x', recipient: 'r', refundTo: 'u' };
+    const now = Date.parse('2026-10-22T10:00:00Z');
+    const bodies = Array.from({ length: 300 }, () => quoteBody({ ...input, slippageBps: 50 }, now));
+    const offsets = new Set(bodies.map((b) => Math.round((Date.parse(b.deadline) - now) / 60_000)));
+    expect(offsets.size).toBeGreaterThan(40);
+    for (const b of bodies) {
+      expect(b.slippageTolerance).toBeGreaterThanOrEqual(30);
+      expect(b.slippageTolerance).toBeLessThanOrEqual(50);
+      expect(Date.parse(b.deadline) - now).toBeGreaterThanOrEqual(40 * 60_000);
+      expect(Date.parse(b.deadline) - now).toBeLessThanOrEqual(120 * 60_000);
+      expect(b.quoteWaitingTimeMs).toBeGreaterThanOrEqual(2000);
+      expect(b.quoteWaitingTimeMs).toBeLessThanOrEqual(4000);
+    }
+    expect(new Set(bodies.map((b) => b.slippageTolerance)).size).toBeGreaterThan(10);
+    expect(new Set(bodies.map((b) => b.quoteWaitingTimeMs)).size).toBeGreaterThan(100);
   });
 
   it('a live swap (dry=false) is BLOCKED, not attempted', async () => {
