@@ -7,8 +7,9 @@
 //  2. each part is quoted at its scheduled time, with its own one-time refundTo and its own recipient
 //  3. the linkability report is computed from the real quote requests and 1Click's timestamps
 //  4. a wallet restored from the seed alone (no index book) re-derives every recipient
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { IndexBook, linkabilityReport, planBatch, recoverRecipients, requireNearDelivered, safeQuote, swapsFromQuotes, walletPaths } from '@zswap/cli';
 
@@ -57,7 +58,10 @@ async function main() {
   console.log(`report: ${report.verdict}; score ${report.score}/100`);
 
   // 4. seed only: a fresh book path that does not exist
-  const restored = await recoverRecipients(SEED, new IndexBook(resolve(DEMO, 'no-such-book.json')), { gap: 10, lookup: true, probeAhead: true });
+  // a probing lookup creates the restored wallet's book; a fresh path each run keeps this seed-only
+  const fresh = mkdtempSync(join(tmpdir(), 'lethe-pass2-restore-'));
+  const restored = await recoverRecipients(SEED, new IndexBook(join(fresh, 'book.json')), { gap: 10, lookup: true, probeAhead: true });
+  rmSync(fresh, { recursive: true, force: true });
   const found = st.quotes.map((q: { index: number; recipient: string }) => ({ index: q.index, recipient: q.recipient, foundFromSeedAlone: restored.recipients.some((x) => x.index === q.index && x.account_id === q.recipient), state: restored.recipients.find((x) => x.index === q.index)?.state }));
   for (const f of found) console.log(`  ${f.foundFromSeedAlone ? '✓' : '✗'} #${f.index} re-derived from the seed alone; on NEAR mainnet: ${f.state?.exists ? 'exists' : 'not created (dry quote, nothing delivered)'}`);
   if (!found.every((f: { foundFromSeedAlone: boolean }) => f.foundFromSeedAlone)) throw new Error('seed-only recovery did not find every recipient');

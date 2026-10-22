@@ -13,8 +13,9 @@
 //  3. the linkability report is computed from the real quote requests and 1Click's timestamps
 //  4. a wallet restored from the seed alone (no index book) re-derives every recipient (probe-ahead
 //     lookup on NEAR mainnet, read-only)
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { IndexBook, linkabilityReport, planBatch, recoverRecipients, requireNearDelivered, safeQuote, swapsFromQuotes, walletPaths } from '@zswap/cli';
 
@@ -65,10 +66,17 @@ async function main() {
 
   // 4. seed only: a fresh book path that does not exist; this probes ahead, so its lookups name the
   // gap of unused recipients to the NEAR RPC operator (see lookupWarning)
-  const restored = await recoverRecipients(SEED, new IndexBook(resolve(DEMO, 'no-such-book-pass3.json')), { gap: 10, lookup: true, probeAhead: true });
+  // a probing lookup creates the restored wallet's book; a fresh path each run keeps this seed-only
+  const fresh = mkdtempSync(join(tmpdir(), 'lethe-pass3-restore-'));
+  const restored = await recoverRecipients(SEED, new IndexBook(join(fresh, 'book.json')), { gap: 10, lookup: true, probeAhead: true });
+  rmSync(fresh, { recursive: true, force: true });
   const found = st.quotes.map((q: { index: number; recipient: string }) => ({ index: q.index, recipient: q.recipient, foundFromSeedAlone: restored.recipients.some((x) => x.index === q.index && x.account_id === q.recipient), state: restored.recipients.find((x) => x.index === q.index)?.state }));
-  for (const f of found) console.log(`  ${f.foundFromSeedAlone ? '✓' : '✗'} #${f.index} re-derived from the seed alone; on NEAR mainnet: ${f.state?.exists ? 'exists' : 'not created (dry quote, nothing delivered)'}`);
-  if (!found.every((f: { foundFromSeedAlone: boolean }) => f.foundFromSeedAlone)) throw new Error('seed-only recovery did not find every recipient');
+  for (const f of found) console.log(`  ${f.foundFromSeedAlone ? '✓' : '✗'} #${f.index} ${f.foundFromSeedAlone ? 're-derived from the seed alone' : `not re-derived from the seed alone: outside the lookahead (0..${restored.recipients.length - 1})`}; on NEAR mainnet: ${f.state?.exists ? 'exists' : 'not created (dry quote, nothing delivered)'}`);
+  // a recipient inside the lookahead that does not match is a bug; one past it is the recovery window:
+  // dry quotes leave no trace on either chain, so nothing extends the lookahead past index gap-1
+  const wrong = found.filter((f: { index: number; foundFromSeedAlone: boolean }) => !f.foundFromSeedAlone && f.index < restored.recipients.length);
+  if (wrong.length) throw new Error(`seed-only recovery derived a different recipient for #${wrong.map((f: { index: number }) => f.index).join(', #')}`);
+  const outside = found.filter((f: { foundFromSeedAlone: boolean }) => !f.foundFromSeedAlone).map((f: { index: number }) => f.index);
   const recipients = new Set(st.quotes.map((q: { recipient: string }) => q.recipient));
   const refunds = new Set(st.quotes.map((q: { refundTo: string }) => q.refundTo));
   if (recipients.size !== st.quotes.length || refunds.size !== st.quotes.length) throw new Error('a recipient or refundTo repeated');
@@ -83,7 +91,17 @@ async function main() {
         plan: st.plan,
         quotes: st.quotes,
         report,
-        seedOnlyRecovery: { book: 'none (seed only)', gap: restored.gap, derived: restored.recipients.length, checked: restored.checked, nearRpc: 'mainnet, read-only', found },
+        seedOnlyRecovery: {
+          book: 'none (seed only)',
+          gap: restored.gap,
+          derived: restored.recipients.length,
+          checked: restored.checked,
+          nearRpc: 'mainnet, read-only',
+          found,
+          ...(outside.length
+            ? { outsideWindow: outside, windowNote: `With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..${restored.recipients.length - 1}, so #${outside.join(', #')} is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.` }
+            : {}),
+        },
       },
       null,
       2,
