@@ -4,7 +4,7 @@ import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, s
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { canonicalRecipient, cryptoRng, type Rng } from './decorrelate.js';
-import { deriveNearRecipient, requireNearDelivered } from './recipient.js';
+import { deriveNearRecipient, recoverRecipients, requireNearDelivered } from './recipient.js';
 
 export const ONECLICK = process.env.ZSWAP_ONECLICK_URL ?? 'https://1click.chaindefuser.com';
 export const ZEC_ASSET = 'nep141:zec.omft.near';
@@ -504,6 +504,26 @@ export function recover(seedFile: string, book: IndexBook, from: number, to: num
       return { ...out, keys: Object.keys(keys), gap, next };
     }
     upTo = highest + 1 + gap;
+  }
+}
+
+/** The end of a recovery's window: every known index, the highest one any signal found, plus the gap. */
+export const lookaheadEnd = (next: number, found: number[], gap: number) => Math.max(next, Math.max(-1, ...found) + 1) + gap;
+
+/**
+ * Recovery from every signal at once. A swap leaves a trace on one side only: a failed swap is refunded
+ * to its one-time Zcash address, a successful one delivers to its NEAR recipient. So the refund scan and
+ * the NEAR lookup feed one lookahead: each persists what it found into the book's `next`, the other then
+ * starts past it, until neither finds more. Read-only on both chains.
+ */
+export async function recoverAll(seedFile: string, book: IndexBook, from: number, to: number, opts: { gap?: number; tokens?: string[] } = {}) {
+  const gap = opts.gap ?? RECOVERY_GAP;
+  let before = -1;
+  for (;;) {
+    const near = await recoverRecipients(seedFile, book, { gap, lookup: true, tokens: opts.tokens });
+    const zcash = recover(seedFile, book, from, to, gap);
+    if (zcash.next === before) return { ...zcash, near: { used: near.used, checked: near.recipients.length } };
+    before = zcash.next;
   }
 }
 

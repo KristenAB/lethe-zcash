@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { deriveNearRecipient, deriveRefund, IndexBook, initSeed, nearAccountState, quote, recoverRecipients, requireNearDelivered, sweepPlan, writeNearCredentials } from '../src/lib.js';
+import { chainTip, DEFAULT_SWEEP_TOKENS, deriveNearRecipient, deriveRefund, IndexBook, initSeed, isRecipientUsed, lookaheadEnd, nearAccountState, quote, recoverAll, recoverRecipients, requireNearDelivered, sweepPlan, writeNearCredentials } from '../src/lib.js';
 
 const dir = mkdtempSync(join(tmpdir(), 'zswap-fresh-'));
 const seed = join(dir, 'seed');
@@ -89,5 +89,53 @@ describe('sweep plan', () => {
   it('a token-only account needs gas, and a top-up from your accounts is named as a link', () => {
     const p = sweepPlan([{ index: 0, account_id: rs[0].account_id, state: { account_id: rs[0].account_id, exists: false, amountYocto: '0', ft: { 'wrap.near': '5' } } }], { 0: 'x.near' });
     expect(p.steps[0].action).toMatch(/cannot pay gas.*links it/);
+  });
+});
+
+describe('recovery from every signal (Oct 22)', () => {
+  it('the recipient lookup sees tokens beyond wNEAR and USDC (FastNEAR FT indexer, read-only)', async () => {
+    const s = await nearAccountState('wrap.near');
+    expect(s.ftIndexed.length).toBeGreaterThan(2);
+    expect(s.ftIndexed.some((c) => !DEFAULT_SWEEP_TOKENS.includes(c))).toBe(true);
+    const fresh = await nearAccountState(deriveNearRecipient(seed, 40).account_id);
+    expect(fresh).toMatchObject({ exists: false, ftIndexed: [] });
+    expect(isRecipientUsed(fresh)).toBe(false);
+  });
+
+  it('a recipient that holds only a third token, and no NEAR, counts as used', () => {
+    expect(isRecipientUsed({ account_id: 'x', exists: false, amountYocto: '0', ft: {}, ftIndexed: ['token.sweat'] })).toBe(true);
+    expect(isRecipientUsed({ account_id: 'x', exists: false, amountYocto: '0', ft: { 'token.sweat': '5' }, ftIndexed: [] })).toBe(true);
+  });
+
+  it('each swap keeps its destination token; the lookup checks that token on chain for its recipient', async () => {
+    const dir2 = mkdtempSync(join(tmpdir(), 'zswap-dest-'));
+    const s2 = join(dir2, 'seed');
+    initSeed(s2);
+    const b2 = new IndexBook(join(dir2, 'book.json'));
+    b2.create(s2);
+    const r = b2.reserve(s2, { freshRecipient: true, destinationAsset: 'nep141:token.sweat' }).r;
+    expect(r.destinationAsset).toBe('nep141:token.sweat');
+    const found = await recoverRecipients(s2, b2, { gap: 0, lookup: true });
+    expect(found.recipients[0].state?.ft).toEqual({ 'token.sweat': '0' });
+  });
+
+  it('the lookahead extends from any signal: NEAR recipients used at 0..10 put refund key 11 inside the window', () => {
+    expect(lookaheadEnd(0, [], 10)).toBe(10); // refund signals alone: refund-11 is outside
+    expect(lookaheadEnd(0, [...Array(11).keys()], 10)).toBe(21);
+    expect(lookaheadEnd(30, [3], 10)).toBe(40);
+  });
+
+  it('recoverAll (testnet scan + NEAR lookup) on a restored wallet: both chains read, the book created past the window', async () => {
+    const dir3 = mkdtempSync(join(tmpdir(), 'zswap-all-'));
+    const s3 = join(dir3, 'seed');
+    initSeed(s3);
+    const b3 = new IndexBook(join(dir3, 'restored.json'));
+    const tip = chainTip();
+    const r = await recoverAll(s3, b3, tip - 2, tip, { gap: 3 });
+    // the NEAR lookup (0..2) moves next to 3; the refund scan then covers every index that may be used (0..2) plus the gap
+    expect(r.keys).toEqual(['account', ...[0, 1, 2, 3, 4, 5].map((i) => `refund-${i}`)]);
+    expect(r.near).toEqual({ used: [], checked: 6 });
+    expect(r.hits).toEqual([]);
+    expect(b3.read().next).toBe(3);
   });
 });

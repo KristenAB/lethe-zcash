@@ -5,7 +5,7 @@ import { appendFileSync, chmodSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { IndexBook, recover, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
+import { IndexBook, recover, recoverAll, chainTip, SetupRequiredError, safeQuote, recoverRecipients, sweepPlan, planBatch } from '@zswap/cli';
 
 const need = (k: string) => process.env[k] || (() => { throw new SetupRequiredError(k); })();
 /**
@@ -64,21 +64,27 @@ export function createServer(): McpServer {
 
   server.registerTool(
     'recover',
-    { title: 'Find refunds (testnet)', description: 'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, so it also works for a wallet restored from its seed without an index book; reports which key found which payment. Read-only.', inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional() }, annotations: { readOnlyHint: true } },
+    {
+      title: 'Find refunds (testnet)',
+      description:
+        'Scans testnet compact blocks from `from_height` with the account key and the one-time keys of every reserved index plus `gap` (default 10) more, extended past any hit, so it also works for a wallet restored from its seed; reports which key found which payment. With lookup: true it also reads each per-swap NEAR recipient on NEAR mainnet, and finds on either chain extend the other lookahead. Afterwards the local index book never hands out an index the recovery looked at (it is created for a restored wallet). Sends nothing.',
+      inputSchema: { from_height: z.number().int().positive(), gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional() },
+      annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
+    },
     (a) =>
-      run('recover', () => {
+      run('recover', async () => {
         const tip = chainTip();
         if (tip - a.from_height > MAX_SCAN_BLOCKS) throw new Error(`recover scans at most ${MAX_SCAN_BLOCKS} blocks per call (asked ${tip - a.from_height} from ${a.from_height}); use a later from_height, or the zswap CLI for a full rescan`);
-        return recover(need('ZSWAP_SEED'), book(), a.from_height, tip, a.gap);
+        return a.lookup ? recoverAll(need('ZSWAP_SEED'), book(), a.from_height, tip, { gap: a.gap }) : recover(need('ZSWAP_SEED'), book(), a.from_height, tip, a.gap);
       }),
   );
   server.registerTool(
     'recipients',
     {
       title: 'Per-swap NEAR recipients (from the seed)',
-      description: 'Re-derives the fresh NEAR implicit account of every swap index 0..(last reserved + gap) from the wallet seed alone (no index book needed). With lookup: true, reads each on NEAR mainnet (exists, NEAR balance, wNEAR and USDC balances) and extends the lookahead past any used one. Read-only; never returns a key.',
+      description: 'Re-derives the fresh NEAR implicit account of every swap index 0..(last reserved + gap) from the wallet seed alone (no index book needed). With lookup: true, reads each on NEAR mainnet (exists, NEAR balance, every token the FastNEAR FT indexer lists, the swap’s own destination token) and extends the lookahead past any used one; the local index book then never hands out an index it looked at. Sends nothing; never returns a key.',
       inputSchema: { gap: z.number().int().min(0).max(100).optional(), lookup: z.boolean().optional() },
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: false, idempotentHint: true, openWorldHint: true },
     },
     (a) => run('recipients', () => recoverRecipients(need('ZSWAP_SEED'), book(), { gap: a.gap, lookup: a.lookup === true })),
   );

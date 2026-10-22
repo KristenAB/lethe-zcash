@@ -17,12 +17,14 @@
 //                                                trade-offs and its linkability report; sends nothing
 //   zswap report                                 linkability report of the swaps quoted from this book
 //   zswap swap ...                               BLOCKED (mainnet ZEC, live deposit address)
-//   zswap recover <fromHeight> [toHeight] [--gap N]  compact-block scan (testnet) with the account key and refund keys
-//                                                0..(last reserved + N), N default 10: works from the seed alone
+//   zswap recover <fromHeight> [toHeight] [--gap N] [--lookup]  compact-block scan (testnet) with the account key and
+//                                                refund keys 0..(last reserved + N), N default 10, extended past any hit;
+//                                                --lookup also reads the NEAR recipients (read-only), and each side's
+//                                                finds extend the other's lookahead; the book's next moves past it all
 //   zswap book                                   reserved indices and their public refundTo addresses
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { BlockedError, chainTip, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
+import { BlockedError, chainTip, CONFIDENTIALITY, type Confidentiality, IndexBook, initWallet, LinkedRecipientError, linkabilityReport, planBatch, recover, recoverAll, recoverRecipients, safeQuote, SetupRequiredError, sweepPlan, swapsFromQuotes, walletPaths, writeNearCredentials } from './lib.js';
 
 const paths = walletPaths();
 const seed = paths.seed;
@@ -60,7 +62,7 @@ try {
     const from = Number(a[0]);
     const to = a[1] ? Number(a[1]) : chainTip();
     if (!Number.isSafeInteger(from)) throw new Error('usage: zswap recover <fromHeight> [toHeight]');
-    out(recover(seed, book, from, to, gap));
+    out(flags.has('--lookup') ? await recoverAll(seed, book, from, to, { gap }) : recover(seed, book, from, to, gap));
   } else if (cmd === 'recipients') out(await recoverRecipients(seed, book, { gap, lookup: flags.has('--lookup') }));
   else if (cmd === 'sweep-plan') {
     const destinations: Record<number, string> = {};
@@ -90,7 +92,7 @@ try {
     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
   } else if (cmd === 'book')
     out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.destinationAsset ? { destinationAsset: r.destinationAsset } : {}), quoted: !!r.quote, ...(r.quoteError ? { quoteError: r.quoteError.outcome } : {}), reservedAt: r.reservedAt })));
-  else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] | book');
+  else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book');
 } catch (e) {
   console.error((e as Error).message);
   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);

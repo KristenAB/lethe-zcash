@@ -9,6 +9,8 @@ import { existsSync } from 'node:fs';
 import { answerSnippet, httpJson, IndexBook, keysBin, ONECLICK, RECOVERY_GAP, SetupRequiredError } from './lib.js';
 
 export const NEAR_RPC = process.env.ZSWAP_NEAR_RPC ?? 'https://rpc.mainnet.fastnear.com';
+/** FastNEAR's public FT-holdings indexer (read-only): every token contract an account holds or held. */
+export const NEAR_FT_INDEXER = process.env.ZSWAP_NEAR_FT_INDEXER ?? 'https://api.fastnear.com';
 
 export interface NearRecipient {
   index: number;
@@ -68,6 +70,8 @@ export interface NearAccountState {
   amountYocto: string;
   /** fungible-token balances on the listed contracts (smallest unit) */
   ft: Record<string, string>;
+  /** every token contract the FT indexer lists for this account, any balance: any token is a sign of use */
+  ftIndexed: string[];
 }
 
 async function rpc(params: Record<string, unknown>): Promise<{ result?: any; error?: any }> {
@@ -77,7 +81,20 @@ async function rpc(params: Record<string, unknown>): Promise<{ result?: any; err
   return r.body as { result?: any; error?: any };
 }
 
-/** Read-only NEAR mainnet lookup: does the account exist, and what does it hold on `tokens`? */
+/** Token contracts the FT indexer lists for an account (FastNEAR /v1/account/<id>/ft, read-only). */
+export async function indexedTokens(accountId: string): Promise<string[]> {
+  const url = `${NEAR_FT_INDEXER}/v1/account/${encodeURIComponent(accountId)}/ft`;
+  const r = await httpJson('NEAR FT indexer', url);
+  if (!r.ok) throw new Error(`NEAR FT indexer ${url}: HTTP ${r.status} ${answerSnippet(r)}`);
+  const tokens = (r.body as { tokens?: { contract_id: string }[] } | undefined)?.tokens;
+  if (!Array.isArray(tokens)) throw new Error(`NEAR FT indexer ${url}: HTTP ${r.status}, no token list: ${answerSnippet(r)}`);
+  return tokens.map((t) => t.contract_id);
+}
+
+/**
+ * Read-only NEAR mainnet lookup: does the account exist, which tokens does the FT indexer list for it
+ * (any contract, not only wNEAR and USDC), and what does it hold on `tokens` (checked on chain)?
+ */
 export async function nearAccountState(accountId: string, tokens: string[] = []): Promise<NearAccountState> {
   const v = await rpc({ request_type: 'view_account', account_id: accountId });
   let exists = false;
@@ -92,13 +109,17 @@ export async function nearAccountState(accountId: string, tokens: string[] = [])
     if (!c.result) throw new Error(`NEAR RPC ft_balance_of on ${contract}: ${JSON.stringify(c.error).slice(0, 200)}`);
     ft[contract] = JSON.parse(Buffer.from(c.result.result).toString());
   }
-  return { account_id: accountId, exists, amountYocto, ft };
+  return { account_id: accountId, exists, amountYocto, ft, ftIndexed: await indexedTokens(accountId) };
 }
 
-/** wNEAR and NEAR-native USDC: the NEAR-delivered assets the live run uses. */
+/** wNEAR and NEAR-native USDC: the NEAR-delivered assets the live runs use. */
 export const DEFAULT_SWEEP_TOKENS = ['wrap.near', '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1'];
 
-const used = (s?: NearAccountState) => !!s && (s.exists || Object.values(s.ft).some((b) => BigInt(b) > 0n));
+/** A recipient was used if it exists, holds any checked token, or the FT indexer lists any token for it. */
+export const isRecipientUsed = (s?: NearAccountState) => !!s && (s.exists || Object.values(s.ft).some((b) => BigInt(b) > 0n) || s.ftIndexed.length > 0);
+const used = isRecipientUsed;
+/** The NEAR contract of a 1Click asset id delivered on NEAR (nep141:<contract>), if it is one. */
+const nearContract = (asset?: string) => (asset && /^nep141:[a-z0-9._-]+$/.test(asset) ? asset.slice('nep141:'.length) : undefined);
 
 export interface RecoveredRecipient extends NearRecipient {
   /** this index is in the local index book (false for a wallet restored from its seed alone) */
@@ -108,20 +129,23 @@ export interface RecoveredRecipient extends NearRecipient {
 
 /**
  * Finds the per-swap NEAR recipients from the seed: indices 0..(last reserved + gap). With `lookup`,
- * each one is checked on NEAR mainnet (read-only) and a used account inside the lookahead extends
- * it, like the Zcash refund scan. Without the index book (a restored wallet) it still derives 0..gap-1.
+ * each one is checked on NEAR mainnet (read-only: exists, any token the FT indexer lists, the swap's own
+ * destination token) and a used account inside the lookahead extends it, like the Zcash refund scan.
+ * Without the index book (a restored wallet) it still derives 0..gap-1.
  */
 export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; tokens?: string[] } = {}) {
   const gap = opts.gap ?? RECOVERY_GAP;
   if (!Number.isSafeInteger(gap) || gap < 0 || gap > 1000) throw new Error('gap must be a whole number up to 1000');
   const b = book.readFor(seedFile);
-  const booked = new Set(b.reservations.map((r) => r.index));
+  const booked = new Map(b.reservations.map((r) => [r.index, r]));
   const out: RecoveredRecipient[] = [];
   let upTo = b.next + gap;
   for (let i = 0; i < upTo; i++) {
     const r: RecoveredRecipient = { ...deriveNearRecipient(seedFile, i), inBook: booked.has(i) };
     if (opts.lookup) {
-      r.state = await nearAccountState(r.account_id, opts.tokens ?? DEFAULT_SWEEP_TOKENS);
+      // on chain: the swap's own destination token (from the book) and any asked for; the indexer covers the rest
+      const own = nearContract(booked.get(i)?.destinationAsset);
+      r.state = await nearAccountState(r.account_id, [...new Set([...(own ? [own] : []), ...(opts.tokens ?? [])])]);
       if (used(r.state)) upTo = Math.max(upTo, i + 1 + gap);
     }
     out.push(r);
