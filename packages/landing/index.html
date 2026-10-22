@@ -295,8 +295,11 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
         const note = el('p', { class: 'note' }, 'A replay of the three real 1Click dry quotes from the published run: no deposit address was created and no funds moved.');
         $('widget-slot').replaceChildren(widget, river, note);
 
-        let at = -1, timer = null;
+        let at = -1, timer = null, pending = null;
         const show = (i, animate) => {
+          // a fade still running from an earlier click must not land its address under this swap's key
+          clearTimeout(pending);
+          pending = null;
           const q = quotes[i];
           const [from, to] = q.what.split(' → ');
           const [, unitIn] = from.split(' ');
@@ -318,7 +321,7 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
           if (animate && at !== -1) {
             addr.classList.remove('arrive');
             addr.classList.add('leave');
-            setTimeout(put, 650);
+            pending = setTimeout(put, 650);
           } else put();
           btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
           rows.forEach((r, j) => {
