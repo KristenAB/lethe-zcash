@@ -76,6 +76,7 @@
       "strongLinkedPairs": 0,
       "weakOnlyPairs": 3,
       "score": 75,
+      "scoreModel": "pre-Oct-22 model, as recorded at run time: no split-pattern or client-fingerprint check, and a pair with only weak hints cost 0.25 however many it shared. Superseded: see reportCurrentModel",
       "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
       "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
     }
@@ -234,6 +235,98 @@
     "strongLinkedPairs": 0,
     "weakOnlyPairs": 3,
     "score": 75,
+    "scoreModel": "pre-Oct-22 model, as recorded at run time: no split-pattern or client-fingerprint check, and a pair with only weak hints cost 0.25 however many it shared. Superseded: see reportCurrentModel",
+    "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  },
+  "reportCurrentModel": {
+    "recomputedAt": "2026-10-22",
+    "note": "The same quotes scored by the current linkabilityReport (SCORE_METHOD) from their public requests and 1Click timestamps; this is the score the landing and dashboard show.",
+    "swaps": 3,
+    "pairs": 3,
+    "links": [
+      {
+        "field": "within 10 min",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "both requests went out within ten minutes"
+      },
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same destination token"
+      },
+      {
+        "field": "split pattern",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "common denominations sent largest first, the order a greedy 1-2-5 split produces"
+      },
+      {
+        "field": "client fingerprint",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"
+      }
+    ],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 3,
+    "score": 32,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
     "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
     "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
   },
