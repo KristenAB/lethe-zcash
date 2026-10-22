@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { delaySchedule, linkabilityReport, MIN_TX_FEE_ZAT, planBatch, roundAmount, splitAmount, swapsFromQuotes } from '../src/lib.js';
+import { canonicalRecipient, delaySchedule, linkabilityReport, MIN_TX_FEE_ZAT, planBatch, roundAmount, SCORE_METHOD, splitAmount, swapsFromQuotes } from '../src/lib.js';
 
 /** a small deterministic generator for tests (mulberry32); the default is crypto-backed */
 const seeded = (s: number) => () => {
@@ -84,7 +84,8 @@ describe('linkability report', () => {
       ['amount', 'weak', [[0, 1]]],
       ['token', 'weak', [[0, 1]]],
     ]);
-    expect(r.score).toBe(92); // 1 weak-only pair of 3 costs a quarter
+    // 1 pair of 3 shares two weak hints (amount, token): each links one time in four, so it costs 1 − 0.75² ≈ 0.44
+    expect(r.score).toBe(85);
     expect(r.verdict).toMatch(/^no public field links any pair; 1 pair/);
   });
 
@@ -117,11 +118,80 @@ describe('planBatch', () => {
 
   it('round + split + fresh recipients + delays: no shared public field, trade-offs listed', () => {
     const p = planBatch({ amountZat: ZEC(0.37), destinationAsset: 'nep141:wrap.near', split: true, delay: { windowS: 7200, minGapS: 300 }, rng: seeded(7) });
-    expect(p.swaps.map((s) => s.amountZat)).toEqual([ZEC(0.2), ZEC(0.1), ZEC(0.05), ZEC(0.02)]);
+    expect(p.swaps.map((s) => s.amountZat).sort((a, b) => Number(BigInt(b) - BigInt(a)))).toEqual([ZEC(0.2), ZEC(0.1), ZEC(0.05), ZEC(0.02)]);
     expect(new Set(p.swaps.map((s) => s.recipient)).size).toBe(4);
     expect(p.report.sharedFields).toBe(0);
     expect(p.tradeOffs.map((t) => t.split(':')[0])).toEqual(['split', 'delay', 'fresh recipient']);
     const together = planBatch({ amountZat: ZEC(0.37), destinationAsset: 'nep141:wrap.near', split: true });
     expect(together.report.links.find((l) => l.field === 'same minute')?.pairs).toHaveLength(6);
+  });
+});
+
+describe('decorrelation leaks the judge found (Oct 22)', () => {
+  it('a split is sent in a random order, not largest first (0.2 ZEC first about a third of the time)', () => {
+    let first = 0;
+    for (let i = 1; i <= 1000; i++) {
+      const p = planBatch({ amountZat: 35_000_000n, destinationAsset: 'nep141:wrap.near', split: true, delay: { windowS: 3600, minGapS: 60 }, rng: seeded(i) });
+      expect(p.swaps.map((s) => Number(s.offsetS))).toEqual([...p.swaps.map((s) => Number(s.offsetS))].sort((a, b) => a - b));
+      if (BigInt(p.swaps[0].amountZat) === 20_000_000n) first++;
+    }
+    expect(first).toBeGreaterThan(270);
+    expect(first).toBeLessThan(400);
+  });
+
+  it('the report names a split sent largest first, or parts that add up to a 1-2-5 total, as a split pattern', () => {
+    const t0 = Date.parse('2026-10-22T10:00:00Z');
+    const at = (m: number) => t0 + m * 3_600_000;
+    const greedy = linkabilityReport([ZEC(0.2), ZEC(0.1), ZEC(0.05)].map((a, i) => ({ amountZat: a, at: at(i), recipient: `r${i}.near`, destinationAsset: `t${i}` })));
+    expect(greedy.links.find((l) => l.field === 'split pattern')).toMatchObject({ strength: 'weak', pairs: [[0, 1], [0, 2], [1, 2]], why: expect.stringMatching(/largest first/) });
+    const total = linkabilityReport([ZEC(0.05), ZEC(0.1), ZEC(0.05)].map((a, i) => ({ amountZat: a, at: at(i), recipient: `r${i}.near`, destinationAsset: `t${i}` })));
+    expect(total.links.find((l) => l.field === 'split pattern')?.why).toMatch(/1-2-5 total/);
+    const mixed = linkabilityReport([ZEC(0.1), ZEC(0.2), ZEC(0.05)].map((a, i) => ({ amountZat: a, at: at(i), recipient: `r${i}.near`, destinationAsset: `t${i}` })));
+    expect(mixed.links.find((l) => l.field === 'split pattern')).toBeUndefined();
+  });
+
+  it('weak hints add up: a pair sharing more of them scores lower, and the weights are printed with the score', () => {
+    const t0 = Date.parse('2026-10-22T10:00:00Z');
+    const one = linkabilityReport([
+      { amountZat: ZEC(0.3), at: t0, recipient: 'a.near', destinationAsset: 'x' },
+      { amountZat: ZEC(0.7), at: t0 + 3 * 3_600_000, recipient: 'b.near', destinationAsset: 'x' },
+    ]);
+    const two = linkabilityReport([
+      { amountZat: ZEC(0.3), at: t0, recipient: 'a.near', destinationAsset: 'x' },
+      { amountZat: ZEC(0.7), at: t0 + 300_000, recipient: 'b.near', destinationAsset: 'x' },
+    ]);
+    expect(one.score).toBe(75);
+    expect(two.score).toBe(56); // 1 − 0.75² = 0.4375 of the pair
+    expect(two.method).toBe(SCORE_METHOD);
+    expect(SCORE_METHOD).toMatch(/Lethe’s own, not a standard/);
+  });
+
+  it('recipients are compared in canonical form: case variants of one address are one recipient', () => {
+    const evm = '0xAbCd00000000000000000000000000000000Ef01';
+    expect(canonicalRecipient(evm)).toBe(canonicalRecipient(evm.toLowerCase()));
+    expect(canonicalRecipient(' Alice.NEAR ')).toBe('alice.near');
+    expect(canonicalRecipient('A'.repeat(64))).toBe('a'.repeat(64));
+    expect(canonicalRecipient('BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4')).toBe('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4');
+    // base58 is case-sensitive: left alone
+    expect(canonicalRecipient('7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU')).toBe('7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU');
+    const r = linkabilityReport([
+      { amountZat: ZEC(0.1), at: 0, recipient: evm, destinationAsset: 'a' },
+      { amountZat: ZEC(0.2), at: 7_200_000, recipient: evm.toLowerCase(), destinationAsset: 'b' },
+    ]);
+    expect(r.links.find((l) => l.field === 'recipient')).toMatchObject({ strength: 'strong', pairs: [[0, 1]] });
+  });
+
+  it('pass 2 (real quotes): the largest-first split and Lethe’s fixed request parameters are reported, and the score drops', () => {
+    const p2 = JSON.parse(readFileSync(resolve(__dirname, '../../../deployments/pass2.json'), 'utf8'));
+    const r = linkabilityReport(swapsFromQuotes(p2.quotes));
+    expect(r.sharedFields).toBe(0);
+    expect(r.links.map((l) => [l.field, l.strength])).toEqual([
+      ['within 10 min', 'weak'],
+      ['token', 'weak'],
+      ['split pattern', 'weak'],
+      ['client fingerprint', 'weak'],
+    ]);
+    expect(r.score).toBeLessThan(75);
+    expect(r.score).toBe(32);
   });
 });

@@ -14,6 +14,27 @@ const zec = (z: bigint) => {
   return `${z < 0n ? '-' : ''}${t} ZEC`;
 };
 export const isCommonAmount = (z: bigint, denoms: readonly bigint[] = DENOMINATIONS_ZAT) => denoms.includes(z);
+/** A 1-2-5 value at any power of ten from 0.01 ZEC (0.01, 0.02, 0.05, 0.1, …, 1, 2, 5, 10, …). */
+export function isRound125(z: bigint): boolean {
+  for (let p = 1_000_000n; p <= z; p *= 10n) if (z === p || z === 2n * p || z === 5n * p) return true;
+  return false;
+}
+
+const BECH32_UPPER = /^[A-Z0-9]{1,83}1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{6,}$/;
+const NEAR_NAMED = /^(?=.{2,64}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*)+$/;
+/**
+ * The form a recipient is compared in. Case variants of one address are one recipient: 0x-hex (EVM, NEAR
+ * eth-implicit) and 64-hex NEAR implicit ids are case-insensitive, NEAR named accounts are lowercase by
+ * rule, and bech32 is all-lower or all-upper. Base58 (Solana, Bitcoin legacy) is case-sensitive and is
+ * only trimmed.
+ */
+export function canonicalRecipient(recipient: string): string {
+  const s = recipient.trim();
+  if (/^0x[0-9a-f]+$/i.test(s) || /^[0-9a-f]{64}$/i.test(s)) return s.toLowerCase();
+  if (NEAR_NAMED.test(s)) return s.toLowerCase();
+  if (BECH32_UPPER.test(s)) return s.toLowerCase();
+  return s;
+}
 
 export interface Split {
   parts: bigint[];
@@ -67,6 +88,16 @@ export function roundAmount(amountZat: bigint, mode: 'down' | 'nearest' = 'down'
 export type Rng = () => number;
 export const cryptoRng: Rng = () => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
 
+/** Fisher-Yates shuffle (a new array). */
+export function shuffle<T>(xs: readonly T[], rng: Rng = cryptoRng): T[] {
+  const a = [...xs];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 /**
  * Random send offsets (seconds from now) for `n` swaps inside `windowS`, never closer than
  * `minGapS` to each other: n uniform points in the window shrunk by the gaps, sorted, then spread.
@@ -91,26 +122,47 @@ export interface PlannedSwap {
   refundTo?: string;
   /** the same ONECLICK_JWT goes with the request: 1Click can link the swaps privately */
   jwt?: boolean;
+  /**
+   * the client's own request parameters that are public in every request: slippage, solver wait and the
+   * deadline's offset from the request time (whole minutes). Known only for real quotes.
+   */
+  fingerprint?: string;
 }
 
 export type Strength = 'strong' | 'weak' | 'provider';
 export interface Link {
-  field: 'refundTo' | 'recipient' | 'amount' | 'same minute' | 'within 10 min' | 'token' | 'partner token';
+  field: 'refundTo' | 'recipient' | 'amount' | 'same minute' | 'within 10 min' | 'token' | 'split pattern' | 'client fingerprint' | 'partner token';
   strength: Strength;
   pairs: [number, number][];
   why: string;
 }
 
+/** How the score is computed. The weights are Lethe's own, not a standard; they are printed with the score. */
+export const SCORE_METHOD =
+  'score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.';
+
 /**
  * What still links the swaps of a batch to each other, pair by pair. `strong` means the public
  * request alone links the pair; `weak` narrows it down (shared with many other users); `provider`
- * means only 1Click can link it. score: 100 = no pair linked at all; each strongly linked pair costs a
- * full pair, a weak-only pair a quarter.
+ * means only 1Click can link it. score: see SCORE_METHOD (100 = no pair linked at all).
  */
 export function linkabilityReport(swaps: PlannedSwap[]) {
   const n = swaps.length;
   const t = swaps.map((s) => new Date(s.at).getTime());
   const amt = swaps.map((s) => BigInt(s.amountZat));
+  // a 1-2-5 split shows in the amounts themselves: parts sent largest first (the order a greedy split
+  // produces), or parts that add up to a 1-2-5 total
+  const byTime = amt.map((a, i) => [a, t[i]] as const).sort((x, y) => x[1] - y[1]).map(([a]) => a);
+  const allCommon = n >= 2 && amt.every((a) => isCommonAmount(a));
+  const greedy = allCommon && byTime.every((a, k) => k === 0 || a <= byTime[k - 1]) && byTime.some((a, k) => k > 0 && a < byTime[k - 1]);
+  const total = amt.reduce((x, y) => x + y, 0n);
+  const split = !allCommon
+    ? ''
+    : greedy
+      ? 'common denominations sent largest first, the order a greedy 1-2-5 split produces'
+      : isRound125(total)
+        ? 'the parts add up to a 1-2-5 total, as the parts of one split would'
+        : '';
   const links = new Map<Link['field'], Link>();
   const add = (field: Link['field'], strength: Strength, why: string, p: [number, number]) => {
     const l = links.get(field) ?? links.set(field, { field, strength, pairs: [], why }).get(field)!;
@@ -122,8 +174,8 @@ export function linkabilityReport(swaps: PlannedSwap[]) {
       const p: [number, number] = [i, j];
       const a = swaps[i];
       const b = swaps[j];
-      if (a.refundTo && a.refundTo === b.refundTo) add('refundTo', 'strong', 'the same refund address is in both public requests', p);
-      if (a.recipient === b.recipient) add('recipient', 'strong', 'the same recipient is in both public requests and receives both on chain', p);
+      if (a.refundTo && canonicalRecipient(a.refundTo) === canonicalRecipient(b.refundTo ?? '')) add('refundTo', 'strong', 'the same refund address is in both public requests', p);
+      if (canonicalRecipient(a.recipient) === canonicalRecipient(b.recipient)) add('recipient', 'strong', 'the same recipient is in both public requests and receives both on chain', p);
       if (amt[i] === amt[j])
         isCommonAmount(amt[i])
           ? add('amount', 'weak', 'the same common amount; other users swap it too, so it narrows rather than links', p)
@@ -132,13 +184,17 @@ export function linkabilityReport(swaps: PlannedSwap[]) {
       if (dt < 60_000) add('same minute', 'strong', 'both requests went out within a minute of each other', p);
       else if (dt < 600_000) add('within 10 min', 'weak', 'both requests went out within ten minutes', p);
       if (a.destinationAsset === b.destinationAsset) add('token', 'weak', 'the same destination token', p);
+      if (split) add('split pattern', 'weak', split, p);
+      if (a.fingerprint && a.fingerprint === b.fingerprint) add('client fingerprint', 'weak', 'the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client', p);
       if (a.jwt && b.jwt) add('partner token', 'provider', 'the same ONECLICK_JWT: 1Click (not the public) can link them', p);
     }
   const pairs = (n * (n - 1)) / 2;
   const key = (p: [number, number]) => `${p[0]}-${p[1]}`;
   const strongPairs = new Set([...links.values()].filter((l) => l.strength === 'strong').flatMap((l) => l.pairs.map(key)));
-  const weakPairs = new Set([...links.values()].filter((l) => l.strength === 'weak').flatMap((l) => l.pairs.map(key)).filter((k) => !strongPairs.has(k)));
-  const cost = strongPairs.size + weakPairs.size / 4;
+  const hints = new Map<string, number>();
+  for (const l of links.values()) if (l.strength === 'weak') for (const p of l.pairs) if (!strongPairs.has(key(p))) hints.set(key(p), (hints.get(key(p)) ?? 0) + 1);
+  const weakPairs = new Set(hints.keys());
+  const cost = strongPairs.size + [...hints.values()].reduce((c, k) => c + (1 - 0.75 ** k), 0);
   const score = pairs === 0 ? 100 : Math.round(100 * (1 - cost / pairs));
   const all = [...links.values()];
   const strongFields = all.filter((l) => l.strength === 'strong').map((l) => l.field);
@@ -151,6 +207,7 @@ export function linkabilityReport(swaps: PlannedSwap[]) {
     strongLinkedPairs: strongPairs.size,
     weakOnlyPairs: weakPairs.size,
     score,
+    method: SCORE_METHOD,
     verdict:
       pairs === 0
         ? 'one swap: nothing in the batch to link it to'
@@ -162,8 +219,18 @@ export function linkabilityReport(swaps: PlannedSwap[]) {
 }
 
 /** The report's input from real 1Click quote responses (their public request and timestamp). */
-export function swapsFromQuotes(quotes: { timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string } }[], jwt = false): PlannedSwap[] {
-  return quotes.map((q) => ({ amountZat: q.quoteRequest.amount, at: q.timestamp, recipient: q.quoteRequest.recipient, destinationAsset: q.quoteRequest.destinationAsset, refundTo: q.quoteRequest.refundTo, jwt }));
+export function swapsFromQuotes(
+  quotes: { timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string; slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }[],
+  jwt = false,
+): PlannedSwap[] {
+  return quotes.map((q) => ({ amountZat: q.quoteRequest.amount, at: q.timestamp, recipient: q.quoteRequest.recipient, destinationAsset: q.quoteRequest.destinationAsset, refundTo: q.quoteRequest.refundTo, jwt, fingerprint: requestFingerprint(q) }));
+}
+
+/** slippage | solver wait | deadline minus request time in whole minutes, from a quote's public request. */
+export function requestFingerprint(q: { timestamp: string; quoteRequest: { slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }): string | undefined {
+  const { slippageTolerance, quoteWaitingTimeMs, deadline } = q.quoteRequest;
+  if (slippageTolerance === undefined || quoteWaitingTimeMs === undefined || !deadline) return undefined;
+  return `${slippageTolerance}|${quoteWaitingTimeMs}|${Math.round((Date.parse(deadline) - Date.parse(q.timestamp)) / 60_000)}`;
 }
 
 /**
@@ -192,7 +259,8 @@ export function planBatch(input: {
   let parts = [amount];
   if (input.split) {
     const s = splitAmount(amount);
-    parts = s.parts;
+    // sent in a random order: largest first is the order a greedy split produces, and it shows
+    parts = shuffle(s.parts, input.rng);
     tradeOffs.push(`split: ${s.tradeOff}`);
   }
   const start = input.start ?? 0;

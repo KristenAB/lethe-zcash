@@ -104,7 +104,8 @@ describe('zswap-mcp', () => {
 
   it('plan_batch returns parts, trade-offs and a linkability report, and sends nothing', async () => {
     const p = JSON.parse((await call(client, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', split: true, window_minutes: 90, min_gap_seconds: 300 })).text);
-    expect(p.swaps.map((s: { amountZat: string }) => s.amountZat)).toEqual(['20000000', '10000000']);
+    // the parts go out in a random order (largest first would show the split)
+    expect(p.swaps.map((s: { amountZat: string }) => s.amountZat).sort()).toEqual(['10000000', '20000000']);
     expect(p.report.sharedFields).toBe(0);
     expect(p.tradeOffs.length).toBe(3);
     const lazy = JSON.parse((await call(client, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', recipient: 'me.near', split: true })).text);
