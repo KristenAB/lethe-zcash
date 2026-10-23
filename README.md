@@ -62,11 +62,11 @@ compact-block scan from block 4,522,708 with every reserved key and the account 
 
 | Payment to | Transaction | Found by | Amount |
 |---|---|---|---|
-| (funding of the demo provider wallet) | [`c1bbb267…`](https://testnet.zcashexplorer.app/transactions/c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54) | — | 4 × 70,000 zat |
-| refund-0 | [`e08cfef2…`](https://testnet.zcashexplorer.app/transactions/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b) | refund-0 | 30,000 zat |
-| refund-1 | [`9404c711…`](https://testnet.zcashexplorer.app/transactions/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100) | refund-1 | 31,000 zat |
-| refund-2 | [`4a7dd0ec…`](https://testnet.zcashexplorer.app/transactions/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899) | refund-2 | 32,000 zat |
-| account | [`bb82609a…`](https://testnet.zcashexplorer.app/transactions/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c) | account | 25,000 zat |
+| (funding of the demo provider wallet) | [`c1bbb267…`](https://testnet.zecblock.com/tx/c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54) | — | 4 × 70,000 zat |
+| refund-0 | [`e08cfef2…`](https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b) | refund-0 | 30,000 zat |
+| refund-1 | [`9404c711…`](https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100) | refund-1 | 31,000 zat |
+| refund-2 | [`4a7dd0ec…`](https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899) | refund-2 | 32,000 zat |
+| account | [`bb82609a…`](https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c) | account | 25,000 zat |
 
 Each refund is found only by its own key; the account's ordinary key sees none of them.
 

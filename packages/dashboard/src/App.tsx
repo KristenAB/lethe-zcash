@@ -48,7 +48,7 @@ type Pass2 = {
 type Pass3 = Pass2 & { plan: { windowS: number; minGapS: number }; seedOnlyRecovery: { windowNote?: string } };
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; run: Run; seedOnly: SeedOnly | null; pass2: Pass2 | null; pass3: Pass3 | null };
 
-const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
+const EXPLORER = 'https://testnet.zecblock.com/tx/';
 const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
 const short = (s: string, a = 12, b = 8) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
 const num = (n: number, d = 4) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d }).format(n);

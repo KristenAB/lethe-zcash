@@ -64,7 +64,7 @@ export const fieldText = (r: Report, f: string) => {
 export const fmt = (n: number, d = 4) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d }).format(n);
 export const day = (s: string) => new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 export const short = (s: string, a = 12, b = 8) => (s.length > a + b + 1 ? `${s.slice(0, a)}…${s.slice(-b)}` : s);
-export const EXPLORER = 'https://testnet.zcashexplorer.app/transactions/';
+export const EXPLORER = 'https://testnet.zecblock.com/tx/';
 export const REPO = 'https://github.com/nickthelegend/zec-unlinkable-swaps';
 export const ZAKURA = 'https://zakura.com/engineering/quantum-unlinkability';
 /** The hero replays pass 2: one swap per part, by send time. */
