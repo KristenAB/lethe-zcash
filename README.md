@@ -38,9 +38,11 @@ recipient), so a restored wallet finds refunds **within 10 indices of the last o
 only happen on failed swaps, which is why the NEAR side counts too. After a recovery the book never
 hands out an index the recovery looked at.
 
-**Demo:** the landing and dashboard build as a static site (`pnpm build:site`; a manual GitHub
-Pages workflow publishes it). Hosted URL: none yet. The repo is private until Nick pushes, then he
-runs the `pages` workflow. Until then: `pnpm --filter @zswap/dashboard dev`.
+**Demo:** live at https://lethe-landing-sooty.vercel.app (dashboard at `/app/`) and
+https://lethe-dashboard.vercel.app, the static `pnpm build:site` output over the published runs
+(`deployments/*.json`); there is no hosted backend (the CLI and MCP run locally). The repo is private
+until Nick pushes; a manual GitHub Pages workflow can publish the same site after that. Locally:
+`pnpm --filter @zswap/dashboard dev`.
 
 ## Live
 

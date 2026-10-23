@@ -13,8 +13,8 @@ it were entered, it would fit the Cross-Chain track.
 remote. Nick creates it and pushes `main`; until then every GitHub, Docs, Run record and Review link
 on the pages returns 404.
 
-**Demo URL:** none yet. `pnpm build:site` builds the landing (`/`) and the dashboard (`/app/`), and a
-manual GitHub Pages workflow publishes them once the repo is public. Locally:
+**Demo URL:** https://lethe-landing-sooty.vercel.app (landing; dashboard at `/app/`) and
+https://lethe-dashboard.vercel.app (dashboard), static over the published runs (`pnpm build:site`). Locally:
 `pnpm --filter @zswap/dashboard dev` (http://localhost:5182).
 
 **Demo video:** none that can be cited. The only clip, `zec-unlinkable-swaps-demo.mp4` (Oct 20, 18 s),
