@@ -38,9 +38,15 @@ requests differently (`page.route`); nothing else is stubbed, and no flow calls 
 
 | Project | Tests | Pass |
 |---|---|---|
-| desktop | 27 | 27 |
-| mobile | 27 | 27 |
-| **Total** | **54** | **54** (`playwright test --list`: "Total: 54 tests in 3 files") |
+| desktop | 30 | 30 |
+| mobile | 30 | 30 |
+| **Total** | **60** | **60** |
+
+Oct 25, 2026: the landing became a one-screen overview (`index.html`: headline, two buttons, the pass-2
+widget alone, three steps, the latest batch's numbers, what is live) and the full page moved to
+`evidence.html`. The 14 page tests now open `evidence.html`; 3 new ones cover the overview (first screen
+as hosted, the numbers against the CLI report and this file's total, reduced motion). `landing.spec.ts` +
+`site.spec.ts`: 36 passed, 0 failed (2.1 min); `dashboard.spec.ts` did not change (its 24 passed on Oct 23).
 
 Covered: the landing widget (first quote, the replay with each refund address fading, hover stops it, a
 click per swap, a second click during a fade, reduced motion), the two wallets, link audit, "All three

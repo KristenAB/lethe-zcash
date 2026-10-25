@@ -1,9 +1,11 @@
-// The landing page (packages/landing) as static files. Everything it shows is checked against
+// The evidence page (packages/landing/evidence.html, the landing until Oct 25) and the one-screen landing
+// (index.html), as static files. Everything it shows is checked against
 // deployments/*.json and against the CLI's linkabilityReport run here in Node. The hero replays pass 2
 // (each part with its own refund address and its own NEAR recipient); the first run is the "before".
 import type { Page } from '@playwright/test';
-import { test, expect, expectNoHScroll, shot, logControls, LANDING } from './fixtures';
-import { run, pass2, seedOnly, before, after, pass3, third, paramsText, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO, ZAKURA, P, sentAt, partName } from './data';
+import { readFileSync } from 'node:fs';
+import { test, expect, expectNoHScroll, shot, logControls, LANDING, SITE } from './fixtures';
+import { run, pass2, seedOnly, before, after, pass3, third, paramsText, FIELDS, fieldText, fmt, day, short, EXPLORER, REPO, ZAKURA, P, sentAt, partName, ROOT } from './data';
 
 const Q = run.quotes;
 const widget = (page: Page) => page.getByRole('region', { name: 'Swap widget: pass 2 dry quotes' });
@@ -30,10 +32,10 @@ async function expectSwap(page: Page, i: number) {
   }
 }
 
-test.describe('landing', () => {
+test.describe('evidence page (the landing until Oct 25)', () => {
   test('hero: the widget under the headline replays pass 2, a different refund address and recipient per swap; no horizontal scroll', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
-    await expect(page).toHaveTitle('Lethe — a new refund address and recipient for every swap');
+    await page.goto(`${LANDING}/evidence.html`);
+    await expect(page).toHaveTitle('Lethe evidence: a new refund address and recipient for every swap');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('A new refund address and recipient for every swap.');
     await expect(widget(page)).toBeVisible();
     await expect(widget(page).locator('.w-head > span')).toHaveText(`Pass 2 · ${day(pass2.ranAt)}`);
@@ -51,7 +53,7 @@ test.describe('landing', () => {
   });
 
   test('the credit: the one-time refund key builds on Zakura’s proposal, and what Lethe adds', async ({ page }) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     const credit = page.locator('#credit');
     await expect(credit.getByRole('link', { name: "Zakura's quantum-unlinkability proposal" })).toHaveAttribute('href', ZAKURA);
     await expect(credit).toContainText('zakura-one-time-ivk');
@@ -59,7 +61,7 @@ test.describe('landing', () => {
   });
 
   test('the widget plays on its own: each refund address and recipient is used once and fades; hovering stops it', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expectSwap(page, 0);
     // the 4.2 s timer moves to swap 2: the old addresses leave, the new ones arrive
     await expect(widget(page).locator('.addr').first()).toHaveClass(/leave/, { timeout: 6000 });
@@ -77,7 +79,7 @@ test.describe('landing', () => {
   });
 
   test('accessibility: the replay is silent for screen readers and has a visible Pause; a picked swap is announced', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     const keys = widget(page).locator('.refund');
     await expect(keys).toHaveAttribute('aria-live', 'off');
     const pause = widget(page).getByRole('button', { name: 'Pause replay' });
@@ -111,7 +113,7 @@ test.describe('landing', () => {
   });
 
   test('clicking each swap shows its own quote, refund address and recipient', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     for (const i of [2, 0, 1]) {
       await steps(page).getByRole('button', { name: `Swap ${i + 1}: ${partName(P[i])}` }).click();
       await expectSwap(page, i);
@@ -124,7 +126,7 @@ test.describe('landing', () => {
   });
 
   test("a second click during the fade never shows another swap's addresses under the new key", async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await steps(page).getByRole('button', { name: `Swap 2: ${partName(P[1])}` }).click();
     await page.waitForTimeout(300);
     await steps(page).getByRole('button', { name: `Swap 3: ${partName(P[2])}` }).click();
@@ -146,7 +148,7 @@ test.describe('landing', () => {
 
   test('reduced motion: no replay and no fade, a click swaps the addresses at once', async ({ page }, info) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expectSwap(page, 0);
     await expect(widget(page).getByRole('button', { name: 'Play replay' })).toBeVisible();
     await page.waitForTimeout(5000);
@@ -163,7 +165,7 @@ test.describe('landing', () => {
   });
 
   test('two wallets, the first run as "before", and "All three links, measured" match the runs and the CLI report', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     // the same three swaps from a wallet that reuses its address, and from Lethe
     await expect(page.locator('#reused li')).toHaveText(Q.map(() => short(run.account.mainnetAddress, 14, 8)));
     await expect(page.locator('#onetime li')).toHaveText(Q.map((q) => short(q.refundTo, 14, 8)));
@@ -226,7 +228,7 @@ test.describe('landing', () => {
   });
 
   test('Why not Confidential Intents: partner auth, what 1Click still sees, and that they compose', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     const ci = page.locator('#confidential');
     await expect(ci.getByRole('heading', { level: 2 })).toHaveText("Why not 1Click's Confidential Intents?");
     const rows = ci.locator('.rows li');
@@ -241,7 +243,7 @@ test.describe('landing', () => {
   });
 
   test('recovery, seed-only recovery, BLOCKED and Run it', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     const rows = page.locator('#recover-rows li');
     await expect(rows).toHaveCount(run.recovery.expect.length);
     for (let i = 0; i < run.recovery.expect.length; i++) {
@@ -275,7 +277,7 @@ test.describe('landing', () => {
   });
 
   test('skip link, brand anchor and every link: same-page anchors move, external links point where they say', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: 'Skip to content' });
     await expect(skip).toBeFocused();
@@ -294,16 +296,17 @@ test.describe('landing', () => {
     await expect(foot.getByRole('link', { name: 'Run record' })).toHaveAttribute('href', `${REPO}/blob/main/deployments/testnet.json`);
     await expect(foot.getByRole('link', { name: 'Review' })).toHaveAttribute('href', `${REPO}/blob/main/docs/JUDGE-2026-10-21.md`);
     await expect(foot.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', REPO);
+    await expect(foot.getByRole('link', { name: 'Overview' })).toHaveAttribute('href', './');
     // every link on the page is a same-page anchor that exists, the repo, the testnet explorer or Zakura's proposal
     const hrefs = await page.locator('a[href]').evaluateAll((as) => as.map((a) => a.getAttribute('href')!));
     for (const h of hrefs) {
       if (h.startsWith('#')) expect(await page.locator(h).count(), h).toBe(1);
-      else expect(h.startsWith(REPO) || h.startsWith(EXPLORER) || h === ZAKURA, h).toBe(true);
+      else expect(h.startsWith(REPO) || h.startsWith(EXPLORER) || h === ZAKURA || h === './', h).toBe(true);
     }
   });
 
   test('"log" buttons: every control whose label contains "log" is clicked (the page has none)', async ({ page }) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expect(widget(page)).toBeVisible();
     const found = await logControls(page);
     // Lethe's landing has no log control. If one is added, this fails until it gets a test of its own.
@@ -312,7 +315,7 @@ test.describe('landing', () => {
 
   test('error and empty states: unreadable data, no quotes, no pass 2', async ({ page }, info) => {
     const serve = (edit: (data: string) => string) =>
-      page.route(`${LANDING}/index.html`, async (route) => {
+      page.route(`${LANDING}/evidence.html`, async (route) => {
         const res = await route.fetch();
         const html = await res.text();
         const out = html.replace(/(<script type="application\/json" id="run">)([\s\S]*?)(<\/script>)/, (_, a, d, c) => a + edit(d) + c);
@@ -320,14 +323,14 @@ test.describe('landing', () => {
         await route.fulfill({ response: res, body: out });
       });
     await serve(() => '{not json');
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expect(page.getByRole('alert')).toContainText('The embedded run could not be read');
     await expect(page.getByRole('alert')).toContainText('sync-run.mjs');
     await expectNoHScroll(page);
     await shot(page, info, 'land-13-error-unreadable');
     await page.unrouteAll();
     await serve((d) => JSON.stringify({ ...JSON.parse(d), quotes: [] }));
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expect(page.getByRole('alert')).toContainText('No published run yet');
     await shot(page, info, 'land-14-empty');
     await page.unrouteAll();
@@ -336,7 +339,7 @@ test.describe('landing', () => {
       delete j.pass2;
       return JSON.stringify(j);
     });
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     await expect(page.locator('#batches')).toHaveText('No pass-2 run recorded yet.');
     await expect(page.locator('#widget-slot').getByRole('status')).toContainText('No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2');
     await expect(widget(page)).toHaveCount(0);
@@ -346,7 +349,7 @@ test.describe('landing', () => {
   });
 
   test('pass 3: the same batch with the Oct 22 code, scored on the same model, each request with its own parameters', async ({ page }, info) => {
-    await page.goto(`${LANDING}/index.html`);
+    await page.goto(`${LANDING}/evidence.html`);
     const links = page.locator('#links');
     // what pass 3 was run to show: no public field and no client-side hint links a pair
     expect(third.sharedFields).toBe(0);
@@ -382,3 +385,48 @@ test.describe('landing', () => {
     await expectNoHScroll(page);
   });
 });
+
+test.describe('landing (one-screen overview)', () => {
+  test('first screen as hosted: headline, subline, two buttons, the pass-2 widget alone; no horizontal scroll', async ({ page }, info) => {
+    await page.goto(`${SITE}/`);
+    await expect(page).toHaveTitle('Lethe · a new refund address for every swap');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('A new refund address and recipient for every swap.');
+    await expect(page.locator('.lede')).toHaveText('Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed.');
+    const ctas = page.locator('.hero .ctas a');
+    await expect(ctas).toHaveText(['Open the dashboard', 'See the evidence']);
+    await expect(ctas.nth(0)).toHaveAttribute('href', 'app/');
+    await expect(ctas.nth(1)).toHaveAttribute('href', 'evidence.html');
+    await expectSwap0(page);
+    await expect(page.getByRole('list', { name: 'One refund address and one recipient per swap' })).toHaveCount(0);
+    await expect(page.locator('#widget-slot .note')).toHaveText(`A replay of ${P.length} real 1Click dry quotes. No deposit address was created and no funds moved.`);
+    await expectNoHScroll(page);
+    await shot(page, info, 'land-20-overview');
+  });
+
+  test('numbers: the latest batch report (CLI) and the TESTING.md total; the strip and the evidence links', async ({ page }) => {
+    await page.goto(`${LANDING}/index.html`);
+    const total = /\| \*\*Total\*\* \| \| \*\*(\d+) \+ doc\*\* \|/.exec(readFileSync(`${ROOT}TESTING.md`, 'utf8'))![1];
+    await expect(page.locator('.facts b')).toHaveText([String(third.sharedFields), String(third.score), total]);
+    await expect(page.locator('.strip h3')).toHaveText(['Live', 'Setup required']);
+    await expect(page.locator('.strip')).toContainText('BLOCKED');
+    await expect(page.getByRole('contentinfo').getByRole('link', { name: "Zakura's proposal" })).toHaveAttribute('href', ZAKURA);
+    await page.locator('.end').getByRole('link', { name: 'See all three links, measured' }).click();
+    await expect(page).toHaveURL(`${LANDING}/evidence.html#links`);
+    await expect(page.locator('#links h2')).toHaveText('All three links, measured');
+  });
+
+  test('reduced motion: no replay and no fade', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`${LANDING}/index.html`);
+    await expectSwap0(page);
+    await expect(widget(page).getByRole('button', { name: 'Play replay' })).toBeVisible();
+    await page.waitForTimeout(4600);
+    await expect(steps(page).getByRole('button', { name: `Swap 1: ${partName(P[0])}` })).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+async function expectSwap0(page: Page) {
+  const w = widget(page);
+  await expect(w.locator('.addr').first()).toHaveText(P[0].refundTo);
+  await expect(w.locator('.addr.rcpt')).toHaveText(P[0].recipient);
+}

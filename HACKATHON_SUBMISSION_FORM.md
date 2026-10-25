@@ -61,7 +61,7 @@ Not done: no real swap (needs mainnet ZEC and sign-off, and the draft crate says
   the seed re-derived #8 and #9; #10 lies past the 10-index lookahead because dry quotes leave no
   trace on either chain (the recovery window, recorded in the file).
 - **Tests:** 105 + doc unit and integration tests (11 Rust + doc, 73 cli, 14 mcp, 7 dashboard) and
-  54 browser E2E tests in Google Chrome (27 desktop + 27 mobile), all passing
+  60 browser E2E tests in Google Chrome (30 desktop + 30 mobile), all passing
   (TESTING.md). Review and fixes: `docs/JUDGE-2026-10-21.md`.
 
 ## Oct 22 features and fixes

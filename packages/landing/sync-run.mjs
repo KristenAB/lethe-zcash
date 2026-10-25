@@ -70,17 +70,24 @@ export function landingData() {
   };
 }
 
-const page = resolve(here, 'index.html');
-const html = readFileSync(page, 'utf8');
+// Both pages carry the same block: the landing (index.html, the widget and the numbers) and the
+// evidence page (evidence.html, every section).
 const re = /(<script type="application\/json" id="run">)([\s\S]*?)(<\/script>)/;
-if (!re.test(html)) throw new Error('index.html has no <script type="application/json" id="run"> block');
-const next = html.replace(re, (_m, a, _b, c) => `${a}${JSON.stringify(landingData())}${c}`);
-if (process.argv.includes('--check')) {
-  if (next !== html) {
-    console.error('packages/landing/index.html is out of date with deployments/: run node packages/landing/sync-run.mjs');
-    process.exit(1);
+const data = JSON.stringify(landingData());
+let stale = false;
+for (const name of ['index.html', 'evidence.html']) {
+  const page = resolve(here, name);
+  const html = readFileSync(page, 'utf8');
+  if (!re.test(html)) throw new Error(`${name} has no <script type="application/json" id="run"> block`);
+  const next = html.replace(re, (_m, a, _b, c) => `${a}${data}${c}`);
+  if (process.argv.includes('--check')) {
+    if (next !== html) {
+      console.error(`packages/landing/${name} is out of date with deployments/: run node packages/landing/sync-run.mjs`);
+      stale = true;
+    }
+  } else if (next !== html) {
+    writeFileSync(page, next);
+    console.log(`landing: embedded run updated in ${name}`);
   }
-} else if (next !== html) {
-  writeFileSync(page, next);
-  console.log('landing: embedded run updated');
 }
+if (stale) process.exit(1);

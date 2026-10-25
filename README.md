@@ -138,7 +138,7 @@ delivered swap or a refund inside the window would extend it.
 | [`packages/examples`](packages/examples) | the resumable live runs above (`run-live`, `run-pass2`) |
 | [`packages/dashboard`](packages/dashboard) | one-time refund addresses, quotes, both batches' linkability reports, recovery |
 | [`packages/docs`](packages/docs) | the linkage problem, the fix, evidence, limits |
-| [`packages/landing`](packages/landing) | one-page landing; `pnpm build:site` puts it at `/` and the dashboard at `/app/` |
+| [`packages/landing`](packages/landing) | `index.html`, the one-screen landing (the pass-2 widget, three steps, three numbers, what is live), and `evidence.html`, every section of the run; `pnpm build:site` puts them at `/` and the dashboard at `/app/` |
 
 ## Run it
 
@@ -154,7 +154,7 @@ pnpm --filter @zswap/cli zswap recipients --lookup                     # recipie
 ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover 4522708 4522730 --lookup   # a restored wallet
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
 pnpm test                          # 105 + doc: 11 Rust (+ doc), 73 cli, 14 mcp, 7 dashboard; live 1Click, testnet, NEAR RPC (TESTING.md)
-pnpm test:e2e                      # 54 browser tests in Google Chrome, 27 desktop + 27 mobile (TESTING.md)
+pnpm test:e2e                      # 60 browser tests in Google Chrome, 30 desktop + 30 mobile (TESTING.md)
 pnpm build:site                    # static site in site/ (landing /, dashboard /app/)
 ZSWAP_FUNDER_WALLET=<demo wallet> pnpm --filter @zswap/examples run-live
 pnpm --filter @zswap/examples run-pass2

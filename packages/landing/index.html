@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lethe — a new refund address and recipient for every swap</title>
+    <title>Lethe · a new refund address for every swap</title>
     <meta name="description" content="Lethe gives every swap out of Zcash through NEAR Intents 1Click a one-time refund address and its own NEAR recipient, both from one seed, and scores what still links a batch. Real 1Click dry quotes; testnet refunds and recipients found again from the seed alone." />
     <meta name="theme-color" content="#e2f4f6" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23e2f4f6'/%3E%3Cpath d='M7 18c3-3 6 3 9 0s6 3 9 0' fill='none' stroke='%230b3440' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='11' r='2.4' fill='%235ee0d6'/%3E%3C/svg%3E" />
@@ -154,6 +154,47 @@
         .addr.leave, .addr.arrive { animation: none; }
         .river li { transition: none; }
       }
+      /* one-screen landing: the widget is the centrepiece; four short sections below */
+      .lede { font-size: 20px; max-width: 30rem; }
+      .ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 0 24px; border-radius: 999px; font: 500 16px/1 var(--sans); text-decoration: none; white-space: nowrap; border: 1px solid var(--line); }
+      .btn:hover { border-color: var(--ink); }
+      .btn-river { background: var(--river); color: #fff; border-color: var(--river); }
+      .btn-river:hover { background: #134a5a; }
+      .note { text-align: center; }
+      main section.band { max-width: 1040px; padding-top: 160px; text-align: center; }
+      .band h2 { font-size: clamp(30px, 3.6vw, 44px); }
+      .steps3 { list-style: none; margin: 56px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; text-align: left; counter-reset: s; }
+      .steps3 li { counter-increment: s; }
+      .steps3 li::before { content: counter(s); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--mist); font: 13px/1 var(--mono); color: var(--aqua-ink); }
+      .steps3 h3 { font-weight: 500; font-size: 20px; letter-spacing: -0.02em; margin: 18px 0 0; }
+      .steps3 p { color: var(--soft); margin: 8px 0 0; }
+      .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; margin-top: 56px; }
+      .facts b { display: block; font: 500 clamp(64px, 8.5vw, 112px)/0.95 var(--sans); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+      .facts span { display: block; margin-top: 12px; font: 13px/1.3 var(--mono); color: var(--soft); }
+      .more { display: inline-flex; gap: 8px; align-items: center; margin-top: 48px; font-weight: 500; text-decoration: none; border-bottom: 2px solid var(--aqua); padding-bottom: 2px; }
+      .strip { margin: 48px auto 0; max-width: 760px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; text-align: left; border-top: 1px solid var(--line); padding-top: 24px; }
+      .strip h3 { font: 13px/1 var(--mono); display: flex; align-items: center; gap: 8px; margin: 0; }
+      .strip h3::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--aqua); }
+      .strip .setup h3::before { background: var(--link-ink); }
+      .strip p { color: var(--soft); margin: 12px 0 0; }
+      .end { max-width: 1040px; margin: 160px auto 0; padding: 96px 32px; text-align: center; background: var(--mist); border-radius: 28px; }
+      .end h2 { font-size: clamp(30px, 3.6vw, 44px); }
+      .end p { color: var(--soft); margin: 12px 0 0; }
+      footer { max-width: 1040px; padding-top: 48px; }
+      @media (max-width: 860px) { .steps3 { grid-template-columns: 1fr; gap: 32px; } }
+      @media (max-width: 640px) {
+        .lede { font-size: 18px; }
+        .ctas .btn { flex: 1 1 auto; }
+        main section.band { padding-top: 104px; }
+        .facts { gap: 10px; }
+        .facts b { font-size: 48px; }
+        .facts span { font-size: 11px; }
+        .strip { grid-template-columns: 1fr; gap: 24px; }
+        .end { margin: 104px 16px 0; padding: 64px 20px; border-radius: 20px; }
+        .end .btn { width: 100%; }
+        footer { padding-top: 40px; }
+      }
     </style>
   </head>
   <body>
@@ -165,7 +206,7 @@
       </a>
       <nav aria-label="Links">
         <!-- site:dashboard-link -->
-        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs">Docs</a>
+        <a href="evidence.html">Evidence</a>
         <a href="https://github.com/nickthelegend/zec-unlinkable-swaps">GitHub</a>
       </nav>
     </header>
@@ -174,97 +215,56 @@
       <div class="hero">
         <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side</p>
         <h1>A new refund address and recipient for every swap.</h1>
-        <p class="lede">Every swap out of Zcash through 1Click names a refund address and a recipient in a public request. Lethe gives each swap a refund address used once and its own NEAR account, both from one seed, and tells you what still links them.</p>
-        <p class="credit" id="credit">The one-time refund key for 1Click's <code>refundTo</code> builds on <a href="https://zakura.com/engineering/quantum-unlinkability">Zakura's quantum-unlinkability proposal</a> (Oct 19) and its draft crate <code>zakura-one-time-ivk</code>. Lethe adds a NEAR recipient per swap from the same seed, recovery from the seed alone on both chains, a locked index book that refuses a reused recipient, opt-in amount and timing decorrelation with a linkability report, and MCP tools.</p>
+        <p class="lede">Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed.</p>
+        <div class="ctas">
+          <!-- site:dashboard-cta -->
+          <a class="btn" href="evidence.html">See the evidence</a>
+        </div>
 
         <div id="widget-slot">
           <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading pass 2…</span></div></div>
         </div>
       </div>
 
-      <section id="forgets" aria-labelledby="forgets-h">
-        <h2 id="forgets-h">The same three swaps, two wallets</h2>
-        <p class="sub">The refundTo each wallet puts on three public 1Click requests.</p>
-        <div class="pair">
-          <div class="same">
-            <h3>A wallet that reuses its address</h3>
-            <ol id="reused"></ol>
-            <p>One address on all three: anyone who reads the requests sees one wallet.</p>
-          </div>
-          <div>
-            <h3>Lethe</h3>
-            <ol id="onetime"></ol>
-            <p>Three addresses, three viewing keys. The addresses alone don't connect them.</p>
-          </div>
+      <section class="band" aria-labelledby="how-h">
+        <h2 id="how-h">One seed. Nothing shared.</h2>
+        <ol class="steps3">
+          <li><h3>One seed</h3><p>Every refund key and NEAR account comes from it, building on Zakura's one-time key.</p></li>
+          <li><h3>Fresh per swap</h3><p>Each 1Click request names its own refundTo and its own recipient.</p></li>
+          <li><h3>Found again</h3><p>A compact-block scan finds each payment from the seed alone.</p></li>
+        </ol>
+      </section>
+
+      <section class="band" aria-labelledby="proof-h">
+        <h2 id="proof-h">Measured on real 1Click quotes.</h2>
+        <div class="facts">
+          <div><b id="f-shared">0</b><span>shared fields</span></div>
+          <div><b id="f-score">75</b><span>score / 100</span></div>
+          <div><b>105</b><span>tests</span></div>
         </div>
+        <a class="more" href="evidence.html#links">See the evidence <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
       </section>
 
-      <section id="audit" aria-labelledby="audit-h">
-        <h2 id="audit-h">Before: the first run</h2>
-        <p class="sub" id="before-sub">The first run's three requests, every field checked for what could link them.</p>
-        <ul class="rows" id="before-quotes" aria-label="First run swaps"></ul>
-        <ul class="rows" id="audit-rows"></ul>
-        <p class="sub" id="before-note" style="font-size: 15px"></p>
-      </section>
-
-      <section id="links" aria-labelledby="links-h">
-        <h2 id="links-h">All three links, measured</h2>
-        <p class="sub">The refund address was the easy link. The recipient, the amount and the timing are the others. Each batch is scored from its real 1Click requests by the report the CLI and MCP print.</p>
-        <div class="batches" id="batches"></div>
-        <p class="method" id="score-method"></p>
-        <h3 class="rows-h">Pass 2 parts</h3>
-        <ul class="rows" id="pass2-rows" aria-label="Pass 2 swaps"></ul>
-        <p class="sub" id="pass2-note" style="font-size: 15px"></p>
-        <h3 class="rows-h" id="pass3-h" hidden>Pass 3 parts</h3>
-        <ul class="rows" id="pass3-rows" aria-label="Pass 3 swaps" hidden></ul>
-        <p class="sub" id="pass3-note" style="font-size: 15px" hidden></p>
-        <p class="sub" style="font-size: 15px"><strong style="font-weight: 500; color: var(--ink)">Sweeping re-links.</strong> Moving several per-swap accounts into one account shows them all paying it, on chain. <code>zswap sweep-plan</code> flags that: leave each account alone, sweep each somewhere different, or swap each back into a shielded address at another time and amount. A token-only account needs NEAR for gas, and a top-up from your own account links it too.</p>
-      </section>
-
-      <section id="confidential" aria-labelledby="ci-h">
-        <h2 id="ci-h">Why not 1Click's Confidential Intents?</h2>
-        <p class="sub">1Click's own private mode (<code>confidentiality: basic</code> or <code>advanced</code>) keeps the quote request out of public view. It is worth using, and Lethe passes it through (<code>--confidentiality</code>). It does not replace a refund address and a recipient per swap:</p>
-        <ul class="rows">
-          <li><span class="k">It needs a partner account</span><span class="d">1Click answers a confidential dry quote with HTTP 401 "User authentication is required for confidential intent quotes". Without <code>ONECLICK_JWT</code>, Lethe says Setup required and reserves nothing.</span></li>
-          <li><span class="k">1Click and its solvers still see both fields</span><span class="d">The refund address and the recipient go to the provider in every mode, and the deposit, refund and delivery happen on public chains. A provider-side breach, a subpoena or a future quantum attacker reading those records links every swap that reused them.</span></li>
-          <li><span class="k">They compose</span><span class="d">A confidential request with a one-time refund address and its own recipient hides the request and leaves nothing to link even for the provider's own records.</span></li>
-        </ul>
-      </section>
-
-      <section id="recover" aria-labelledby="recover-h">
-        <h2 id="recover-h">Found again, from the seed alone</h2>
-        <p class="sub" id="recover-sub">1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund. A compact-block scan finds each payment with its own key only.</p>
-        <ul class="rows" id="recover-rows"></ul>
-        <p class="sub" id="seed-only" style="font-size: 15px"></p>
-      </section>
-
-      <section id="not-done" aria-labelledby="nd-h">
-        <h2 id="nd-h">Not yet</h2>
-        <ul class="rows">
-          <li><span class="k"><span class="tag">BLOCKED</span>A real swap</span><span class="d">A live quote creates a mainnet deposit address and needs mainnet ZEC and the maintainer's sign-off. So no real 1Click refund to a one-time address has been seen yet; the quotes above are dry.</span></li>
-          <li><span class="k">Draft key derivation</span><span class="d"><code>zakura-one-time-ivk</code> 0.0.1-rc1 says it must not issue live addresses before review. Mainnet addresses appear here only in dry quotes.</span></li>
-          <li><span class="k">Spending a refund</span><span class="d">The one-time keys keep the account's spending authority, but this project does not spend a one-time note.</span></li>
-          <li><span class="k">Delivery to a per-swap NEAR account</span><span class="d">1Click accepted each fresh implicit account in a dry quote; nothing was delivered, so no sweep has been run. Amount splitting and delays are planned by Lethe, not sent on a schedule by it.</span></li>
-        </ul>
-      </section>
-
-      <section id="try" aria-labelledby="run-h">
-        <h2 id="run-h">Run it</h2>
-        <p class="sub">Rust, a compact-block scanner, a CLI and an MCP server. The tests call the real 1Click API with dry quotes and scan Zcash testnet.</p>
-        <pre><code>pnpm install &amp;&amp; pnpm build &amp;&amp; pnpm test
-pnpm --filter @zswap/cli zswap init                              # a seed and its index book in .demo/
-pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near        # its own refund address and NEAR recipient
-pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180
-ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover &lt;from-height&gt; --lookup   # from the seed alone
-pnpm --filter @zswap/dashboard dev                                # the dashboard: http://localhost:5182</code></pre>
+      <section class="band" aria-labelledby="live-h">
+        <h2 id="live-h">What's live today</h2>
+        <div class="strip">
+          <div><h3>Live</h3><p>Real 1Click dry quotes and testnet recoveries, replayed in the dashboard.</p></div>
+          <div class="setup"><h3>Setup required</h3><p>A real swap is BLOCKED on mainnet ZEC and sign-off. The key crate is a draft.</p></div>
+        </div>
       </section>
     </main>
 
+    <section class="end" aria-labelledby="end-h">
+      <h2 id="end-h">Every request, every field, checked.</h2>
+      <p>The evidence page scores all three batches field by field.</p>
+      <div class="ctas"><a class="btn btn-river" href="evidence.html#links">See all three links, measured</a></div>
+    </section>
+
     <footer>
-      <span>Lethe · MIT © 2026 Nivesh Gajengi · not audited</span>
+      <span>Lethe · MIT © 2026 Nivesh Gajengi · builds on <a href="https://zakura.com/engineering/quantum-unlinkability">Zakura's proposal</a> · not audited</span>
       <nav aria-label="Footer">
-        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json">Run record</a>
-        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/docs/JUDGE-2026-10-21.md">Review</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/TESTING.md">Tests</a>
         <a href="https://github.com/nickthelegend/zec-unlinkable-swaps">GitHub</a>
       </nav>
     </footer>
@@ -297,6 +297,10 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
         if (!quotes.length) return fail('No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs.');
         const ranOn = new Date(run.ranAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // the proof numbers: the latest batch's report (pass 3 when it has run)
+        const latest = (run.pass3 && run.pass3.report) || (run.pass2 && run.pass2.after);
+        if (latest) { $('f-shared').textContent = String(latest.sharedFields); $('f-score').textContent = String(latest.score); }
 
         // the hero widget: pass 2, one real dry quote at a time, each part with its own refund address
         // and its own NEAR recipient
@@ -343,7 +347,8 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
           });
           const total = parts.reduce((t, q) => t + Number(q.amountZat), 0) / 1e8;
           const note = el('p', { class: 'note' }, `A replay of pass 2: ${fmt(total, 8)} ZEC split into ${parts.length} parts, ${parts.length} real 1Click dry quotes, each with its own one-time refund address and its own NEAR implicit recipient. No deposit address was created and no funds moved.`);
-          slot.replaceChildren(widget, river, note);
+          // the landing keeps the widget alone; the river of used addresses is on the evidence page
+          slot.replaceChildren(widget, el('p', { class: 'note' }, `A replay of ${parts.length} real 1Click dry quotes. No deposit address was created and no funds moved.`));
 
           let at = -1, timer = null, pending = null;
           const show = (i, animate) => {
@@ -418,92 +423,6 @@ pnpm --filter @zswap/dashboard dev                                # the dashboar
           }
         }
 
-        // two wallets
-        for (const q of quotes) {
-          $('reused').append(el('li', { title: run.account.mainnetAddress }, short(run.account.mainnetAddress, 14, 8)));
-          $('onetime').append(el('li', { title: q.refundTo }, short(q.refundTo, 14, 8)));
-        }
-
-        // before: the first run, with its link audit computed from its requests
-        const distinct = (xs) => new Set(xs).size;
-        const n = quotes.length;
-        const times = quotes.map((q) => Date.parse(q.timestamp));
-        const spread = (Math.max(...times) - Math.min(...times)) / 1000;
-        const sharedRecipient = distinct(quotes.map((q) => q.recipient)) < n;
-        $('before-sub').textContent = `The first run (${ranOn}): three real dry quotes, each with its own one-time refund address. Every field of the three requests, checked for what could link them.`;
-        for (const q of quotes)
-          $('before-quotes').append(
-            el(
-              'li',
-              {},
-              el('span', { class: 'k' }, `#${q.index} · ${q.what}`),
-              el('span', { class: 'v' }, fmt(Number(q.amountOut))),
-              el('span', { class: 'd' }, 'refundTo ', el('code', { title: q.refundTo }, short(q.refundTo, 10, 6)), ' · recipient ', el('code', { class: quotes.filter((x) => x.recipient === q.recipient).length > 1 ? 'links' : '', title: q.recipient }, short(q.recipient, 8, 6))),
-            ),
-          );
-        const audit = [
-          ['refundTo', `${distinct(quotes.map((q) => q.refundTo))} different across ${n}`, distinct(quotes.map((q) => q.refundTo)) === n ? 'does not link' : 'links swaps'],
-          ['recipient', `${distinct(quotes.map((q) => q.recipient))} across ${n}`, distinct(quotes.map((q) => q.recipient)) === n ? 'does not link' : `links ${n - distinct(quotes.map((q) => q.recipient)) + 1} swaps`],
-          ['quote time', `all ${n} within ${fmt(spread, 1)} s`, 'a timing cluster'],
-          ['amount', `exact (${quotes.map((q) => fmt(Number(q.amountZat) / 1e8, 8)).join(', ')} ZEC)`, 'public in every request'],
-        ];
-        for (const [k, v, verdict] of audit)
-          $('audit-rows').append(el('li', {}, el('span', { class: 'k' }, k), el('span', { class: `v ${verdict === 'does not link' ? 'cut' : 'links'}` }, verdict), el('span', { class: 'd' }, v)));
-        $('before-note').textContent = sharedRecipient
-          ? `The first run cut the first row only: all ${n} quotes named one NEAR recipient (${short(quotes[0].recipient, 8, 6)}), so they stay linked through it. The review recorded that as a defect. Since then a swap with no recipient goes to its own NEAR account (pass 2, at the top), and a reused recipient is refused unless you accept the link. A shared 1Click token and your IP are still yours to manage.`
-          : 'A shared 1Click token and your IP are still yours to manage.';
-
-        // all three links: two batches scored at sync time by the CLI's linkabilityReport
-        const FIELDS = ['refundTo', 'recipient', 'amount', 'same minute', 'within 10 min', 'token', 'split pattern', 'client fingerprint', 'partner token'];
-        const day = (s) => new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-        const batch = (title, when, r) =>
-          el(
-            'div',
-            { class: 'batch' },
-            el('div', { class: 'batch-head' }, el('h3', {}, title), el('span', { class: 'when' }, when)),
-            el('p', { class: 'score' }, el('strong', { class: r.sharedFields === 0 ? 'cut' : 'links' }, String(r.sharedFields)), `shared public field${r.sharedFields === 1 ? '' : 's'} · score ${r.score}/100`),
-            el('ul', { class: 'fields', 'aria-label': `${title}: fields` }, ...FIELDS.map((f) => {
-              const l = r.links.find((x) => x.field === f);
-              return el('li', { class: !l ? 'clear' : l.strength === 'strong' ? 'strong' : 'weak', title: l ? l.why : 'links no pair' }, el('span', {}, f), el('b', {}, !l ? 'clear' : `${l.strength} · ${l.pairs}/${r.pairs}`));
-            })),
-            el('p', { class: 'verdict' }, `${r.verdict}.`),
-          );
-        const partRow = (q, t0, extra) =>
-          el('li', {}, el('span', { class: 'k' }, `${fmt(Number(q.amountZat) / 1e8, 8)} ZEC `, el('span', { class: 'muted' }, `at +${Math.round((Date.parse(q.timestamp) - t0) / 1000)} s`)), el('span', { class: 'v' }, `→ ${fmt(Number(q.amountOut))} wNEAR`), el('span', { class: 'd' }, 'recipient ', el('code', { title: q.recipient }, short(q.recipient, 10, 6)), ' · refundTo ', el('code', { title: q.refundTo }, short(q.refundTo, 10, 6)), ...extra, ' · ', el('span', { class: q.foundFromSeedAlone ? 'cut' : '' }, q.foundFromSeedAlone ? 'found from the seed alone' : 'not found from the seed')));
-        if (p2) {
-          const p3 = run.pass3;
-          $('batches').append(batch('First run', ranOn, p2.before), batch('Pass 2', day(p2.ranAt), p2.after));
-          if (p3) {
-            $('batches').classList.add('three');
-            $('batches').append(batch('Pass 3', day(p3.ranAt), p3.report));
-          }
-          const t0 = Math.min(...p2.parts.map((q) => Date.parse(q.timestamp)));
-          for (const q of p2.parts) $('pass2-rows').append(partRow(q, t0, []));
-          $('score-method').textContent = `How the score is computed: ${p2.after.method}`;
-          const weak = p2.after.links.filter((l) => l.strength === 'weak').map((l) => l.field);
-          $('pass2-note').textContent = `${p2.parts.length} parts of a 1-2-5 split, sent on a random schedule (a demo window of minutes; a real one would be hours), each to its own NEAR implicit account (${p2.near}). No public field links them; ${weak.length} weak hints are left: ${weak.join(', ')}. The parts went out largest first and with Lethe's fixed request parameters, both fixed since${p3 ? ': pass 3 below' : ' (random order, parameters drawn per quote)'}. The NEAR accounts do not exist on chain: dry quotes deliver nothing.`;
-          if (p3) {
-            for (const id of ['pass3-h', 'pass3-rows', 'pass3-note']) $(id).hidden = false;
-            const t3 = Math.min(...p3.parts.map((q) => Date.parse(q.timestamp)));
-            for (const q of p3.parts) $('pass3-rows').append(partRow(q, t3, [` · slippage ${q.slippageBps} bps, wait ${fmt(q.waitMs / 1000, 3)} s, deadline +${q.deadlineMin} min`]));
-            const weak3 = p3.report.links.filter((l) => l.strength === 'weak').map((l) => l.field);
-            $('pass3-note').textContent = `The same ${fmt(p3.parts.reduce((t, q) => t + Number(q.amountZat), 0) / 1e8, 8)} ZEC batch with the Oct 22 code: the parts went out in a random order, at least ${Math.round(p3.minGapS / 60)} minutes apart in a ${Math.round(p3.windowS / 60)}-minute window, and each request drew its own slippage, solver wait and deadline. Score ${p2.before.score} → ${p2.after.score} → ${p3.report.score} on the same model. ${weak3.length ? `Left: ${weak3.join(', ')}${weak3.length === 1 && weak3[0] === 'token' ? ' (every swap to wNEAR shares it)' : ''}.` : 'No hint is left.'} Real 1Click dry quotes, request public; nothing was delivered.${p3.windowNote ? ` ${p3.windowNote}` : ''}`;
-          }
-        } else $('batches').append(el('p', { class: 'sub' }, 'No pass-2 run recorded yet.'));
-
-        // recovery
-        for (const e of run.recovery.expect) {
-          const who = e.label === 'account' ? 'the account address' : `one-time address #${e.label.slice(7)}`;
-          const by = e.foundBy.map((k) => (k === 'account' ? 'the account key' : `key #${k.slice(7)}`)).join(', ') || 'no key';
-          $('recover-rows').append(
-            el('li', {}, el('span', { class: 'k' }, who), el('span', { class: 'v' }, e.value === null ? '—' : `${fmt(e.value, 0)} zat`), el('span', { class: 'd' }, 'found by ', el('strong', {}, by), e.ok ? ' only · ' : ' · ', el('a', { href: EXPLORER + e.txid }, el('code', {}, short(e.txid, 10, 6))), e.height ? ` · block ${fmt(e.height, 0)}` : '')),
-          );
-        }
-        const s = run.seedOnly;
-        if (s) {
-          const found = run.recovery.expect.filter((e) => s.hits.some((h) => h.txid === e.txid && h.key === e.label)).length;
-          $('seed-only').textContent = `Then the same scan with the seed and no index book, as a restored wallet would run it: ${s.keysScanned - 1} refund keys (a lookahead of ${s.gap}), ${s.blocks} blocks, ${found} of ${run.recovery.expect.length} payments found, each by its own key.`;
-        }
       })();
     </script>
   </body>
