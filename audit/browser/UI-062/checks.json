@@ -1,0 +1,121 @@
+{
+  "id": "UI-062",
+  "status": "FAIL",
+  "notes": "Visible address prefixes/suffixes differ from the exact abbreviations specified in AUDIT.md; checks record actual and expected strings. First-run USDC output is 60.452; expected 60.4520. First-run exact-amount line trims required ZEC decimal places.",
+  "start": "2026-10-26T04:05:48.773Z",
+  "end": "2026-10-26T04:05:50.219Z",
+  "url": "https://lethe-dashboard.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live dashboard before: the first run section (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
+  "expected": "Section with h2 \"Before: the first run\" shows sub text beginning \"The first run (Oct 20, 2026): 3 real dry quotes\"; ul lists 3 quotes with shared recipient code.links \"798a2c5e\u2026c5d87c72\"; Link audit list shows refundTo \"does not link\" (cut, 3 different across 3, none is the account address), recipient \"links 3 swaps\" (links), quote time \"a timing cluster\", amount \"public in every request\" (exact: 0.10000000, 0.05000000, 0.20000000 ZEC); paragraph explains review recorded it as defect.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] h2",
+      "ok": true,
+      "actual": "Before: the first run",
+      "expected": "Before: the first run"
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] .sub contains The first run (Oct 20, 2026): 3 real dry quotes",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "ul[aria-label=\"First run swaps\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "first quote values",
+      "ok": false,
+      "actual": [
+        "24.4211",
+        "60.452",
+        "48.8776"
+      ],
+      "expected": [
+        "24.4211",
+        "60.4520",
+        "48.8776"
+      ]
+    },
+    {
+      "label": "shared recipient text",
+      "ok": false,
+      "actual": [
+        "798a2c5e\u2026d87c72",
+        "798a2c5e\u2026d87c72",
+        "798a2c5e\u2026d87c72"
+      ],
+      "expected": [
+        "798a2c5e\u2026c5d87c72",
+        "798a2c5e\u2026c5d87c72",
+        "798a2c5e\u2026c5d87c72"
+      ]
+    },
+    {
+      "label": "ul[aria-label=\"Link audit\"] li count",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "audit verdicts",
+      "ok": true,
+      "actual": [
+        "does not link",
+        "links 3 swaps",
+        "a timing cluster",
+        "public in every request"
+      ],
+      "expected": [
+        "does not link",
+        "links 3 swaps",
+        "a timing cluster",
+        "public in every request"
+      ]
+    },
+    {
+      "label": "ul[aria-label=\"Link audit\"] li:first-child .v @class",
+      "ok": true,
+      "actual": "v cut",
+      "expected": "v cut"
+    },
+    {
+      "label": "audit details",
+      "ok": false,
+      "actual": [
+        "3 different across 3, none is the account address",
+        "1 across 3",
+        "all 3 within 6.6 s",
+        "exact: 0.1, 0.05, 0.2 ZEC"
+      ],
+      "expected": [
+        "3 different across 3, none is the account address",
+        "1 across 3",
+        "all 3 within 6.6 s",
+        "exact: 0.10000000, 0.05000000, 0.20000000 ZEC"
+      ]
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] .sub.small contains The review recorded that as a defect",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

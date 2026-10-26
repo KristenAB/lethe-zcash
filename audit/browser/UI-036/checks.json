@@ -1,0 +1,35 @@
+{
+  "id": "UI-036",
+  "status": "FAIL",
+  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-118: PASS. redeploy blocked: this run must not deploy",
+  "start": "2026-10-26T04:10:38.138Z",
+  "end": "2026-10-26T04:10:42.289Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence All three links measured - Pass 2 batch (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Batch card \"Pass 2\" shows when \"Oct 21, 2026\", score strong.cut \"0\", text \"shared public fields \u00b7 score 32/100\"; fields list shows within 10 min \"weak \u00b7 3/3\", token \"weak \u00b7 3/3\", split pattern \"weak \u00b7 3/3\", client fingerprint \"weak \u00b7 3/3\", other 5 fields \"clear\"; verdict displays \"no public field links any pair; 3 pair(s) share only weak hints.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": false,
+      "actual": 403,
+      "expected": 200
+    },
+    {
+      "label": "flow execution",
+      "ok": false,
+      "actual": "locator.textContent: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.batch').nth(1).locator('h3')\u001b[22m\n"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": false,
+      "actual": [
+        "HTTP 403 https://lethe-landing-sooty.vercel.app/evidence.html",
+        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/evidence.html",
+        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
+        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
+      ],
+      "expected": []
+    }
+  ]
+}

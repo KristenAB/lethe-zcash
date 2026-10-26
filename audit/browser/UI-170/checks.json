@@ -1,0 +1,243 @@
+{
+  "id": "UI-170",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:09:56.610Z",
+  "end": "2026-10-26T04:09:57.770Z",
+  "url": "http://127.0.0.1:8432/app/",
+  "viewport": "1280x800",
+  "flow": "Local static site dashboard render (1280x800 desktop) - http://127.0.0.1:8432/app/",
+  "expected": "GET /app/ and relative testnet.json, pass2.json, pass3.json and recovery-seed-only.json each return HTTP 200. Eyebrow displays \"pass 2 \u00b7 Oct 21, 2026\"; h1 displays \"Every swap its own refund address and recipient.\"; hero renders widget showing swap 1 (0.2 ZEC, 50.7011 wNEAR, key #5 u1rezfhdwv\u2026, account #5 66e730c4\u2026); facts dl shows \"Sent at: +0 s\", \"Recipient from the seed alone: found again, no index book\" (cut), \"Recipient on NEAR: not created (dry quote)\", \"Request: public\", \"Signature: ed25519:4NAEr3\u2026STw5\"; ol.river has 3 button rows; note displays \"Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".eyebrow",
+      "ok": true,
+      "actual": "pass 2 \u00b7 Oct 21, 2026",
+      "expected": "pass 2 \u00b7 Oct 21, 2026"
+    },
+    {
+      "label": "h1",
+      "ok": true,
+      "actual": "Every swap its own refund address and recipient.",
+      "expected": "Every swap its own refund address and recipient."
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+0 s",
+      "expected": "+0 s"
+    },
+    {
+      "label": "facts values",
+      "ok": true,
+      "actual": [
+        "+0 s",
+        "found again, no index book",
+        "not created (dry quote)",
+        "public",
+        "ed25519:4NAEr3\u2026STw5"
+      ],
+      "expected": [
+        "+0 s",
+        "found again, no index book",
+        "not created (dry quote)",
+        "public",
+        "ed25519:4NAEr3\u2026STw5"
+      ]
+    },
+    {
+      "label": "facts labels",
+      "ok": true,
+      "actual": [
+        "Sent at",
+        "Recipient from the seed alone",
+        "Recipient on NEAR",
+        "Request",
+        "Signature"
+      ],
+      "expected": [
+        "Sent at",
+        "Recipient from the seed alone",
+        "Recipient on NEAR",
+        "Request",
+        "Signature"
+      ]
+    },
+    {
+      "label": ".facts dd.cut @class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": ".river button count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": ".note",
+      "ok": true,
+      "actual": "Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.",
+      "expected": "Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved."
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "http://127.0.0.1:8432/app/testnet.json",
+          "status": 200,
+          "statusText": "OK"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "http://127.0.0.1:8432/app/pass2.json",
+          "status": 200,
+          "statusText": "OK"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "http://127.0.0.1:8432/app/pass3.json",
+          "status": 200,
+          "statusText": "OK"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "http://127.0.0.1:8432/app/recovery-seed-only.json",
+          "status": 200,
+          "statusText": "OK"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

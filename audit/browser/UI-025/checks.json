@@ -1,0 +1,415 @@
+{
+  "id": "UI-025",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:04:10.420Z",
+  "end": "2026-10-26T04:04:25.398Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence pass-2 widget autoplay, river sync, and hover stop (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Replay timer advances every 4.2s: swap 1 active sets river row 1 class=\"now\" and status text \"in use\"; swap 2 active sets river row 1 class=\"gone\" status \"used, forgotten\" and row 2 class=\"now\" status \"in use\"; swap 3 active sets rows 1 and 2 \"gone\" and row 3 \"now\"; hovering over widget stops timer and holds current swap.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "now",
+        "ahead",
+        "ahead"
+      ],
+      "expected": [
+        "now",
+        "ahead",
+        "ahead"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "in use",
+        "",
+        ""
+      ],
+      "expected": [
+        "in use",
+        "",
+        ""
+      ]
+    },
+    {
+      "label": "first autoplay begins at 4.2 seconds",
+      "actual": 3599,
+      "expected": "approximately 4200ms (fonts/load may precede timer start)",
+      "ok": true
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.1",
+      "expected": "0.1"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "25.324",
+      "expected": "25.324"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +138 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "gone",
+        "now",
+        "ahead"
+      ],
+      "expected": [
+        "gone",
+        "now",
+        "ahead"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "used, forgotten",
+        "in use",
+        ""
+      ],
+      "expected": [
+        "used, forgotten",
+        "in use",
+        ""
+      ]
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.05",
+      "expected": "0.05"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "gone",
+        "gone",
+        "now"
+      ],
+      "expected": [
+        "gone",
+        "gone",
+        "now"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "used, forgotten",
+        "used, forgotten",
+        "in use"
+      ],
+      "expected": [
+        "used, forgotten",
+        "used, forgotten",
+        "in use"
+      ]
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.05",
+      "expected": "0.05"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "gone",
+        "gone",
+        "now"
+      ],
+      "expected": [
+        "gone",
+        "gone",
+        "now"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "used, forgotten",
+        "used, forgotten",
+        "in use"
+      ],
+      "expected": [
+        "used, forgotten",
+        "used, forgotten",
+        "in use"
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

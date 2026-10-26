@@ -1,0 +1,37 @@
+{
+  "id": "UI-006",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:03:13.560Z",
+  "end": "2026-10-26T04:03:19.901Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing pass-2 widget hover stops replay (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "Mouse hover over widget triggers mouseenter listener which cancels replay timer; widget remains locked on current swap after 5000ms delay without advancing.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "hover holds swap after 5000ms",
+      "ok": true,
+      "actual": [
+        "key #5",
+        "account #5"
+      ],
+      "expected": [
+        "key #5",
+        "account #5"
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

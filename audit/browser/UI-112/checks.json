@@ -1,0 +1,73 @@
+{
+  "id": "UI-112",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:08:20.503Z",
+  "end": "2026-10-26T04:08:26.810Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence pass-2 widget reduced motion (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "In prefers-reduced-motion: reduce mode, autoplay does not run, clicking step button 3 updates addresses instantaneously with animation-name: none on .addr and transition-duration: 0s on river items.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": ".play",
+      "ok": true,
+      "actual": "Play",
+      "expected": "Play"
+    },
+    {
+      "label": ".play @aria-label",
+      "ok": true,
+      "actual": "Play replay",
+      "expected": "Play replay"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "no animation classes",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".addr animationName",
+      "ok": true,
+      "actual": "none",
+      "expected": "none"
+    },
+    {
+      "label": ".river li transitionDuration",
+      "ok": true,
+      "actual": "0s",
+      "expected": "0s"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

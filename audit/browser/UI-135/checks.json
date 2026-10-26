@@ -1,0 +1,31 @@
+{
+  "id": "UI-135",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:08:53.548Z",
+  "end": "2026-10-26T04:08:54.755Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence no control labelled \"log\" - http://127.0.0.1:8431/evidence.html",
+  "expected": "Evaluation of all buttons, links, tabs, and summaries yields 0 controls whose text or label contains \"log\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "log controls",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

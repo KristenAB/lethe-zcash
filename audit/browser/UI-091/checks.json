@@ -1,0 +1,59 @@
+{
+  "id": "UI-091",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:07:19.405Z",
+  "end": "2026-10-26T04:07:20.624Z",
+  "url": "http://127.0.0.1:8431/",
+  "viewport": "1280x800",
+  "flow": "Local landing three steps section (1280x800 desktop) - http://127.0.0.1:8431/",
+  "expected": "Section with h2 \"One seed. Nothing shared.\" displays 3-step grid: step 1 \"One seed: Every refund key and NEAR account comes from it, building on Zakura's one-time key.\", step 2 \"Fresh per swap: Each 1Click request names its own refundTo and its own recipient.\", step 3 \"Found again: A compact-block scan finds each payment from the seed alone.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#how-h",
+      "ok": true,
+      "actual": "One seed. Nothing shared.",
+      "expected": "One seed. Nothing shared."
+    },
+    {
+      "label": "three step headings",
+      "ok": true,
+      "actual": [
+        "One seed",
+        "Fresh per swap",
+        "Found again"
+      ],
+      "expected": [
+        "One seed",
+        "Fresh per swap",
+        "Found again"
+      ]
+    },
+    {
+      "label": "three step descriptions",
+      "ok": true,
+      "actual": [
+        "Every refund key and NEAR account comes from it, building on Zakura's one-time key.",
+        "Each 1Click request names its own refundTo and its own recipient.",
+        "A compact-block scan finds each payment from the seed alone."
+      ],
+      "expected": [
+        "Every refund key and NEAR account comes from it, building on Zakura's one-time key.",
+        "Each 1Click request names its own refundTo and its own recipient.",
+        "A compact-block scan finds each payment from the seed alone."
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

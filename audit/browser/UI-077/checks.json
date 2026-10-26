@@ -1,0 +1,35 @@
+{
+  "id": "UI-077",
+  "status": "FAIL",
+  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-170: PASS. redeploy blocked: this run must not deploy",
+  "start": "2026-10-26T04:06:09.204Z",
+  "end": "2026-10-26T04:06:12.813Z",
+  "url": "https://lethe-landing-sooty.vercel.app/app/",
+  "viewport": "1280x800",
+  "flow": "Live landing host /app/ desktop render (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/app/",
+  "expected": "GET /app/ and relative testnet.json, pass2.json, pass3.json and recovery-seed-only.json return HTTP 200. Eyebrow displays \"pass 2 \u00b7 Oct 21, 2026\"; h1 displays \"Every swap its own refund address and recipient.\"; hero renders widget showing swap 1 (0.2 ZEC, 50.7011 wNEAR, key #5 u1rezfhdwv\u2026, account #5 66e730c4\u2026); facts dl shows \"Sent at: +0 s\", \"Recipient from the seed alone: found again, no index book\" (cut), \"Recipient on NEAR: not created (dry quote)\", \"Request: public\", \"Signature: ed25519:4NAEr3\u2026STw5\"; ol.river has 3 button rows; note displays \"Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.\". Sections show \"Before: the first run\", \"All three links, measured\" with First run 0/100, Pass 2 32/100 and Pass 3 75/100, four recovery payments of 30,000/31,000/32,000/25,000 zat, and \"BLOCKED\" on \"A real swap\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": false,
+      "actual": 403,
+      "expected": 200
+    },
+    {
+      "label": "flow execution",
+      "ok": false,
+      "actual": "locator.textContent: Timeout 2500ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.eyebrow').first()\u001b[22m\n"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": false,
+      "actual": [
+        "HTTP 403 https://lethe-landing-sooty.vercel.app/app/",
+        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/app/",
+        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
+        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
+      ],
+      "expected": []
+    }
+  ]
+}

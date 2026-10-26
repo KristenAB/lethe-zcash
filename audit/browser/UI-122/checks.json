@@ -1,0 +1,139 @@
+{
+  "id": "UI-122",
+  "status": "FAIL",
+  "notes": "25.324 displayed where 25.3240 is required. Parts lists trim required eight-place ZEC decimals; pass-2 output also trims 25.3240 to 25.324.",
+  "start": "2026-10-26T04:08:37.806Z",
+  "end": "2026-10-26T04:08:38.988Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence Pass 2 parts list (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "List ul#pass2-rows displays 3 parts: part 1 \"0.20000000 ZEC at +0 s \u2192 50.7011 wNEAR\" (recipient 66e730c484\u2026, refundTo u1rezfhdwv\u2026, found from the seed alone); part 2 \"0.10000000 ZEC at +138 s \u2192 25.3240 wNEAR\" (recipient 3e33948911\u2026, refundTo u1ehzec56h\u2026, found from the seed alone); part 3 \"0.05000000 ZEC at +278 s \u2192 12.6482 wNEAR\" (recipient 4afc1f2c07\u2026, refundTo u1z4sgt6hu\u2026, found from the seed alone); paragraph #pass2-note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#pass2-rows li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "#pass2-rows visible",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 send exact 0.20000000",
+      "ok": false,
+      "actual": false,
+      "expected": true
+    },
+    {
+      "label": "part 1 output exact 50.7011",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 0",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": "part recipient title 0",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "part 2 send exact 0.10000000",
+      "ok": false,
+      "actual": false,
+      "expected": true
+    },
+    {
+      "label": "part 2 output exact 25.3240",
+      "ok": false,
+      "actual": false,
+      "expected": true
+    },
+    {
+      "label": "part 2 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 1",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": "part recipient title 1",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "part 3 send exact 0.05000000",
+      "ok": false,
+      "actual": false,
+      "expected": true
+    },
+    {
+      "label": "part 3 output exact 12.6482",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 2",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": "part recipient title 2",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "1-2-5 split note",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "largest first note",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

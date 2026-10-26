@@ -1,0 +1,50 @@
+[
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "document",
+    "url": "http://127.0.0.1:8431/"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:8431/"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "stylesheet",
+    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "font",
+    "url": "https://fonts.gstatic.com/l/font?kit=_XmG-HUzqDCFdgfMsYiV_F7wfS-Bs_d_QDxV4LHMfNf0Ye72XT46KIt9-xeS-g&skey=3eaac920d8b62e62&v=v9"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "font",
+    "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.gstatic.com/l/font?kit=_XmG-HUzqDCFdgfMsYiV_F7wfS-Bs_d_QDxV4LHMfNf0Ye72XT46KIt9-xeS-g&skey=3eaac920d8b62e62&v=v9"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
+  }
+]

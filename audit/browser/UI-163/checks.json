@@ -1,0 +1,42 @@
+{
+  "id": "UI-163",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Only this named error/empty state used routing.",
+  "start": "2026-10-26T04:09:46.059Z",
+  "end": "2026-10-26T04:09:47.221Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Local dashboard empty state: quotes empty (1280x800 desktop) - http://127.0.0.1:5182/",
+  "expected": "When /testnet.json returns quotes: [], displays div.error.empty-state role=\"status\" with text \"No swaps yet. Quote one with zswap quote 0.1 nep141:wrap.near <near-account>.\".",
+  "checks": [
+    {
+      "label": "routing authorized for own error/empty state",
+      "ok": true,
+      "actual": "When /testnet.json returns quotes: [], displays div.error.empty-state role=\"status\" with text \"No swaps yet. Quote one with zswap quote 0.1 nep141:wrap.near <near-account>.\"."
+    },
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".error.empty-state",
+      "ok": true,
+      "actual": "No swaps yet. Quote one with zswap quote 0.1 nep141:wrap.near <near-account>.",
+      "expected": "No swaps yet. Quote one with zswap quote 0.1 nep141:wrap.near <near-account>."
+    },
+    {
+      "label": ".error @role",
+      "ok": true,
+      "actual": "status",
+      "expected": "status"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

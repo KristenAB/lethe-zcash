@@ -1,0 +1,63 @@
+{
+  "id": "UI-096",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:07:25.426Z",
+  "end": "2026-10-26T04:07:26.648Z",
+  "url": "http://127.0.0.1:8431/",
+  "viewport": "375x812",
+  "flow": "Local landing what is live today strip (375x812 mobile) - http://127.0.0.1:8431/",
+  "expected": "Strip grid switches from 2 columns to 1 column; dot indicators and text wrap cleanly; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".strip one computed column",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".strip within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".strip bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "DIV",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

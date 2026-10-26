@@ -1,0 +1,42 @@
+{
+  "id": "UI-137",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Only this named error/empty state used routing.",
+  "start": "2026-10-26T04:08:55.923Z",
+  "end": "2026-10-26T04:08:57.154Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence empty state: no published quotes - http://127.0.0.1:8431/evidence.html",
+  "expected": "Setting script#run quotes: [] causes div.error role=\"alert\" to display \"No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs.\".",
+  "checks": [
+    {
+      "label": "routing authorized for own error/empty state",
+      "ok": true,
+      "actual": "Setting script#run quotes: [] causes div.error role=\"alert\" to display \"No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs.\"."
+    },
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#widget-slot .error",
+      "ok": true,
+      "actual": "No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs.",
+      "expected": "No published run yet: run pnpm --filter @zswap/examples run-live, then node packages/landing/sync-run.mjs."
+    },
+    {
+      "label": "#widget-slot .error @role",
+      "ok": true,
+      "actual": "alert",
+      "expected": "alert"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

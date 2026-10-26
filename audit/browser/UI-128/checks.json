@@ -1,0 +1,105 @@
+{
+  "id": "UI-128",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:10:58.536Z",
+  "end": "2026-10-26T04:10:59.611Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "375x812",
+  "flow": "Local evidence Found again section (375x812 mobile) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Recovery row grid switches to single column; explorer txid links truncate with ellipsis; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#recover .rows li one computed column",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer links truncate with ellipsis",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover a within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover a bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "A",
+          "left": 169,
+          "right": 306,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 166,
+          "right": 303,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 168,
+          "right": 305,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 16,
+          "right": 321,
+          "width": 305
+        }
+      ]
+    },
+    {
+      "label": "#recover within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "SECTION",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "id": "UI-159",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:09:41.157Z",
+  "end": "2026-10-26T04:09:42.420Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Local dashboard skip link and header/footer links (1280x800 desktop) - http://127.0.0.1:5182/",
+  "expected": "First Tab focuses \"Skip to content\"; Enter and the brand link target #main; chip text is \"Zcash testnet\"; top \"Docs\" href is \"https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs\" and \"GitHub\" href is \"https://github.com/nickthelegend/zec-unlinkable-swaps\"; footer \"Run record\" href is \"https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json\" and \"Review\" href is \"https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/docs/JUDGE-2026-10-21.md\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "first Tab",
+      "ok": true,
+      "actual": "Skip to content",
+      "expected": "Skip to content"
+    },
+    {
+      "label": "skip hash",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": ".brand @href",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": "brand hash",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": "header a[href=\"https://github.com/nickthelegend/zec-unlinkable-swaps\"] @href",
+      "ok": true,
+      "actual": "https://github.com/nickthelegend/zec-unlinkable-swaps",
+      "expected": "https://github.com/nickthelegend/zec-unlinkable-swaps"
+    },
+    {
+      "label": "header a[href$=\"/tree/main/packages/docs\"] @href",
+      "ok": true,
+      "actual": "https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs",
+      "expected": "https://github.com/nickthelegend/zec-unlinkable-swaps/tree/main/packages/docs"
+    },
+    {
+      "label": "footer a[href$=\"/deployments/testnet.json\"] @href",
+      "ok": true,
+      "actual": "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json",
+      "expected": "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/deployments/testnet.json"
+    },
+    {
+      "label": "footer a[href$=\"/docs/JUDGE-2026-10-21.md\"] @href",
+      "ok": true,
+      "actual": "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/docs/JUDGE-2026-10-21.md",
+      "expected": "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/docs/JUDGE-2026-10-21.md"
+    },
+    {
+      "label": ".chip",
+      "ok": true,
+      "actual": "Zcash testnet",
+      "expected": "Zcash testnet"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

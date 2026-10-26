@@ -1,0 +1,99 @@
+{
+  "id": "UI-019",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:04:02.574Z",
+  "end": "2026-10-26T04:04:03.881Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing skip link and all navigation links (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "First Tab press focuses skip link (\"Skip to content\") at left: 16px, top: 12px; pressing Enter navigates URL to #main; brand link has aria-label \"Lethe, top of page\" and navigates to #main; top nav link \"Evidence\" has href=\"evidence.html\"; top nav link \"GitHub\" has href=\"https://github.com/nickthelegend/zec-unlinkable-swaps\"; footer credit link points to \"https://zakura.com/engineering/quantum-unlinkability\"; footer nav links point to \"evidence.html\", \"https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/TESTING.md\", and GitHub repo.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "first Tab",
+      "ok": true,
+      "actual": "Skip to content",
+      "expected": "Skip to content"
+    },
+    {
+      "label": ".skip left",
+      "ok": true,
+      "actual": "16px",
+      "expected": "16px"
+    },
+    {
+      "label": ".skip top",
+      "ok": true,
+      "actual": "12px",
+      "expected": "12px"
+    },
+    {
+      "label": "skip hash",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": ".brand @href",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": "brand hash",
+      "ok": true,
+      "actual": "#main",
+      "expected": "#main"
+    },
+    {
+      "label": "header a[href=\"https://github.com/nickthelegend/zec-unlinkable-swaps\"] @href",
+      "ok": true,
+      "actual": "https://github.com/nickthelegend/zec-unlinkable-swaps",
+      "expected": "https://github.com/nickthelegend/zec-unlinkable-swaps"
+    },
+    {
+      "label": ".brand @aria-label",
+      "ok": true,
+      "actual": "Lethe, top of page",
+      "expected": "Lethe, top of page"
+    },
+    {
+      "label": "header a[href=\"evidence.html\"] @href",
+      "ok": true,
+      "actual": "evidence.html",
+      "expected": "evidence.html"
+    },
+    {
+      "label": "footer a[href=\"https://zakura.com/engineering/quantum-unlinkability\"] @href",
+      "ok": true,
+      "actual": "https://zakura.com/engineering/quantum-unlinkability",
+      "expected": "https://zakura.com/engineering/quantum-unlinkability"
+    },
+    {
+      "label": "footer nav hrefs",
+      "ok": true,
+      "actual": [
+        "evidence.html",
+        "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/TESTING.md",
+        "https://github.com/nickthelegend/zec-unlinkable-swaps"
+      ],
+      "expected": [
+        "evidence.html",
+        "https://github.com/nickthelegend/zec-unlinkable-swaps/blob/main/TESTING.md",
+        "https://github.com/nickthelegend/zec-unlinkable-swaps"
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}
