@@ -1,0 +1,55 @@
+ROW CLI-027
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-027"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","--allow-linked-recipient"]
+STDOUT
+{
+  "index": 1,
+  "refundTo": "u1z9umyrz05dgvx9qzlmp48yn3dtrzn3lxxp58tl2380cgqhzlq3stzplcted5r7f3740h9ndfxhu7qxjzykyfeavnc4wkxuv675xyxhtd",
+  "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "warning": "recipient reused: this swap is linked to an earlier one on the destination chain",
+  "amountIn": "0.1",
+  "amountOut": "26.560078737877954016748",
+  "refundFee": "32000",
+  "confidentiality": "public",
+  "correlationId": "2767e3cb-692b-41c3-938f-6bf20aa297ac"
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 3474
+{
+  "inspection": {
+    "next": 2,
+    "count": 2,
+    "mode": "600",
+    "reservations": [
+      {
+        "index": 0,
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "refundTo": "u1l8ttma9dhk2n8h5qj6gzn3er8x5za9jhvae4xt2dmsrgj5c08l2xyuernhzp25vmjndalkylm7w7ggufgdawq0m3tgsrjnwk4sje5a93",
+        "quoted": false
+      },
+      {
+        "index": 1,
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "refundTo": "u1z9umyrz05dgvx9qzlmp48yn3dtrzn3lxxp58tl2380cgqhzlq3stzplcted5r7f3740h9ndfxhu7qxjzykyfeavnc4wkxuv675xyxhtd",
+        "quoted": true,
+        "linkedRecipient": true
+      }
+    ]
+  }
+}
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 3.648
+CLEANUP: isolated TMPDIR removed after command.

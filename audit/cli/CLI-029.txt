@@ -1,0 +1,29 @@
+ROW CLI-029
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-029"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","refused.near"]
+STDOUT
+STDERR
+refused: recipient refused.near was named in the quote request of swap #0 from this wallet (1Click refused that quote, but it received the request). The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 115
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","no-answer.near"]
+STDOUT
+STDERR
+refused: recipient no-answer.near was named in the quote request of swap #1 from this wallet (1Click never answered it, but the request may have reached 1Click). The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 115
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.439
+CLEANUP: isolated TMPDIR removed after command.

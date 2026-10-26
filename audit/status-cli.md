@@ -21,3 +21,18 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | CLI-013 | PASS | [CLI-013.txt](cli/CLI-013.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-014 | PASS | [CLI-014.txt](cli/CLI-014.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-015 | PASS | [CLI-015.txt](cli/CLI-015.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-016 | PASS | [CLI-016.txt](cli/CLI-016.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
+| CLI-017 | PASS | [CLI-017.txt](cli/CLI-017.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
+| CLI-018 | PASS | [CLI-018.txt](cli/CLI-018.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
+| CLI-019 | PASS | [CLI-019.txt](cli/CLI-019.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
+| CLI-020 | PASS | [CLI-020.txt](cli/CLI-020.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-021 | PASS | [CLI-021.txt](cli/CLI-021.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-022 | UNTESTED | [CLI-022.txt](cli/CLI-022.txt) | needs ONECLICK_JWT |
+| CLI-023 | UNTESTED | [CLI-023.txt](cli/CLI-023.txt) | needs ONECLICK_JWT |
+| CLI-024 | PASS | [CLI-024.txt](cli/CLI-024.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-025 | PASS | [CLI-025.txt](cli/CLI-025.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-026 | PASS | [CLI-026.txt](cli/CLI-026.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-027 | PASS | [CLI-027.txt](cli/CLI-027.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
+| CLI-028 | PASS | [CLI-028.txt](cli/CLI-028.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-029 | PASS | [CLI-029.txt](cli/CLI-029.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-030 | PASS | [CLI-030.txt](cli/CLI-030.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |

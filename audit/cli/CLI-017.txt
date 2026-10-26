@@ -1,0 +1,70 @@
+ROW CLI-017
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-017"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near"]
+STDOUT
+{
+  "index": 0,
+  "refundTo": "u1p0vj4lrrtxc60z9jl4685f6pldt32j6zv5p5sxsdmfkv0hs9pv9smrx7sm6wsk4vq5r72t0q6vywz4fyhr6hmer5teumj7uefyuzpxtu",
+  "recipient": "be1a5c47ba0614b80230995c1f04c8ccb495d0b6122d282aee42d6e8d9ec590b",
+  "freshRecipient": true,
+  "amountIn": "0.1",
+  "amountOut": "26.56695858616369685115",
+  "refundFee": "32000",
+  "confidentiality": "public",
+  "correlationId": "d6951ef2-5031-40b5-9cf2-d71b50ddedc9"
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 3993
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near"]
+STDOUT
+{
+  "index": 1,
+  "refundTo": "u1lcry6cahar302rtzsqqgejcvqs8yw4zfhsucjh0cprhrldczqu4rgxr0afpugdftzm3ctkwyyv94jz0mpnnu9dvfs64yf04csc6jym9j",
+  "recipient": "ae84564b4efebe87ffc43d2da803fb31f2120f44bdf4df541a5238d69af41eaa",
+  "freshRecipient": true,
+  "amountIn": "0.1",
+  "amountOut": "26.56911041935237151064",
+  "refundFee": "32000",
+  "confidentiality": "public",
+  "correlationId": "830d5245-b423-4cf6-a2de-b26cb7ded5ef"
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 3059
+{
+  "inspection": {
+    "next": 2,
+    "count": 2,
+    "mode": "600",
+    "reservations": [
+      {
+        "index": 0,
+        "recipient": "be1a5c47ba0614b80230995c1f04c8ccb495d0b6122d282aee42d6e8d9ec590b",
+        "refundTo": "u1p0vj4lrrtxc60z9jl4685f6pldt32j6zv5p5sxsdmfkv0hs9pv9smrx7sm6wsk4vq5r72t0q6vywz4fyhr6hmer5teumj7uefyuzpxtu",
+        "quoted": true
+      },
+      {
+        "index": 1,
+        "recipient": "ae84564b4efebe87ffc43d2da803fb31f2120f44bdf4df541a5238d69af41eaa",
+        "refundTo": "u1lcry6cahar302rtzsqqgejcvqs8yw4zfhsucjh0cprhrldczqu4rgxr0afpugdftzm3ctkwyyv94jz0mpnnu9dvfs64yf04csc6jym9j",
+        "quoted": true
+      }
+    ]
+  }
+}
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 7.223
+CLEANUP: isolated TMPDIR removed after command.

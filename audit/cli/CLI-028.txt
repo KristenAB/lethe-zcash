@@ -1,0 +1,91 @@
+ROW CLI-028
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-028"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near"," 0xABCabc "]
+STDOUT
+STDERR
+refused: recipient 0xABCabc was named in the quote request of swap #0 from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 116
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
+STDOUT
+STDERR
+refused: recipient AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA was named in the quote request of swap #1 from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 114
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near"," ALICE.NEAR "]
+STDOUT
+STDERR
+refused: recipient ALICE.NEAR was named in the quote request of swap #2 from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 113
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","BC1QQQQQQ"]
+STDOUT
+STDERR
+refused: recipient BC1QQQQQQ was named in the quote request of swap #3 from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 112
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","0xABCabc"]
+STDOUT
+STDERR
+refused: recipient 0xABCabc was named in the quote request of swap #0 from this wallet. The recipient is sent in clear with every quote, so a second swap to it is linked to the first whatever its refundTo. Use a fresh recipient, or pass --allow-linked-recipient (MCP: allow_linked_recipient) to accept the link.
+EXIT_CODE 4
+ELAPSED_MS 114
+{
+  "inspection": {
+    "next": 6,
+    "count": 6,
+    "mode": "600",
+    "reservations": [
+      {
+        "index": 0,
+        "refundTo": "u1v2c2gn9al75rys7h85wk62uweefkfhu6dkgy5nzqnynx0u5r7qlvv6xwgdef4p7wtr0a6em2nh4evmjcej8hvkey0s5mtpm2sg9sz7ag",
+        "quoted": true
+      },
+      {
+        "index": 1,
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "refundTo": "u1hpwsvkk3uy3wf7ex9st77qfmg0e26lajymwm3tuazq2rq4sly354z28edh57dmxh7xdeugdjqw33vqw9flc9et5vqprrlg9cvqnthzss",
+        "quoted": false
+      },
+      {
+        "index": 2,
+        "recipient": "alice.near",
+        "refundTo": "u180ghylvvxmxwr9errn7z86aztw02ps7795zlq82z0xxdcf0dt3hjxq9havt98sqtls8qxu0llppzul7ggc5j95xm7hd4jswlv58nzqqz",
+        "quoted": false
+      },
+      {
+        "index": 3,
+        "recipient": "bc1qqqqqq",
+        "refundTo": "u1xe7td9a76hd4f9ahgshudafud0eyr3p0m00ulhgqvj0ks3cuxpzdqqrs99ay8vtlff3843c0l8zvzga29r09d722mxxltzs3scc5lcqf",
+        "quoted": false
+      },
+      {
+        "index": 4,
+        "recipient": "AbcDEF",
+        "refundTo": "u1tgx8uc9e9zggqj5x65tgsqwl3743zaegxjvy4wvz93adqwxxltf8a56kuhes4e55hdtnuhu9avzatlhwx5g08qxud4j28lqr6vcvfvad",
+        "quoted": false
+      },
+      {
+        "index": 5,
+        "recipient": "abcdef",
+        "refundTo": "u10p995duxpcsncx25p2w6p47jj6cfqn68fw7thmw9ngf845wwc375uqxa4cwa6c6wvqh5rccyzh4jakrpqh3c2xj94tva6hazxuscn00q",
+        "quoted": false
+      }
+    ]
+  }
+}
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.832
+CLEANUP: isolated TMPDIR removed after command.

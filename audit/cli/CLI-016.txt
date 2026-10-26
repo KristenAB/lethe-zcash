@@ -1,0 +1,47 @@
+ROW CLI-016
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-016"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+STDOUT
+{
+  "index": 0,
+  "refundTo": "u1edrmdy4x2wwn78qaukd3px7ycgc0973p9y5nzrnmey3zdyqgzdlpdwdv9s7zcmpth6yplsw7wfje5jh77t0pxmfqh4r7w8865cp950wn",
+  "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "amountIn": "0.1",
+  "amountOut": "26.568559955594881818594",
+  "refundFee": "32000",
+  "confidentiality": "public",
+  "correlationId": "5a2563b0-0456-4c7a-a6f2-0948cc3d2003"
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 2673
+{
+  "inspection": {
+    "next": 1,
+    "count": 1,
+    "mode": "600",
+    "reservations": [
+      {
+        "index": 0,
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "refundTo": "u1edrmdy4x2wwn78qaukd3px7ycgc0973p9y5nzrnmey3zdyqgzdlpdwdv9s7zcmpth6yplsw7wfje5jh77t0pxmfqh4r7w8865cp950wn",
+        "quoted": true
+      }
+    ]
+  }
+}
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 2.825
+CLEANUP: isolated TMPDIR removed after command.
