@@ -1,0 +1,98 @@
+ROW CLI-036
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-036"]
+MODE source review
+
+STDOUT
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L365-L415
+365:     return this.locked(() => {
+366:       if (!existsSync(this.path))
+367:         throw new SetupRequiredError(
+368:           `this seed has no index book (${this.path})`,
+369:           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
+370:         );
+371:       const b = this.bind(this.read(), seedFile);
+372:       const given = opts.recipient?.trim();
+373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
+374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+378:       // a retry of a request that provably never left takes over its reservation: same index, same
+379:       // refundTo, no index burned and no false "already used"
+380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+381:       if (retry) {
+382:         delete retry.quoteError;
+383:         retry.retries = (retry.retries ?? 0) + 1;
+384:         if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
+385:         this.write(b);
+386:         return { r: retry, key: deriveRefund(seedFile, retry.index) };
+387:       }
+388:       const index = b.next;
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+402:   attach(index: number, quote: unknown) {
+403:     this.locked(() => {
+404:       const b = this.read();
+405:       const r = b.reservations.find((x) => x.index === index);
+406:       if (!r) throw new Error(`index ${index} is not reserved`);
+407:       r.quote = quote;
+408:       delete r.quoteError;
+409:       this.write(b);
+410:     });
+411:   }
+412:   /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
+413:   failed(index: number, error: unknown) {
+414:     this.locked(() => {
+415:       const b = this.read();
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L452-L480
+452: }
+453: 
+454: /**
+455:  * 1Click's request visibility. `public` (its default) publishes the quote request; `basic` and
+456:  * `advanced` are Confidential Intents, answered only for an authenticated partner (ONECLICK_JWT). In
+457:  * every mode 1Click and its solvers still see refundTo and recipient, and the deposit, refund and
+458:  * delivery are still on public chains.
+459:  */
+460: export type Confidentiality = 'public' | 'basic' | 'advanced';
+461: export const CONFIDENTIALITY: readonly Confidentiality[] = ['public', 'basic', 'advanced'];
+462: 
+463: export interface QuoteInput {
+464:   amountZat: bigint;
+465:   destinationAsset: string;
+466:   recipient: string;
+467:   refundTo: string;
+468:   slippageBps?: number;
+469:   dry?: boolean;
+470:   /** passed through to 1Click when set; basic/advanced need ONECLICK_JWT */
+471:   confidentiality?: Confidentiality;
+472: }
+473: 
+474: /** The deadline is 40 to 120 minutes after the request, to the second, chosen per quote. */
+475: export const DEADLINE_RANGE_S = [40 * 60, 120 * 60] as const;
+476: /** The solver wait is 2 to 4 seconds, to the millisecond, chosen per quote. */
+477: export const WAIT_RANGE_MS = [2000, 4000] as const;
+478: const between = (lo: number, hi: number, rng: Rng) => lo + Math.floor(rng() * (hi - lo + 1));
+479: 
+480: /**
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.022
+CLEANUP: isolated TMPDIR removed after command.

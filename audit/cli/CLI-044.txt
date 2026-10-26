@@ -1,0 +1,79 @@
+ROW CLI-044
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-044"]
+MODE source review
+
+STDOUT
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L226-L245
+226:  */
+227: export class IndexBook {
+228:   constructor(readonly path: string) {}
+229:   exists(): boolean {
+230:     return existsSync(this.path);
+231:   }
+232:   read(): Book {
+233:     return existsSync(this.path) ? JSON.parse(readFileSync(this.path, 'utf8')) : { next: 0, reservations: [] };
+234:   }
+235:   /**
+236:    * Refuses a book written for another seed: its indices say nothing about this seed's, and reserving
+237:    * from it would hand out indices this seed already put on public quotes. A book from before the
+238:    * binding is checked by re-deriving its first refundTo, then bound.
+239:    */
+240:   private bind(b: Book, seedFile: string): Book {
+241:     const id = seedId(seedFile);
+242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+243:     if (b.fvk_id !== undefined) {
+244:       if (b.fvk_id !== id) throw other();
+245:       return b;
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L327-L367
+327:   }
+328:   private locked<T>(fn: () => T): T {
+329:     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
+330:     const lock = `${this.path}.lock`;
+331:     const until = Date.now() + LOCK_WAIT_MS;
+332:     const token = `${process.pid}.${randomBytes(8).toString('hex')}`;
+333:     let fd: number | undefined;
+334:     while (fd === undefined) {
+335:       try {
+336:         fd = openSync(lock, 'wx', 0o600);
+337:         writeSync(fd, token);
+338:       } catch (e) {
+339:         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+340:         const seen = readToken(lock);
+341:         try {
+342:           if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) {
+343:             // test hook: widens the window between judging a lock stale and breaking it
+344:             pause(Math.floor(Math.random() * Number(process.env.ZSWAP_LOCK_BREAK_PAUSE_MS ?? 0)));
+345:             this.breakStale(lock, seen);
+346:           }
+347:         } catch {
+348:           /* released meanwhile */
+349:         }
+350:         if (Date.now() > until) throw new Error(`index book ${this.path} is locked by another process (${lock}); refusing to reserve without it`);
+351:         pause(10 + Math.floor(Math.random() * 20));
+352:       }
+353:     }
+354:     try {
+355:       return fn();
+356:     } finally {
+357:       closeSync(fd);
+358:       // remove the lock only while it is still this process's own
+359:       if (readToken(lock) === token) unlinkSync(lock);
+360:     }
+361:   }
+362:   /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
+365:     return this.locked(() => {
+366:       if (!existsSync(this.path))
+367:         throw new SetupRequiredError(
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.023
+CLEANUP: isolated TMPDIR removed after command.

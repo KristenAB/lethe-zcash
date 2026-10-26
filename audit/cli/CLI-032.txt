@@ -1,0 +1,59 @@
+ROW CLI-032
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-032"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+STDOUT
+STDERR
+1Click did not answer in 1.5 s (http://127.0.0.1:63608/v0/quote)
+EXIT_CODE 1
+ELAPSED_MS 1659
+{
+  "inspection": {
+    "next": 1,
+    "count": 1,
+    "mode": "600",
+    "reservations": [
+      {
+        "index": 0,
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "refundTo": "u1n3a3422re700stluyehwveggxp8ntyttuzxmh94wk2f2hd8588k7797nj723s4792wnnft2qwdduh49tvs9z0gn53utdes9xcyjsnxma",
+        "quoted": false,
+        "quoteError": "no-answer"
+      }
+    ]
+  }
+}
+{
+  "requests": [
+    {
+      "method": "POST",
+      "url": "/v0/quote",
+      "body": {
+        "dry": true,
+        "swapType": "EXACT_INPUT",
+        "slippageTolerance": 92,
+        "originAsset": "nep141:zec.omft.near",
+        "depositType": "ORIGIN_CHAIN",
+        "destinationAsset": "nep141:wrap.near",
+        "amount": "10000000",
+        "refundTo": "u1n3a3422re700stluyehwveggxp8ntyttuzxmh94wk2f2hd8588k7797nj723s4792wnnft2qwdduh49tvs9z0gn53utdes9xcyjsnxma",
+        "refundType": "ORIGIN_CHAIN",
+        "recipient": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "recipientType": "DESTINATION_CHAIN",
+        "deadline": "2026-10-26T05:26:11.935Z",
+        "quoteWaitingTimeMs": 3183
+      }
+    }
+  ]
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 1.818
+CLEANUP: isolated TMPDIR removed after command.
