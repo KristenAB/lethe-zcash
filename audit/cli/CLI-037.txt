@@ -1,0 +1,79 @@
+ROW CLI-037
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-037"]
+MODE source review
+
+STDOUT
+| CLI-037 | Wallet binding: another wallet's book, source contract | Exit 2; stderr contains `Setup required: the index book of this seed` and `belongs to another seed`; reservation and quote POST are refused. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L240-L255
+240:   private bind(b: Book, seedFile: string): Book {
+241:     const id = seedId(seedFile);
+242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+243:     if (b.fvk_id !== undefined) {
+244:       if (b.fvk_id !== id) throw other();
+245:       return b;
+246:     }
+247:     const first = b.reservations[0];
+248:     if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
+249:     b.fvk_id = id;
+250:     return b;
+251:   }
+252:   /** The read-only view of this seed's book (refuses another seed's). */
+253:   readFor(seedFile: string): Book {
+254:     return this.bind(this.read(), seedFile);
+255:   }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L401
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
+365:     return this.locked(() => {
+366:       if (!existsSync(this.path))
+367:         throw new SetupRequiredError(
+368:           `this seed has no index book (${this.path})`,
+369:           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
+370:         );
+371:       const b = this.bind(this.read(), seedFile);
+372:       const given = opts.recipient?.trim();
+373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
+374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+378:       // a retry of a request that provably never left takes over its reservation: same index, same
+379:       // refundTo, no index burned and no false "already used"
+380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+381:       if (retry) {
+382:         delete retry.quoteError;
+383:         retry.retries = (retry.retries ?? 0) + 1;
+384:         if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
+385:         this.write(b);
+386:         return { r: retry, key: deriveRefund(seedFile, retry.index) };
+387:       }
+388:       const index = b.next;
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

@@ -1,0 +1,95 @@
+ROW RS-004
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-004"]
+MODE source review
+
+STDOUT
+| RS-004 | `zswap-keys account`, source contract only | Exit 0 JSON fields are `address`, `uivk`, `fvk_id`, `mainnet_address`; identifiers derive from account 0 with coin types 1/133; seed and spending keys never appear in stdout. Key-bearing stdout is not collected in this run. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L43-L52
+43:         Some("account") if a.len() == 2 => {
+44:             let s = seed(&a[1]);
+45:             let acct = account(&s, COIN_TESTNET).unwrap_or_else(|e| fail(e));
+46:             let main = account(&s, COIN_MAINNET).unwrap_or_else(|e| fail(e));
+47:             let net = network(COIN_TESTNET);
+48:             println!(
+49:                 "{}",
+50:                 serde_json::json!({ "address": address(&acct, net).unwrap_or_else(|e| fail(e)), "uivk": uivk(&acct, net).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&acct), "mainnet_address": address(&main, network(COIN_MAINNET)).unwrap_or_else(|e| fail(e)) })
+51:             );
+52:         }
+
+SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f4cdd3906467c600fa7ed1d9c466a2c L21-L81
+21: pub const COIN_TESTNET: u32 = 1;
+22: pub const COIN_MAINNET: u32 = 133;
+23:
+24: #[derive(Debug)]
+25: pub enum Error {
+26:     Seed(String),
+27:     Derivation(u64),
+28:     Encoding(String),
+29: }
+30:
+31: impl std::fmt::Display for Error {
+32:     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+33:         match self {
+34:             Error::Seed(e) => write!(f, "bad seed: {e}"),
+35:             Error::Derivation(i) => write!(f, "index {i} has no valid one-time key (negligible probability; use the next index)"),
+36:             Error::Encoding(e) => write!(f, "encoding failed: {e}"),
+37:         }
+38:     }
+39: }
+40: impl std::error::Error for Error {}
+41:
+42: /// The wallet's ZIP 32 account 0 for one network (coin type decides testnet vs mainnet keys).
+43: pub fn account(seed: &[u8], coin_type: u32) -> Result<FullViewingKey, Error> {
+44:     if seed.len() < 32 {
+45:         return Err(Error::Seed("at least 32 bytes".into()));
+46:     }
+47:     let sk = SpendingKey::from_zip32_seed(seed, coin_type, zip32::AccountId::ZERO).map_err(|e| Error::Seed(format!("{e:?}")))?;
+48:     Ok(FullViewingKey::from(&sk))
+49: }
+50:
+51: /// One-time key `index` for `purpose` (refund or receive).
+52: pub fn one_time(account: &FullViewingKey, purpose: Purpose, index: u64) -> Result<FullViewingKey, Error> {
+53:     KeyId::new(purpose, index).derive(account).map_err(|_| Error::Derivation(index))
+54: }
+55:
+56: pub fn network(coin_type: u32) -> NetworkType {
+57:     if coin_type == COIN_MAINNET {
+58:         NetworkType::Main
+59:     } else {
+60:         NetworkType::Test
+61:     }
+62: }
+63:
+64: /// Unified address with only an Orchard-family receiver (receives in Ironwood on current testnet).
+65: pub fn address(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
+66:     let raw = fvk.address_at(0u32, Scope::External).to_raw_address_bytes();
+67:     let ua = unified::Address::try_from_items(vec![unified::Receiver::Orchard(raw)]).map_err(|e| Error::Encoding(e.to_string()))?;
+68:     Ok(ua.encode(&net))
+69: }
+70:
+71: /// Unified incoming viewing key with only the Orchard-family item: sees payments to `address`.
+72: pub fn uivk(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
+73:     let ivk = fvk.to_ivk(Scope::External).to_bytes();
+74:     let u = unified::Uivk::try_from_items(vec![unified::Ivk::Orchard(ivk)]).map_err(|e| Error::Encoding(e.to_string()))?;
+75:     Ok(u.encode(&net))
+76: }
+77:
+78: /// sha256 of the raw full viewing key: an identifier for tests and logs (not a secret, not a key).
+79: pub fn fvk_id(fvk: &FullViewingKey) -> String {
+80:     hex::encode(Sha256::digest(fvk.to_bytes()))
+81: }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

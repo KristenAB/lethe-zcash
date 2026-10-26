@@ -1,0 +1,38 @@
+ROW RS-016
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "RS-016"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","--amount","30000"]
+STDOUT
+{"report":{"txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","found":true,"height":4522718,"confirmations":20106,"tip":4542823,"outputs":[{"pool":"Ironwood","value":30000,"memo":"testnet stand-in for the refund of swap 0","memo_binary":false}],"pools":{"sapling":false,"orchard":false,"ironwood":true,"transparent":false}},"verdict":{"ok":true,"paid_zat":30000,"reasons":[]},"lightwalletd":"https://testnet.zec.rocks:443"}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 605
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","--amount","31000"]
+STDOUT
+{"report":{"txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","found":true,"height":4522723,"confirmations":20101,"tip":4542823,"outputs":[{"pool":"Ironwood","value":31000,"memo":"testnet stand-in for the refund of swap 1","memo_binary":false}],"pools":{"sapling":false,"orchard":false,"ironwood":true,"transparent":false}},"verdict":{"ok":true,"paid_zat":31000,"reasons":[]},"lightwalletd":"https://testnet.zec.rocks:443"}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 707
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","--amount","32000"]
+STDOUT
+{"report":{"txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","found":true,"height":4522723,"confirmations":20101,"tip":4542823,"outputs":[{"pool":"Ironwood","value":32000,"memo":"testnet stand-in for the refund of swap 2","memo_binary":false}],"pools":{"sapling":false,"orchard":false,"ironwood":true,"transparent":false}},"verdict":{"ok":true,"paid_zat":32000,"reasons":[]},"lightwalletd":"https://testnet.zec.rocks:443"}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 595
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","--amount","25000"]
+STDOUT
+{"report":{"txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","found":true,"height":4522726,"confirmations":20098,"tip":4542823,"outputs":[{"pool":"Ironwood","value":25000,"memo":"payment to the ordinary account address","memo_binary":false}],"pools":{"sapling":false,"orchard":false,"ironwood":true,"transparent":false}},"verdict":{"ok":true,"paid_zat":25000,"reasons":[]},"lightwalletd":"https://testnet.zec.rocks:443"}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 581
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 2.637
+CLEANUP: isolated TMPDIR removed after command.

@@ -1,0 +1,151 @@
+ROW CLI-045
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-045"]
+MODE source review
+
+STDOUT
+| CLI-045 | Interruption between reservation and quote attachment, source review | Durable reservation survives without an attached quote; its index is not handed out as new; an uncertain request remains protected by the recipient guard rather than being classified `unsent`. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L163-L200
+163: export interface Reservation {
+164:   index: number;
+165:   purpose: 'refund';
+166:   reservedAt: string;
+167:   refundTo: string;
+168:   testnetAddress: string;
+169:   /** destination recipient of this swap (sent in clear with the quote) */
+170:   recipient?: string;
+171:   /** set when the caller accepted reusing a recipient of an earlier swap */
+172:   linkedRecipient?: true;
+173:   /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
+174:   freshRecipient?: true;
+175:   /** the quote's destination asset: a recovery checks that token on this swap's NEAR recipient */
+176:   destinationAsset?: string;
+177:   quote?: unknown;
+178:   /** the quote did not come back; `unsent` means the request provably never reached 1Click */
+179:   quoteError?: { outcome: RequestOutcome; message: string; at: string };
+180:   /** times a never-sent request was retried with this same reservation */
+181:   retries?: number;
+182: }
+183: export interface ReserveOptions {
+184:   recipient?: string;
+185:   allowLinkedRecipient?: boolean;
+186:   /** use this swap's own NEAR implicit account (derived from the seed at the same index) as recipient */
+187:   freshRecipient?: boolean;
+188:   destinationAsset?: string;
+189: }
+190: /** The quote request of this reservation provably never left this machine: 1Click never saw its fields. */
+191: const neverSent = (r: Reservation) => !r.quote && r.quoteError?.outcome === 'unsent';
+192: /** Whether a failed quote request could have reached 1Click. */
+193: export const requestOutcome = (e: unknown): RequestOutcome =>
+194:   e instanceof HttpError ? e.outcome : e instanceof SetupRequiredError ? (e.outcome ?? 'unsent') : e instanceof BlockedError ? 'unsent' : 'no-answer';
+195: const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteRequest?: { recipient?: string } } | undefined)?.quoteRequest?.recipient;
+196: export interface Book {
+197:   next: number;
+198:   reservations: Reservation[];
+199:   /** the seed this book belongs to: fvk_id of its account key (a hash, not a key) */
+200:   fvk_id?: string;
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L451
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
+365:     return this.locked(() => {
+366:       if (!existsSync(this.path))
+367:         throw new SetupRequiredError(
+368:           `this seed has no index book (${this.path})`,
+369:           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
+370:         );
+371:       const b = this.bind(this.read(), seedFile);
+372:       const given = opts.recipient?.trim();
+373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
+374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+378:       // a retry of a request that provably never left takes over its reservation: same index, same
+379:       // refundTo, no index burned and no false "already used"
+380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+381:       if (retry) {
+382:         delete retry.quoteError;
+383:         retry.retries = (retry.retries ?? 0) + 1;
+384:         if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
+385:         this.write(b);
+386:         return { r: retry, key: deriveRefund(seedFile, retry.index) };
+387:       }
+388:       const index = b.next;
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+402:   attach(index: number, quote: unknown) {
+403:     this.locked(() => {
+404:       const b = this.read();
+405:       const r = b.reservations.find((x) => x.index === index);
+406:       if (!r) throw new Error(`index ${index} is not reserved`);
+407:       r.quote = quote;
+408:       delete r.quoteError;
+409:       this.write(b);
+410:     });
+411:   }
+412:   /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
+413:   failed(index: number, error: unknown) {
+414:     this.locked(() => {
+415:       const b = this.read();
+416:       const r = b.reservations.find((x) => x.index === index);
+417:       if (!r) throw new Error(`index ${index} is not reserved`);
+418:       r.quoteError = { outcome: requestOutcome(error), message: String((error as Error)?.message ?? error).slice(0, 300), at: new Date().toISOString() };
+419:       this.write(b);
+420:     });
+421:   }
+422: }
+423:
+424: /**
+425:  * One swap quote the safe way, as the CLI, the MCP server and the examples do it: a fresh NEAR recipient
+426:  * is checked against 1Click's token list before any index is reserved; the index is written down before
+427:  * its refundTo goes out; the quote is attached to it, or its failure recorded (with whether 1Click could
+428:  * have seen the request, which the recipient guard needs).
+429:  */
+430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
+433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
+436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+437:   const { r } = book.reserve(
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+446:   } catch (e) {
+447:     book.failed(r.index, e);
+448:     throw e;
+449:   }
+450:   book.attach(r.index, q);
+451:   return { r, q };
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

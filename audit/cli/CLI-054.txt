@@ -1,0 +1,41 @@
+ROW CLI-054
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-054"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","sweep-plan"]
+STDOUT
+{
+  "steps": [
+    {
+      "index": 0,
+      "from": "f23c3dbde8d6c4e46fbbf0ec33d782f0c97cc9131f974de1f5092d59df14ab20",
+      "to": null,
+      "action": "leave it here and spend from this account directly (no sweep, no new link)"
+    },
+    {
+      "index": 1,
+      "from": "8e26d62ef673212c3f8094a7069bc3df19f5d91e8a70b4479c13e1ad7a733683",
+      "to": null,
+      "action": "leave it here and spend from this account directly (no sweep, no new link)"
+    }
+  ],
+  "warnings": [],
+  "relinked": 0,
+  "keyExport": "zswap near-key <index> <out-file> writes that account’s near-cli credentials (0600, never printed); import it into a NEAR wallet or near-cli to sign the sweep"
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 119
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.309
+CLEANUP: isolated TMPDIR removed after command.

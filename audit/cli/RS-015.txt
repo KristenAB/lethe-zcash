@@ -1,0 +1,26 @@
+ROW RS-015
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "RS-015"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","--amount","1"]
+STDOUT
+STDERR
+error: not a testnet unified incoming viewing key: Address is not Bech32m encoded
+EXIT_CODE 2
+ELAPSED_MS 3
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","verify","not-a-txid","--amount","1"]
+STDOUT
+STDERR
+error: not a txid (64 hex characters): not-a-txid
+EXIT_CODE 2
+ELAPSED_MS 405
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.558
+CLEANUP: isolated TMPDIR removed after command.

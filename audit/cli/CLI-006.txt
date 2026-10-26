@@ -1,0 +1,52 @@
+ROW CLI-006
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-006"]
+MODE source review
+
+STDOUT
+| CLI-006 | `where`: relative overrides, source contract | With `INIT_CWD=/work`, `ZSWAP_SEED=x/seed`, `ZSWAP_BOOK=x/book.json`, stdout paths are `/work/x/seed` and `/work/x/book.json`; absent book override resolves beside the configured seed. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L99-L118
+99:  * the examples: ZSWAP_SEED, default <repo>/.demo/seed; ZSWAP_BOOK, default the index book next to that
+100:  * seed. A relative path is taken from the directory the command was typed in (pnpm's INIT_CWD).
+101:  */
+102: export function walletPaths(env: NodeJS.ProcessEnv = process.env): { seed: string; book: string } {
+103:   const base = env.INIT_CWD ?? process.cwd();
+104:   const seed = env.ZSWAP_SEED ? resolve(base, env.ZSWAP_SEED) : resolve(ROOT, '.demo/seed');
+105:   const book = env.ZSWAP_BOOK ? resolve(base, env.ZSWAP_BOOK) : join(dirname(seed), 'index-book.json');
+106:   return { seed, book };
+107: }
+108:
+109: function bin(envName: string, rel: string, name: string): string {
+110:   const v = process.env[envName];
+111:   if (v) {
+112:     if (!existsSync(v)) throw new SetupRequiredError(envName, `${v} does not exist`);
+113:     return v;
+114:   }
+115:   const c = [resolve(ROOT, rel, 'target/release', name), process.env.CARGO_TARGET_DIR ? resolve(process.env.CARGO_TARGET_DIR, 'release', name) : ''].find((p) => p && existsSync(p));
+116:   if (!c) throw new SetupRequiredError(envName, `build ${rel} (cargo build --release)`);
+117:   return c;
+118: }
+
+SOURCE packages/cli/test/wallet-binding.test.ts SHA256 13b3fcf8458626f77bf4254732b2910a50089e8f3aa6678ea9d855d83060bd69 L57-L64
+57: describe('one wallet location for the CLI, the MCP server and the examples', () => {
+58:   it('defaults: <repo>/.demo/seed and the index book next to it; relative paths from where the command was typed', () => {
+59:     expect(walletPaths({})).toEqual({ seed: resolve(ROOT, '.demo/seed'), book: resolve(ROOT, '.demo/index-book.json') });
+60:     expect(walletPaths({ ZSWAP_SEED: '/w/seed' })).toEqual({ seed: '/w/seed', book: '/w/index-book.json' });
+61:     expect(walletPaths({ ZSWAP_SEED: 'x/seed', ZSWAP_BOOK: 'x/b.json', INIT_CWD: '/home/me' })).toEqual({ seed: '/home/me/x/seed', book: '/home/me/x/b.json' });
+62:   });
+63:
+64:   it('pnpm --filter @zswap/cli zswap (run in packages/cli) uses the repo-root wallet, as the examples do', () => {
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

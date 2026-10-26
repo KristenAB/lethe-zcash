@@ -1,0 +1,113 @@
+ROW RS-022
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-022"]
+MODE source review
+
+STDOUT
+| RS-022 | Transaction integrity and missing/orphaned transaction, source contract | Returned bytes with mismatched txid cause exit 2 and `lightwalletd returned a transaction whose txid differs from the one requested`; unknown/orphaned transaction produces `found: false`, null height, zero confirmations and empty outputs. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3d42cec9dd6e26867d4ee391 L44-L53
+44:     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+45:         match self {
+46:             VerifyError::BadKey(e) => write!(f, "not a testnet unified incoming viewing key: {e}"),
+47:             VerifyError::BadTxid(t) => write!(f, "not a txid (64 hex characters): {t}"),
+48:             VerifyError::Lwd(e) => write!(f, "{e}"),
+49:             VerifyError::Unparseable(e) => write!(f, "transaction does not parse: {e}"),
+50:             VerifyError::TxidMismatch => write!(f, "lightwalletd returned a transaction whose txid differs from the one requested"),
+51:         }
+52:     }
+53: }
+
+SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3d42cec9dd6e26867d4ee391 L156-L176
+156: /// Fetch `txid` and decrypt it with `uivk`. A txid lightwalletd does not know is reported with
+157: /// `found: false`, not as an error.
+158: pub async fn inspect(c: &mut lwd::Client, uivk: &UnifiedIncomingViewingKey, txid: &str, tip: BlockHeight) -> Result<TxReport, VerifyError> {
+159:     let id = lwd::parse_txid(txid).ok_or_else(|| VerifyError::BadTxid(txid.to_string()))?;
+160:     let empty = |found| TxReport { txid: txid.to_string(), found, height: None, confirmations: 0, tip: tip.into(), outputs: vec![], pools: Pools::default() };
+161:     let (data, loc) = match lwd::get_transaction(c, &id).await? {
+162:         lwd::FetchedTx::Found { data, location } => (data, location),
+163:         lwd::FetchedTx::NotFound => return Ok(empty(false)),
+164:     };
+165:     let mined = match loc {
+166:         lwd::TxLocation::Mined(h) => Some(h),
+167:         lwd::TxLocation::Mempool => None,
+168:         // Only on a fork that is not the main chain: as good as not found.
+169:         lwd::TxLocation::Orphaned => return Ok(empty(false)),
+170:     };
+171:     let tx = Transaction::read(&data[..], BranchId::for_height(&NETWORK, mined.unwrap_or(tip + 1))).map_err(|e| VerifyError::Unparseable(e.to_string()))?;
+172:     if tx.txid() != id {
+173:         return Err(VerifyError::TxidMismatch);
+174:     }
+175:     let mut outputs = Vec::new();
+176:     if let (Some(b), Some(ivk)) = (tx.sapling_bundle(), uivk.sapling()) {
+
+SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5230f9747858543207cc5a39 L68-L123
+68: /// Where lightwalletd says a transaction is (`RawTransaction.height` semantics).
+69: #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+70: pub enum TxLocation {
+71:     Mempool,
+72:     Mined(BlockHeight),
+73:     /// Mined only on a fork that is not the main chain.
+74:     Orphaned,
+75: }
+76:
+77: impl TxLocation {
+78:     pub fn from_raw_height(h: u64) -> Self {
+79:         match h {
+80:             0 => TxLocation::Mempool,
+81:             u64::MAX => TxLocation::Orphaned,
+82:             h => match u32::try_from(h) {
+83:                 Ok(h) => TxLocation::Mined(BlockHeight::from_u32(h)),
+84:                 Err(_) => TxLocation::Orphaned,
+85:             },
+86:         }
+87:     }
+88: }
+89:
+90: pub enum FetchedTx {
+91:     Found { data: Vec<u8>, location: TxLocation },
+92:     NotFound,
+93: }
+94:
+95: /// `GetTransaction` by txid. lightwalletd and Zaino both report an unknown txid as an RPC
+96: /// error rather than an empty result, so map the known "not found" shapes to `NotFound`.
+97: pub async fn get_transaction(client: &mut Client, txid: &TxId) -> Result<FetchedTx, LwdError> {
+98:     let filter = TxFilter { block: None, index: 0, hash: txid.as_ref().to_vec() };
+99:     match client.get_transaction(filter).await {
+100:         Ok(r) => {
+101:             let raw = r.into_inner();
+102:             if raw.data.is_empty() {
+103:                 return Ok(FetchedTx::NotFound);
+104:             }
+105:             Ok(FetchedTx::Found { location: TxLocation::from_raw_height(raw.height), data: raw.data })
+106:         }
+107:         Err(s) if is_not_found(&s) => Ok(FetchedTx::NotFound),
+108:         Err(s) => Err(LwdError::Rpc(s)),
+109:     }
+110: }
+111:
+112: fn is_not_found(s: &tonic::Status) -> bool {
+113:     if s.code() == tonic::Code::NotFound {
+114:         return true;
+115:     }
+116:     let m = s.message().to_ascii_lowercase();
+117:     m.contains("no such mempool or blockchain transaction") || m.contains("not found") || m.contains("no such transaction")
+118: }
+119:
+120: /// Parse a display-order (block-explorer) txid.
+121: pub fn parse_txid(s: &str) -> Option<TxId> {
+122:     TxId::from_hex(s.trim())
+123: }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

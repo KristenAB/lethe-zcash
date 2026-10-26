@@ -1,0 +1,45 @@
+ROW RS-009
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-009"]
+MODE source review
+
+STDOUT
+| RS-009 | `zswap-keys near` / `near-key` invalid index, source contract | Negative, fractional, nonnumeric or index 2147483648 exits 2 with `error: index must be a whole number below 2^31`; no credential output file is created. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L25-L27
+25: fn near_index(s: &str) -> u32 {
+26:     s.parse::<u32>().ok().filter(|i| *i < 0x8000_0000).unwrap_or_else(|| fail("index must be a whole number below 2^31"))
+27: }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L71-L88
+71:         Some("near") if a.len() == 3 => {
+72:             let s = seed(&a[1]);
+73:             let i = near_index(&a[2]);
+74:             let (account_id, public_key) = near_recipient(&s, i);
+75:             println!("{}", serde_json::json!({ "index": i, "path": near_path(i), "account_id": account_id, "public_key": public_key }));
+76:         }
+77:         Some("near-key") if a.len() == 4 => {
+78:             let s = seed(&a[1]);
+79:             let i = near_index(&a[2]);
+80:             let mut f = fs::OpenOptions::new()
+81:                 .write(true)
+82:                 .create_new(true)
+83:                 .mode(0o600)
+84:                 .open(&a[3])
+85:                 .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
+86:             f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
+87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
+88:         }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

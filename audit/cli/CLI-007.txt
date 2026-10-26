@@ -1,0 +1,29 @@
+ROW CLI-007
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-007"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts"]
+STDOUT
+STDERR
+usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup [--probe-ahead]] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book
+EXIT_CODE 1
+ELAPSED_MS 115
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","unknown"]
+STDOUT
+STDERR
+usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup [--probe-ahead]] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book
+EXIT_CODE 1
+ELAPSED_MS 107
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 2.874
+CLEANUP: isolated TMPDIR removed after command.

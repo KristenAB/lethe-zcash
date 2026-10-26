@@ -1,0 +1,69 @@
+ROW CLI-044
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-044"]
+MODE source review
+
+STDOUT
+| CLI-044 | Active book lock cannot be obtained, source contract | After the 45000 ms lock wait, stderr contains `is locked by another process` and `refusing to reserve without it`; no unlocked reservation or quote POST occurs. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L206-L216
+206: /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
+207: export const STALE_LOCK_MS = 15_000;
+208: /** A waiter waits longer than a lock takes to go stale, so a crashed holder never makes reserving fail. */
+209: export const LOCK_WAIT_MS = 45_000;
+210: const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+211: const readToken = (f: string) => {
+212:   try {
+213:     return readFileSync(f, 'utf8');
+214:   } catch {
+215:     return undefined;
+216:   }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L328-L361
+328:   private locked<T>(fn: () => T): T {
+329:     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
+330:     const lock = `${this.path}.lock`;
+331:     const until = Date.now() + LOCK_WAIT_MS;
+332:     const token = `${process.pid}.${randomBytes(8).toString('hex')}`;
+333:     let fd: number | undefined;
+334:     while (fd === undefined) {
+335:       try {
+336:         fd = openSync(lock, 'wx', 0o600);
+337:         writeSync(fd, token);
+338:       } catch (e) {
+339:         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+340:         const seen = readToken(lock);
+341:         try {
+342:           if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) {
+343:             // test hook: widens the window between judging a lock stale and breaking it
+344:             pause(Math.floor(Math.random() * Number(process.env.ZSWAP_LOCK_BREAK_PAUSE_MS ?? 0)));
+345:             this.breakStale(lock, seen);
+346:           }
+347:         } catch {
+348:           /* released meanwhile */
+349:         }
+350:         if (Date.now() > until) throw new Error(`index book ${this.path} is locked by another process (${lock}); refusing to reserve without it`);
+351:         pause(10 + Math.floor(Math.random() * 20));
+352:       }
+353:     }
+354:     try {
+355:       return fn();
+356:     } finally {
+357:       closeSync(fd);
+358:       // remove the lock only while it is still this process's own
+359:       if (readToken(lock) === token) unlinkSync(lock);
+360:     }
+361:   }
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

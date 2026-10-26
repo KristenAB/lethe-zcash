@@ -1,0 +1,134 @@
+ROW CLI-041
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-041"]
+MODE source review
+
+STDOUT
+| CLI-041 | Book race: six concurrent reservations, source/test-contract review only | Six distinct indices 0–5 and six distinct refund addresses persist; `next: 6`; no process reports a lock/unlink error. No processes or tests are started in this run. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L328-L401
+328:   private locked<T>(fn: () => T): T {
+329:     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
+330:     const lock = `${this.path}.lock`;
+331:     const until = Date.now() + LOCK_WAIT_MS;
+332:     const token = `${process.pid}.${randomBytes(8).toString('hex')}`;
+333:     let fd: number | undefined;
+334:     while (fd === undefined) {
+335:       try {
+336:         fd = openSync(lock, 'wx', 0o600);
+337:         writeSync(fd, token);
+338:       } catch (e) {
+339:         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
+340:         const seen = readToken(lock);
+341:         try {
+342:           if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) {
+343:             // test hook: widens the window between judging a lock stale and breaking it
+344:             pause(Math.floor(Math.random() * Number(process.env.ZSWAP_LOCK_BREAK_PAUSE_MS ?? 0)));
+345:             this.breakStale(lock, seen);
+346:           }
+347:         } catch {
+348:           /* released meanwhile */
+349:         }
+350:         if (Date.now() > until) throw new Error(`index book ${this.path} is locked by another process (${lock}); refusing to reserve without it`);
+351:         pause(10 + Math.floor(Math.random() * 20));
+352:       }
+353:     }
+354:     try {
+355:       return fn();
+356:     } finally {
+357:       closeSync(fd);
+358:       // remove the lock only while it is still this process's own
+359:       if (readToken(lock) === token) unlinkSync(lock);
+360:     }
+361:   }
+362:   /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
+365:     return this.locked(() => {
+366:       if (!existsSync(this.path))
+367:         throw new SetupRequiredError(
+368:           `this seed has no index book (${this.path})`,
+369:           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
+370:         );
+371:       const b = this.bind(this.read(), seedFile);
+372:       const given = opts.recipient?.trim();
+373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
+374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+378:       // a retry of a request that provably never left takes over its reservation: same index, same
+379:       // refundTo, no index burned and no false "already used"
+380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+381:       if (retry) {
+382:         delete retry.quoteError;
+383:         retry.retries = (retry.retries ?? 0) + 1;
+384:         if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
+385:         this.write(b);
+386:         return { r: retry, key: deriveRefund(seedFile, retry.index) };
+387:       }
+388:       const index = b.next;
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+
+SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275db94d3d5d18dd05b70304aa653833968a97 L1-L36
+1: // Two wallet processes (CLI and MCP, or two agents) reserving at the same moment must never get the
+2: // same index: the same index means the same refundTo on two public quotes, which links the swaps.
+3: import { execFile } from 'node:child_process';
+4: import { mkdtempSync, readFileSync, utimesSync, writeFileSync } from 'node:fs';
+5: import { tmpdir } from 'node:os';
+6: import { join, resolve } from 'node:path';
+7: import { promisify } from 'node:util';
+8: import { describe, expect, it } from 'vitest';
+9: import { IndexBook, initSeed } from '../src/lib.js';
+10:
+11: const run = promisify(execFile);
+12: const TSX = resolve(__dirname, '../node_modules/.bin/tsx');
+13: const WORKER = resolve(__dirname, 'reserve-worker.ts');
+14:
+15: describe('index book under concurrent wallet processes', () => {
+16:   it('six processes reserving at once get six different indices and six different refundTo', async () => {
+17:     const dir = mkdtempSync(join(tmpdir(), 'zswap-race-'));
+18:     const seed = join(dir, 'seed');
+19:     const book = join(dir, 'book.json');
+20:     initSeed(seed);
+21:     new IndexBook(book).create(seed);
+22:     const startAt = Date.now() + 2500;
+23:     const outs = await Promise.allSettled(Array.from({ length: 6 }, () => run(TSX, [WORKER, seed, book, String(startAt)])));
+24:     const failed = outs.flatMap((o) => (o.status === 'rejected' ? [String((o.reason as Error).message).split('\n').find((l) => /Error/.test(l))] : []));
+25:     expect(failed).toEqual([]);
+26:     const got = outs.map((o) => JSON.parse((o as PromiseFulfilledResult<{ stdout: string }>).value.stdout.trim()) as { index: number; refundTo: string });
+27:     expect(new Set(got.map((g) => g.index)).size).toBe(6);
+28:     expect(new Set(got.map((g) => g.refundTo)).size).toBe(6);
+29:     const b = JSON.parse(readFileSync(book, 'utf8'));
+30:     expect(b.next).toBe(6);
+31:     expect(b.reservations.map((r: { index: number }) => r.index).sort()).toEqual([0, 1, 2, 3, 4, 5]);
+32:   });
+33:
+34:   // A crashed process leaves book.json.lock behind. Every waiter then judges it stale at the same moment;
+35:   // breaking it must let exactly one of them in (before: B unlinked the stale lock and created its own,
+36:   // then C's unlink deleted B's live lock and C entered too, so two processes reserved the same index).
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

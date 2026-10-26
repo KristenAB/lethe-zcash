@@ -1,0 +1,125 @@
+ROW RS-020
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-020"]
+MODE source review
+
+STDOUT
+| RS-020 | Payment-rule transparent policy, source/test-contract review | Transaction with a transparent input/output yields `TRANSPARENT_PART` and exit 1 by default; `--allow-transparent` removes that policy reason while retaining amount/memo/confirmation checks. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3d42cec9dd6e26867d4ee391 L207-L282
+207: pub fn check(r: &TxReport, e: &Expect) -> Verdict {
+208:     let mut reasons = Vec::new();
+209:     if !r.found {
+210:         return Verdict { ok: false, paid_zat: 0, reasons: vec!["TX_NOT_FOUND".into()] };
+211:     }
+212:     let counted: Vec<&Output> = r.outputs.iter().filter(|o| e.memo.as_ref().is_none_or(|m| o.memo.as_deref() == Some(m.as_str()))).collect();
+213:     let paid_zat = counted.iter().map(|o| o.value).sum();
+214:     if r.outputs.is_empty() {
+215:         reasons.push("NO_OUTPUT_TO_KEY".into());
+216:     } else if counted.is_empty() {
+217:         reasons.push("MEMO_MISMATCH".into());
+218:     }
+219:     if !r.outputs.is_empty() && paid_zat < e.amount_zat {
+220:         reasons.push("AMOUNT_TOO_LOW".into());
+221:     }
+222:     if r.confirmations < e.min_conf {
+223:         reasons.push("NOT_CONFIRMED".into());
+224:     }
+225:     if e.shielded_only && r.pools.transparent {
+226:         reasons.push("TRANSPARENT_PART".into());
+227:     }
+228:     Verdict { ok: reasons.is_empty(), paid_zat, reasons }
+229: }
+230:
+231: /// Connect, fetch, decrypt, check.
+232: pub async fn verify(lwd_url: &str, uivk: &str, txid: &str, e: &Expect) -> Result<Verification, VerifyError> {
+233:     let key = parse_uivk(uivk)?;
+234:     let mut c = lwd::connect(lwd_url).await?;
+235:     let tip = lwd::chain_tip(&mut c).await?;
+236:     let report = inspect(&mut c, &key, txid, tip).await?;
+237:     let verdict = check(&report, e);
+238:     Ok(Verification { report, verdict, lightwalletd: lwd_url.to_string() })
+239: }
+240:
+241: #[cfg(test)]
+242: mod tests {
+243:     use super::*;
+244:
+245:     fn report(outputs: Vec<(u64, Option<&str>)>, conf: u32, transparent: bool) -> TxReport {
+246:         TxReport {
+247:             txid: "00".repeat(32),
+248:             found: true,
+249:             height: Some(100),
+250:             confirmations: conf,
+251:             tip: 100 + conf.saturating_sub(1),
+252:             outputs: outputs.into_iter().map(|(value, m)| Output { pool: "Ironwood", value, memo: m.map(String::from), memo_binary: false }).collect(),
+253:             pools: Pools { ironwood: true, transparent, ..Pools::default() },
+254:         }
+255:     }
+256:     const E: fn(u64, Option<&str>) -> Expect = |amount_zat, memo| Expect { amount_zat, memo: memo.map(String::from), min_conf: 1, shielded_only: true };
+257:
+258:     #[test]
+259:     fn exact_payment_passes_and_counts_only_matching_memos() {
+260:         let r = report(vec![(60, Some("inv-1")), (40, Some("inv-1")), (500, Some("other"))], 3, false);
+261:         assert_eq!(check(&r, &E(100, Some("inv-1"))), Verdict { ok: true, paid_zat: 100, reasons: vec![] });
+262:         assert_eq!(check(&r, &E(101, Some("inv-1"))).reasons, vec!["AMOUNT_TOO_LOW"]);
+263:         assert_eq!(check(&r, &E(600, None)).paid_zat, 600);
+264:     }
+265:
+266:     #[test]
+267:     fn each_failure_has_its_reason() {
+268:         assert_eq!(check(&report(vec![], 3, false), &E(1, None)).reasons, vec!["NO_OUTPUT_TO_KEY"]);
+269:         assert_eq!(check(&report(vec![(100, Some("a"))], 3, false), &E(100, Some("b"))).reasons, vec!["MEMO_MISMATCH", "AMOUNT_TOO_LOW"]);
+270:         assert_eq!(check(&report(vec![(100, None)], 0, false), &E(100, None)).reasons, vec!["NOT_CONFIRMED"]);
+271:         assert_eq!(check(&report(vec![(100, None)], 2, true), &E(100, None)).reasons, vec!["TRANSPARENT_PART"]);
+272:         let mut gone = report(vec![], 0, false);
+273:         gone.found = false;
+274:         assert_eq!(check(&gone, &E(1, None)).reasons, vec!["TX_NOT_FOUND"]);
+275:     }
+276:
+277:     #[test]
+278:     fn transparent_allowed_when_asked() {
+279:         let e = Expect { shielded_only: false, ..E(100, None) };
+280:         assert!(check(&report(vec![(100, None)], 2, true), &e).ok);
+281:     }
+282: }
+
+SOURCE packages/scan/src/main.rs SHA256 b5cfb648626de44345787f837b2d96441296456dd817c2c96a79ef0290708766 L38-L62
+38:         Some("verify") => {
+39:             let txid = args.get(1).filter(|a| !a.starts_with("--")).unwrap_or_else(|| fail(2, USAGE));
+40:             let mut e = Expect { amount_zat: 0, memo: None, min_conf: 1, shielded_only: true };
+41:             let mut amount = None;
+42:             let mut i = 2;
+43:             while i < args.len() {
+44:                 let val = || args.get(i + 1).cloned().unwrap_or_else(|| fail(2, format!("{} needs a value", args[i])));
+45:                 match args[i].as_str() {
+46:                     "--amount" => amount = Some(val().parse::<u64>().unwrap_or_else(|_| fail(2, "--amount must be zatoshis (a whole number)"))),
+47:                     "--memo" => e.memo = Some(val()),
+48:                     "--min-conf" => e.min_conf = val().parse().unwrap_or_else(|_| fail(2, "--min-conf must be a whole number")),
+49:                     "--allow-transparent" => {
+50:                         e.shielded_only = false;
+51:                         i += 1;
+52:                         continue;
+53:                     }
+54:                     other => fail(2, format!("unknown option {other}\n{USAGE}")),
+55:                 }
+56:                 i += 2;
+57:             }
+58:             e.amount_zat = amount.unwrap_or_else(|| fail(2, "--amount is required"));
+59:             let v = verify(&lwd_url(), &env("ZPV_UIVK"), txid, &e).await.unwrap_or_else(|err| fail(2, err));
+60:             println!("{}", serde_json::to_string(&v).expect("serializable"));
+61:             std::process::exit(if v.verdict.ok { 0 } else { 1 });
+62:         }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

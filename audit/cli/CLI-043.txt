@@ -1,0 +1,117 @@
+ROW CLI-043
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-043"]
+MODE source review
+
+STDOUT
+| CLI-043 | Book durability before exposing reserved address, source review | Reservation write fsyncs the temporary file before rename and the containing directory after rename, before returning or posting; persisted book mode is 0600 and `next` advances exactly once. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L280-L299
+280:   /** Write to a temporary file, fsync it, rename it over the book, then fsync the folder: on disk, not in a cache. */
+281:   private write(b: Book) {
+282:     const dir = dirname(this.path);
+283:     mkdirSync(dir, { recursive: true, mode: 0o700 });
+284:     const tmp = `${this.path}.${process.pid}.tmp`;
+285:     const fd = openSync(tmp, 'w', 0o600);
+286:     try {
+287:       writeSync(fd, JSON.stringify(b, null, 2));
+288:       fsyncSync(fd);
+289:     } finally {
+290:       closeSync(fd);
+291:     }
+292:     renameSync(tmp, this.path);
+293:     const d = openSync(dir, 'r');
+294:     try {
+295:       fsyncSync(d);
+296:     } finally {
+297:       closeSync(d);
+298:     }
+299:   }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L389-L401
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L430-L451
+430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
+433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
+436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+437:   const { r } = book.reserve(
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+446:   } catch (e) {
+447:     book.failed(r.index, e);
+448:     throw e;
+449:   }
+450:   book.attach(r.index, q);
+451:   return { r, q };
+
+SOURCE packages/cli/test/book-durability.test.ts SHA256 bfed1a8621b62cebb79cad9f63fdc8a882a66c3e652d0adb6627e1f9c8092eb3 L1-L65
+1: // The index book is the only record of which indices went out on public quotes. A write that sits in
+2: // the OS cache when the external disk is unplugged or the machine sleeps loses a reservation, and the
+3: // index is then handed out again. Every write must reach the disk: the file and its folder are fsynced.
+4: import { mkdtempSync, readFileSync, statSync } from 'node:fs';
+5: import * as fs from 'node:fs';
+6: import { tmpdir } from 'node:os';
+7: import { join } from 'node:path';
+8: import { afterEach, describe, expect, it, vi } from 'vitest';
+9:
+10: vi.mock('node:fs', async (importOriginal) => {
+11:   const real = await importOriginal<typeof import('node:fs')>();
+12:   return { ...real, fsyncSync: vi.fn(real.fsyncSync) };
+13: });
+14: const { IndexBook, initSeed } = await import('../src/lib.js');
+15:
+16: afterEach(() => vi.mocked(fs.fsyncSync).mockClear());
+17:
+18: describe('index book durability', () => {
+19:   it('a reservation is fsynced (the book file and its folder) before reserve returns', () => {
+20:     const dir = mkdtempSync(join(tmpdir(), 'zswap-fsync-'));
+21:     const seed = join(dir, 'seed');
+22:     const path = join(dir, 'book.json');
+23:     initSeed(seed);
+24:     const book = new IndexBook(path);
+25:     book.create(seed);
+26:     vi.mocked(fs.fsyncSync).mockClear();
+27:     const { r } = book.reserve(seed);
+28:     expect(r.index).toBe(0);
+29:     // one fsync of the written file, one of the folder that holds the rename
+30:     expect(vi.mocked(fs.fsyncSync).mock.calls.length).toBeGreaterThanOrEqual(2);
+31:     expect(JSON.parse(readFileSync(path, 'utf8')).next).toBe(1);
+32:     expect(statSync(path).mode & 0o777).toBe(0o600);
+33:   });
+34: });
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

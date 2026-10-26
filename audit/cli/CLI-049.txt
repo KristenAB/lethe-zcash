@@ -1,0 +1,88 @@
+ROW CLI-049
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-049"]
+MODE source review
+
+STDOUT
+| CLI-049 | Probe-ahead local book mutation, source review | After probe lookup, stdout `next` equals persisted `max(old next, highest used index + 1 + gap)`; restored book is created bound to the account; later reservations cannot precede that value. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L162-L185
+162: export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; probeAhead?: boolean; tokens?: string[] } = {}) {
+163:   const gap = opts.gap ?? RECOVERY_GAP;
+164:   if (!Number.isSafeInteger(gap) || gap < 0 || gap > 1000) throw new Error('gap must be a whole number up to 1000');
+165:   const b = book.readFor(seedFile);
+166:   const booked = new Map(b.reservations.map((r) => [r.index, r]));
+167:   const out: RecoveredRecipient[] = [];
+168:   let upTo = b.next + gap;
+169:   let asked = 0;
+170:   for (let i = 0; i < upTo; i++) {
+171:     const r: RecoveredRecipient = { ...deriveNearRecipient(seedFile, i), inBook: booked.has(i) };
+172:     if (opts.lookup && (opts.probeAhead || booked.has(i))) {
+173:       if (asked++ > 0) await sleep(Math.floor(Math.random() * (lookupJitterMs() + 1)));
+174:       // on chain: the swap's own destination token (from the book) and any asked for; the indexer covers the rest
+175:       const own = nearContract(booked.get(i)?.destinationAsset);
+176:       r.state = await nearAccountState(r.account_id, [...new Set([...(own ? [own] : []), ...(opts.tokens ?? [])])]);
+177:       if (opts.probeAhead && used(r.state)) upTo = Math.max(upTo, i + 1 + gap);
+178:     }
+179:     out.push(r);
+180:   }
+181:   const usedIdx = out.filter((r) => used(r.state)).map((r) => r.index);
+182:   // a probing lookup is a recovery: the book never hands out an index it looked at (see IndexBook.advance)
+183:   const next = opts.lookup && opts.probeAhead ? book.advance(seedFile, Math.max(-1, ...usedIdx) + 1 + gap) : b.next;
+184:   return { gap, recipients: out, used: usedIdx, checked: asked, next };
+185: }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L240-L279
+240:   private bind(b: Book, seedFile: string): Book {
+241:     const id = seedId(seedFile);
+242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+243:     if (b.fvk_id !== undefined) {
+244:       if (b.fvk_id !== id) throw other();
+245:       return b;
+246:     }
+247:     const first = b.reservations[0];
+248:     if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
+249:     b.fvk_id = id;
+250:     return b;
+251:   }
+252:   /** The read-only view of this seed's book (refuses another seed's). */
+253:   readFor(seedFile: string): Book {
+254:     return this.bind(this.read(), seedFile);
+255:   }
+256:   /** Creates the empty book bound to `seedFile`; false if it already exists. */
+257:   create(seedFile: string): boolean {
+258:     return this.locked(() => {
+259:       if (existsSync(this.path)) {
+260:         this.bind(this.read(), seedFile);
+261:         return false;
+262:       }
+263:       this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
+264:       return true;
+265:     });
+266:   }
+267:   /**
+268:    * After a recovery: never hand out an index that recovery looked at. Indices inside the lookahead may
+269:    * have been named in public quotes with nothing ever paid to them, so `next` moves past them. Creates
+270:    * the book (bound to the seed) for a wallet restored from its seed alone.
+271:    */
+272:   advance(seedFile: string, next: number): number {
+273:     return this.locked(() => {
+274:       const b = existsSync(this.path) ? this.bind(this.read(), seedFile) : { next: 0, reservations: [], fvk_id: seedId(seedFile) };
+275:       b.next = Math.max(b.next, next);
+276:       this.write(b);
+277:       return b.next;
+278:     });
+279:   }
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

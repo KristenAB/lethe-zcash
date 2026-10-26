@@ -1,0 +1,140 @@
+ROW CLI-058
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-058"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","sweep-plan","--lookup"]
+STDOUT
+{
+  "steps": [
+    {
+      "index": 0,
+      "from": "e37f1b2cdfe5d01adffdefed972f3d1b236062dde889256b55e7de000a36a941",
+      "to": null,
+      "action": "leave it here and spend from this account directly (no sweep, no new link)"
+    },
+    {
+      "index": 1,
+      "from": "2957fcf9f73bba9e3b8e0fd88a6b2f29f3a75a38e9a269f6a7df37d87f80c00b",
+      "to": null,
+      "action": "leave it here and spend from this account directly (no sweep, no new link)"
+    }
+  ],
+  "warnings": [],
+  "relinked": 0,
+  "keyExport": "zswap near-key <index> <out-file> writes that account’s near-cli credentials (0600, never printed); import it into a NEAR wallet or near-cli to sign the sweep"
+}
+STDERR
+privacy: a NEAR lookup sends every recipient it checks from this IP, seconds apart, to 127.0.0.1:63731 (NEAR RPC) and 127.0.0.1:63731 (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.
+EXIT_CODE 0
+ELAPSED_MS 152
+{
+  "askedAccounts": [
+    "e37f1b2cdfe5d01adffdefed972f3d1b236062dde889256b55e7de000a36a941",
+    "2957fcf9f73bba9e3b8e0fd88a6b2f29f3a75a38e9a269f6a7df37d87f80c00b",
+    "bdc091f83fe89bece10105073f74b4e3c9d705c9c40f8c03b9bb826652ffafd7"
+  ],
+  "next": 3
+}
+{
+  "requests": [
+    {
+      "method": "POST",
+      "url": "/",
+      "body": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "query",
+        "params": {
+          "finality": "final",
+          "request_type": "view_account",
+          "account_id": "e37f1b2cdfe5d01adffdefed972f3d1b236062dde889256b55e7de000a36a941"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/",
+      "body": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "query",
+        "params": {
+          "finality": "final",
+          "request_type": "call_function",
+          "account_id": "wrap.near",
+          "method_name": "ft_balance_of",
+          "args_base64": "eyJhY2NvdW50X2lkIjoiZTM3ZjFiMmNkZmU1ZDAxYWRmZmRlZmVkOTcyZjNkMWIyMzYwNjJkZGU4ODkyNTZiNTVlN2RlMDAwYTM2YTk0MSJ9"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/v1/account/e37f1b2cdfe5d01adffdefed972f3d1b236062dde889256b55e7de000a36a941/ft",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "url": "/",
+      "body": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "query",
+        "params": {
+          "finality": "final",
+          "request_type": "view_account",
+          "account_id": "2957fcf9f73bba9e3b8e0fd88a6b2f29f3a75a38e9a269f6a7df37d87f80c00b"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/",
+      "body": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "query",
+        "params": {
+          "finality": "final",
+          "request_type": "call_function",
+          "account_id": "wrap.near",
+          "method_name": "ft_balance_of",
+          "args_base64": "eyJhY2NvdW50X2lkIjoiMjk1N2ZjZjlmNzNiYmE5ZTNiOGUwZmQ4OGE2YjJmMjlmM2E3NWEzOGU5YTI2OWY2YTdkZjM3ZDg3ZjgwYzAwYiJ9"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/v1/account/2957fcf9f73bba9e3b8e0fd88a6b2f29f3a75a38e9a269f6a7df37d87f80c00b/ft",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "url": "/",
+      "body": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "query",
+        "params": {
+          "finality": "final",
+          "request_type": "view_account",
+          "account_id": "bdc091f83fe89bece10105073f74b4e3c9d705c9c40f8c03b9bb826652ffafd7"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/v1/account/bdc091f83fe89bece10105073f74b4e3c9d705c9c40f8c03b9bb826652ffafd7/ft",
+      "body": null
+    }
+  ]
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.364
+CLEANUP: isolated TMPDIR removed after command.

@@ -1,0 +1,200 @@
+ROW CLI-071
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-071"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+{
+  "command": "linkabilityReport(swapsFromQuotes(deployments/pass2.json.quotes))",
+  "report": {
+    "swaps": 3,
+    "pairs": 3,
+    "links": [
+      {
+        "field": "within 10 min",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "both requests went out within ten minutes"
+      },
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same destination token"
+      },
+      {
+        "field": "split pattern",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "common denominations sent largest first, the order a greedy 1-2-5 split produces"
+      },
+      {
+        "field": "client fingerprint",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"
+      }
+    ],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 3,
+    "score": 32,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  },
+  "recorded": {
+    "recomputedAt": "2026-10-22",
+    "note": "The same quotes scored by the current linkabilityReport (SCORE_METHOD) from their public requests and 1Click timestamps; this is the score the landing and dashboard show.",
+    "swaps": 3,
+    "pairs": 3,
+    "links": [
+      {
+        "field": "within 10 min",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "both requests went out within ten minutes"
+      },
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same destination token"
+      },
+      {
+        "field": "split pattern",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "common denominations sent largest first, the order a greedy 1-2-5 split produces"
+      },
+      {
+        "field": "client fingerprint",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client"
+      }
+    ],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 3,
+    "score": 32,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.134
+CLEANUP: isolated TMPDIR removed after command.

@@ -1,0 +1,33 @@
+ROW RS-002
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-002"]
+MODE source review
+
+STDOUT
+| RS-002 | `zswap-keys init`, source contract only | New-file branch exits 0 with exact JSON `{"created":true}`, writes exactly 32 random bytes with create-new mode 0600; existing-file branch exits 0 with `{"created":false}` and no overwrite. No seed is opened or created in this run. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L32-L42
+32:         Some("init") if a.len() == 2 => {
+33:             if fs::metadata(&a[1]).is_ok() {
+34:                 println!("{{\"created\":false}}");
+35:                 return;
+36:             }
+37:             let mut s = [0u8; 32];
+38:             rand::fill(&mut s);
+39:             let mut f = fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(&a[1]).unwrap_or_else(|e| fail(e));
+40:             f.write_all(&s).unwrap_or_else(|e| fail(e));
+41:             println!("{{\"created\":true}}");
+42:         }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

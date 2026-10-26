@@ -1,0 +1,201 @@
+ROW CLI-064
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-064"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","plan","0.137","nep141:wrap.near","--round","down"]
+STDOUT
+{
+  "swaps": [
+    {
+      "part": 0,
+      "amountZat": "10000000",
+      "offsetS": 0,
+      "at": "2026-10-26T04:35:13.488Z",
+      "recipient": "fresh recipient #0",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #0",
+      "jwt": false
+    }
+  ],
+  "tradeOffs": [
+    "round: swaps 0.1 ZEC instead of 0.137 ZEC (-0.037 ZEC)",
+    "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+  ],
+  "report": {
+    "swaps": 1,
+    "pairs": 0,
+    "links": [],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 0,
+    "score": 100,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "one swap: nothing in the batch to link it to",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 110
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","plan","0.17","nep141:wrap.near","--round","nearest"]
+STDOUT
+{
+  "swaps": [
+    {
+      "part": 0,
+      "amountZat": "20000000",
+      "offsetS": 0,
+      "at": "2026-10-26T04:35:13.575Z",
+      "recipient": "fresh recipient #0",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #0",
+      "jwt": false
+    }
+  ],
+  "tradeOffs": [
+    "round: swaps 0.2 ZEC instead of 0.17 ZEC (+0.03 ZEC)",
+    "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+  ],
+  "report": {
+    "swaps": 1,
+    "pairs": 0,
+    "links": [],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 0,
+    "score": 100,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "one swap: nothing in the batch to link it to",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 86
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","plan","0.7","nep141:wrap.near","--round","nearest"]
+STDOUT
+{
+  "swaps": [
+    {
+      "part": 0,
+      "amountZat": "50000000",
+      "offsetS": 0,
+      "at": "2026-10-26T04:35:13.661Z",
+      "recipient": "fresh recipient #0",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #0",
+      "jwt": false
+    }
+  ],
+  "tradeOffs": [
+    "round: swaps 0.5 ZEC instead of 0.7 ZEC (-0.2 ZEC)",
+    "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+  ],
+  "report": {
+    "swaps": 1,
+    "pairs": 0,
+    "links": [],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 0,
+    "score": 100,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "one swap: nothing in the batch to link it to",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 85
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","plan","0.123456","nep141:wrap.near","--split"]
+STDOUT
+{
+  "swaps": [
+    {
+      "part": 0,
+      "amountZat": "10000000",
+      "offsetS": 0,
+      "at": "2026-10-26T04:35:13.745Z",
+      "recipient": "fresh recipient #0",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #0",
+      "jwt": false
+    },
+    {
+      "part": 1,
+      "amountZat": "2000000",
+      "offsetS": 0,
+      "at": "2026-10-26T04:35:13.745Z",
+      "recipient": "fresh recipient #1",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #1",
+      "jwt": false
+    }
+  ],
+  "tradeOffs": [
+    "split: 2 swaps instead of 1: about 0.0001 ZEC more in deposit fees (ZIP 317 minimum per transaction), each part priced and slipped separately, and 0.003456 ZEC stays in the wallet. Each part needs its own refund address, recipient and time, or the parts link each other.",
+    "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+  ],
+  "report": {
+    "swaps": 2,
+    "pairs": 1,
+    "links": [
+      {
+        "field": "same minute",
+        "strength": "strong",
+        "pairs": [
+          [
+            0,
+            1
+          ]
+        ],
+        "why": "both requests went out within a minute of each other"
+      },
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ]
+        ],
+        "why": "the same destination token"
+      },
+      {
+        "field": "split pattern",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ]
+        ],
+        "why": "common denominations sent largest first, the order a greedy 1-2-5 split produces"
+      }
+    ],
+    "sharedFields": 1,
+    "strongLinkedPairs": 1,
+    "weakOnlyPairs": 0,
+    "score": 0,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "1 of 1 pairs linked by same minute",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 85
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.518
+CLEANUP: isolated TMPDIR removed after command.

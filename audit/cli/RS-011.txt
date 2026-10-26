@@ -1,0 +1,44 @@
+ROW RS-011
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-011"]
+MODE source review
+
+STDOUT
+| RS-011 | `zswap-keys near-key`, source contract only | Exclusive 0600 file creation writes near-cli fields `account_id`, `public_key`, `private_key` internally; stdout is only `index`, `account_id`, `written`; existing output exits 2 with `refusing to overwrite an existing file`. No export or credentials inspection occurs here. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L77-L88
+77:         Some("near-key") if a.len() == 4 => {
+78:             let s = seed(&a[1]);
+79:             let i = near_index(&a[2]);
+80:             let mut f = fs::OpenOptions::new()
+81:                 .write(true)
+82:                 .create_new(true)
+83:                 .mode(0o600)
+84:                 .open(&a[3])
+85:                 .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
+86:             f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
+87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
+88:         }
+
+SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd767a43f83883311071efd9b6f82d25ccf L59-L67
+59: /// near-cli's credentials JSON (`~/.near-credentials/mainnet/<account>.json`) for recipient `index`.
+60: /// The NEAR private key encoding is base58 of the 64-byte `secret ‖ public` keypair.
+61: pub fn near_credentials_json(seed: &[u8], index: u32) -> String {
+62:     let sk = near_signing_key(seed, index);
+63:     let (account_id, public_key) = near_recipient(seed, index);
+64:     let private_key = format!("ed25519:{}", bs58::encode(sk.to_keypair_bytes()).into_string());
+65:     serde_json::json!({ "account_id": account_id, "public_key": public_key, "private_key": private_key }).to_string()
+66: }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

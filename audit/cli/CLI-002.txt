@@ -1,0 +1,71 @@
+ROW CLI-002
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-002"]
+MODE source review
+
+STDOUT
+| CLI-002 | `init`: existing wallet, source contract only | Exit 0; JSON contains `seedCreated: false`, `bookCreated: false`; existing wallet files are not replaced. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L138-L161
+138: /** Creates a 32-byte seed (0600) if missing, and its folder (0700). Returns whether it was created. */
+139: export function initSeed(seedFile: string): boolean {
+140:   mkdirSync(dirname(seedFile), { recursive: true, mode: 0o700 });
+141:   return JSON.parse(execFileSync(keysBin(), ['init', seedFile]).toString()).created;
+142: }
+143:
+144: /**
+145:  * A new wallet: the seed and its empty index book, bound to each other. For a seed that already exists
+146:  * without a book, the book is created only with `assertNew` (the caller says this seed never quoted a
+147:  * swap); otherwise its indices may already be public, and `zswap recover` must rebuild the book first.
+148:  */
+149: export function initWallet(seedFile: string, book: IndexBook, opts: { assertNew?: boolean } = {}): { seedCreated: boolean; bookCreated: boolean; seed: string; book: string } {
+150:   const seedCreated = initSeed(seedFile);
+151:   let bookCreated = false;
+152:   if (!book.exists()) {
+153:     if (!seedCreated && !opts.assertNew)
+154:       throw new SetupRequiredError(
+155:         `index book for the existing seed ${seedFile}`,
+156:         `expected at ${book.path}. Run \`zswap recover <birthday-height>\` to rebuild it from the chain, or \`zswap init --new\` if this seed has never quoted a swap`,
+157:       );
+158:     bookCreated = book.create(seedFile);
+159:   }
+160:   return { seedCreated, bookCreated, seed: seedFile, book: book.path };
+161: }
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L257-L266
+257:   create(seedFile: string): boolean {
+258:     return this.locked(() => {
+259:       if (existsSync(this.path)) {
+260:         this.bind(this.read(), seedFile);
+261:         return false;
+262:       }
+263:       this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
+264:       return true;
+265:     });
+266:   }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L32-L42
+32:         Some("init") if a.len() == 2 => {
+33:             if fs::metadata(&a[1]).is_ok() {
+34:                 println!("{{\"created\":false}}");
+35:                 return;
+36:             }
+37:             let mut s = [0u8; 32];
+38:             rand::fill(&mut s);
+39:             let mut f = fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(&a[1]).unwrap_or_else(|e| fail(e));
+40:             f.write_all(&s).unwrap_or_else(|e| fail(e));
+41:             println!("{{\"created\":true}}");
+42:         }
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+CLEANUP: source review created no seed, book or credentials files.

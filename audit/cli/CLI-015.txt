@@ -1,0 +1,38 @@
+ROW CLI-015
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/vitest", "run", "test/amount-validation.test.ts"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+
+ RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli
+
+ ✓ test/amount-validation.test.ts (8 tests) 763ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  10:03:59
+   Duration  914ms (transform 36ms, setup 0ms, collect 41ms, tests 763ms, environment 0ms, prepare 39ms)
+
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 2.103
+CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
+433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
+436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+
+STDERR
+
+EXIT_CODE 0

@@ -1,0 +1,49 @@
+ROW CLI-082
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/vitest", "run", "test/cli.test.ts", "-t", "a live swap"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+
+ RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli
+
+ ✓ test/cli.test.ts (8 tests | 7 skipped) 1ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 7 skipped (8)
+   Start at  10:05:35
+   Duration  138ms (transform 37ms, setup 0ms, collect 45ms, tests 1ms, environment 0ms, prepare 26ms)
+
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.344
+CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+508: export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
+509:   if (q.dry === false) throw new BlockedError('BLOCKED: a live (dry=false) quote creates a mainnet deposit address; it needs mainnet ZEC and Nick’s OK, and zakura-one-time-ivk is not yet reviewed for live addresses');
+510:   const body = quoteBody(q);
+511:   const headers: Record<string, string> = { 'content-type': 'application/json' };
+512:   if (process.env.ONECLICK_JWT) headers.authorization = `Bearer ${process.env.ONECLICK_JWT}`;
+513:   const r = await httpJson('1Click', `${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });
+514:   if (r.status === 401) {
+515:     const said = (r.body as { message?: string } | undefined)?.message ?? answerSnippet(r);
+516:     throw new SetupRequiredError(
+517:       'ONECLICK_JWT',
+518:       process.env.ONECLICK_JWT ? `1Click rejected the partner JWT: ${said} (HTTP 401)` : `1Click: ${said} (HTTP 401); ${q.confidentiality ?? 'this'} quotes need a 1Click partner JWT`,
+519:       'refused',
+520:     );
+521:   }
+522:   if (!r.ok) throw new HttpError(`1Click refused the quote: HTTP ${r.status} ${answerSnippet(r)}`, 'refused', r.status);
+523:   if (r.body === null || typeof r.body !== 'object') throw new HttpError(`1Click answered HTTP ${r.status} with a body that is not a JSON object: ${answerSnippet(r)}`, 'refused', r.status);
+524:   return r.body as Record<string, unknown>;
+525: }
+
+STDERR
+
+EXIT_CODE 0
