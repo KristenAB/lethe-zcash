@@ -1,0 +1,55 @@
+[
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "document",
+    "url": "https://lethe-landing-sooty.vercel.app/evidence.html"
+  },
+  {
+    "event": "response",
+    "status": 403,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/evidence.html"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "script",
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/static/challenge.v2.min.js"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/static/challenge.v2.min.js"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/static/challenge.v2.wasm"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/static/challenge.v2.wasm"
+  },
+  {
+    "event": "request",
+    "method": "POST",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge"
+  },
+  {
+    "event": "response",
+    "status": 708,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge"
+  },
+  {
+    "event": "requestfailed",
+    "url": "https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
+    "error": "net::ERR_ABORTED"
+  }
+]

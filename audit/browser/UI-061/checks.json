@@ -1,0 +1,61 @@
+{
+  "id": "UI-061",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:05:47.489Z",
+  "end": "2026-10-26T04:05:48.769Z",
+  "url": "https://lethe-dashboard.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live dashboard river button accessible names (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
+  "expected": "Each button in ol.river is accessible by its visible label `#<index> <refundTo> <recipient> <state>` (e.g. `#5 u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur 66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a shown`).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "river visible name 0",
+      "ok": true,
+      "actual": "#5 u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur 66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a shown",
+      "expected": "#5 u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur 66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a shown"
+    },
+    {
+      "label": "accessible river exact name 0",
+      "ok": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "label": "river visible name 1",
+      "ok": true,
+      "actual": "#6 u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j 3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada used once",
+      "expected": "#6 u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j 3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada used once"
+    },
+    {
+      "label": "accessible river exact name 1",
+      "ok": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "label": "river visible name 2",
+      "ok": true,
+      "actual": "#7 u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr 4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d used once",
+      "expected": "#7 u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr 4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d used once"
+    },
+    {
+      "label": "accessible river exact name 2",
+      "ok": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

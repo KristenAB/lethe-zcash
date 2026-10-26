@@ -1,0 +1,50 @@
+[
+  {
+    "time": "2026-10-26T04:10:10.391Z",
+    "type": "debug",
+    "text": "[vite] connecting...",
+    "location": {
+      "url": "http://127.0.0.1:5182/@vite/client",
+      "line": 732,
+      "column": 8,
+      "lineNumber": 732,
+      "columnNumber": 8
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:10.427Z",
+    "type": "info",
+    "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "location": {
+      "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=d50268be",
+      "line": 22162,
+      "column": 53,
+      "lineNumber": 22162,
+      "columnNumber": 53
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:10.438Z",
+    "type": "debug",
+    "text": "[vite] connected.",
+    "location": {
+      "url": "http://127.0.0.1:5182/@vite/client",
+      "line": 826,
+      "column": 11,
+      "lineNumber": 826,
+      "columnNumber": 11
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:11.066Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "location": {
+      "url": "http://127.0.0.1:5182/@fs//Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/packages/mcp/src/tools.ts",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  }
+]

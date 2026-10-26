@@ -1,0 +1,46 @@
+{
+  "id": "UI-175",
+  "status": "FAIL",
+  "notes": "Status-only browser probe returned HTTP 200; expected HTTP 403 Restricted. Response body intentionally not read; this does not establish wallet-content exposure.",
+  "start": "2026-10-26T04:10:07.646Z",
+  "end": "2026-10-26T04:10:08.787Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Dev server security: deny index-book.json - http://127.0.0.1:5182/",
+  "expected": "Browser fetch to /@fs/<repo>/.demo/index-book.json returns HTTP 403 Restricted.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "/@fs//Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/.demo/index-book.json",
+          "status": 200,
+          "statusText": "OK"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": false,
+      "actual": [
+        200
+      ],
+      "expected": [
+        403
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

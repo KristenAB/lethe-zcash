@@ -1,0 +1,737 @@
+{
+  "id": "UI-168",
+  "status": "FAIL",
+  "notes": "Exact decimal precision differs: e.g. 0.2 displayed where 0.20000000 is required.",
+  "start": "2026-10-26T04:11:53.519Z",
+  "end": "2026-10-26T04:11:54.874Z",
+  "url": "http://127.0.0.1:8432/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local static site evidence render (1280x800 desktop) - http://127.0.0.1:8432/evidence.html",
+  "expected": "GET /evidence.html returns HTTP 200 static HTML with embedded script#run JSON. Document title is \"Lethe evidence: a new refund address and recipient for every swap\"; h1 is \"A new refund address and recipient for every swap.\"; hero shows swap 1: 0.20000000 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s. \"A wallet that reuses its address\" repeats the recorded account mainnet address 3 times, while \"Lethe\" lists the three distinct recorded refund addresses. \"Before: the first run\" shows recipient \"links 3 swaps\"; \"All three links, measured\" shows scores 0/100, 32/100 and 75/100. \"Why not 1Click's Confidential Intents?\" names HTTP 401 and ONECLICK_JWT; \"Found again, from the seed alone\" lists 30,000/31,000/32,000/25,000 zat; \"Not yet\" labels \"A real swap\" as \"BLOCKED\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "script#run count",
+      "ok": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "label": "title",
+      "ok": true,
+      "actual": "Lethe evidence: a new refund address and recipient for every swap",
+      "expected": "Lethe evidence: a new refund address and recipient for every swap"
+    },
+    {
+      "label": "h1",
+      "ok": true,
+      "actual": "A new refund address and recipient for every swap.",
+      "expected": "A new refund address and recipient for every swap."
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": false,
+      "actual": "0.2",
+      "expected": "0.20000000"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "now",
+        "ahead",
+        "ahead"
+      ],
+      "expected": [
+        "now",
+        "ahead",
+        "ahead"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "in use",
+        "",
+        ""
+      ],
+      "expected": [
+        "in use",
+        "",
+        ""
+      ]
+    },
+    {
+      "label": "recorded reused account addresses",
+      "ok": true,
+      "actual": [
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm",
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm",
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm"
+      ],
+      "expected": [
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm",
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm",
+        "u1ces8sa6vedcmzvgy6mvdv0y565m7r928n7j3w87xc6eqfnfyhqsfzj62smmp3cjetrtcq0acrtdhqhjtwlv7a95sjh4z5amm9qrg7fkm"
+      ]
+    },
+    {
+      "label": "recorded distinct one-time addresses",
+      "ok": true,
+      "actual": [
+        "u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr",
+        "u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q",
+        "u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx"
+      ],
+      "expected": [
+        "u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr",
+        "u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q",
+        "u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx"
+      ]
+    },
+    {
+      "label": "three distinct refund addresses",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "#audit-rows li:nth-child(2) .v",
+      "ok": true,
+      "actual": "links 3 swaps",
+      "expected": "links 3 swaps"
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "First run",
+      "expected": "First run"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 20, 2026",
+      "expected": "Oct 20, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "2",
+      "expected": "2"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "links",
+      "expected": "links"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong \u00b7 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong \u00b7 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong \u00b7 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong \u00b7 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "3 of 3 pairs linked by recipient, same minute.",
+      "expected": "3 of 3 pairs linked by recipient, same minute."
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 2",
+      "expected": "Pass 2"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 21, 2026",
+      "expected": "Oct 21, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "client fingerprint",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "client fingerprint",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 3",
+      "expected": "Pass 3"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 22, 2026",
+      "expected": "Oct 22, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
+    },
+    {
+      "label": "#confidential contains HTTP 401",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#confidential contains ONECLICK_JWT",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover .sub contains 1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "four recovery rows",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "recovery label 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 0",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+      "expected": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"
+    },
+    {
+      "label": "recovery label 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 1",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+      "expected": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"
+    },
+    {
+      "label": "recovery label 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 2",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+      "expected": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"
+    },
+    {
+      "label": "recovery label 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 3",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c",
+      "expected": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"
+    },
+    {
+      "label": "#seed-only",
+      "ok": true,
+      "actual": "Then the same scan with the seed and no index book, as a restored wallet would run it: 13 refund keys (a lookahead of 10), 23 blocks, 4 of 4 payments found, each by its own key.",
+      "expected": "Then the same scan with the seed and no index book, as a restored wallet would run it: 13 refund keys (a lookahead of 10), 23 blocks, 4 of 4 payments found, each by its own key."
+    },
+    {
+      "label": "#not-done h2",
+      "ok": true,
+      "actual": "Not yet",
+      "expected": "Not yet"
+    },
+    {
+      "label": "#not-done li count",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "#not-done .tag",
+      "ok": true,
+      "actual": "BLOCKED",
+      "expected": "BLOCKED"
+    },
+    {
+      "label": "#not-done li:first-child contains A real swap",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:first-child contains mainnet ZEC and the maintainer's sign-off",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:nth-child(2) contains Draft key derivation",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:nth-child(2) contains zakura-one-time-ivk",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:nth-child(2) contains 0.0.1-rc1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:nth-child(3) contains Spending a refund",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#not-done li:nth-child(4) contains Delivery to a per-swap NEAR account",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

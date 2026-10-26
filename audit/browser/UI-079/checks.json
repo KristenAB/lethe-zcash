@@ -1,0 +1,35 @@
+{
+  "id": "UI-079",
+  "status": "FAIL",
+  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-172: FAIL. redeploy blocked: this run must not deploy",
+  "start": "2026-10-26T04:06:14.018Z",
+  "end": "2026-10-26T04:06:18.299Z",
+  "url": "https://lethe-landing-sooty.vercel.app/app/",
+  "viewport": "1280x800",
+  "flow": "Live landing host /app/ swap widget & river interaction - https://lethe-landing-sooty.vercel.app/app/",
+  "expected": "Selecting step buttons 1, 2 and 3 displays, respectively, swap 1: 0.20000000 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s; swap 2: 0.10000000 ZEC, 25.3240 wNEAR, key #6 refundTo `u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j`, account #6 recipient `3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada`, Sent at +138 s; swap 3: 0.05000000 ZEC, 12.6482 wNEAR, key #7 refundTo `u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr`, account #7 recipient `4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d`, Sent at +278 s. Only the selected step has aria-pressed=\"true\". Selecting river buttons 1, 2 and 3 selects the same respective swaps; only the selected river button has aria-current=\"true\" and text \"shown\", and the other two show \"used once\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": false,
+      "actual": 403,
+      "expected": 200
+    },
+    {
+      "label": "flow execution",
+      "ok": false,
+      "actual": "locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.steps button').first()\u001b[22m\n"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": false,
+      "actual": [
+        "HTTP 403 https://lethe-landing-sooty.vercel.app/app/",
+        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/app/",
+        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
+        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
+      ],
+      "expected": []
+    }
+  ]
+}

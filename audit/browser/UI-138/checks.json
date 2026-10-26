@@ -1,0 +1,48 @@
+{
+  "id": "UI-138",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Only this named error/empty state used routing.",
+  "start": "2026-10-26T04:08:57.164Z",
+  "end": "2026-10-26T04:08:58.388Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence missing pass-2 state - http://127.0.0.1:8431/evidence.html",
+  "expected": "Removing pass2 from script#run causes div.error role=\"status\" in #widget-slot to display \"No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2, then node packages/landing/sync-run.mjs.\" and #batches to display \"No pass-2 run recorded yet.\".",
+  "checks": [
+    {
+      "label": "routing authorized for own error/empty state",
+      "ok": true,
+      "actual": "Removing pass2 from script#run causes div.error role=\"status\" in #widget-slot to display \"No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2, then node packages/landing/sync-run.mjs.\" and #batches to display \"No pass-2 run recorded yet.\"."
+    },
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#widget-slot .error",
+      "ok": true,
+      "actual": "No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2, then node packages/landing/sync-run.mjs.",
+      "expected": "No pass-2 run recorded yet: run pnpm --filter @zswap/examples run-pass2, then node packages/landing/sync-run.mjs."
+    },
+    {
+      "label": "#widget-slot .error @role",
+      "ok": true,
+      "actual": "status",
+      "expected": "status"
+    },
+    {
+      "label": "#batches",
+      "ok": true,
+      "actual": "No pass-2 run recorded yet.",
+      "expected": "No pass-2 run recorded yet."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

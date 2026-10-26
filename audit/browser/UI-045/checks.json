@@ -1,0 +1,163 @@
+{
+  "id": "UI-045",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:05:17.538Z",
+  "end": "2026-10-26T04:05:18.857Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence Found again section (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Section #recover sub shows \"1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund\"; ul#recover-rows shows 4 payments: \"one-time address #0\" 30,000 zat found by key #0 only, link e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b, block 4,522,718; \"one-time address #1\" 31,000 zat found by key #1 only, link 9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100, block 4,522,723; \"one-time address #2\" 32,000 zat found by key #2 only, link 4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899, block 4,522,723; \"the account address\" 25,000 zat found by the account key only, link bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c, block 4,522,726; all explorer links point to https://testnet.zecblock.com/tx/ followed by the corresponding full txid; paragraph #seed-only states \"Then the same scan with the seed and no index book, as a restored wallet would run it: 13 refund keys (a lookahead of 10), 23 blocks, 4 of 4 payments found, each by its own key.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#recover .sub contains 1Click has no testnet, so a demo provider wallet paid each one-time testnet address as a stand-in refund",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "four recovery rows",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "recovery label 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 0",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+      "expected": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"
+    },
+    {
+      "label": "recovery label 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 1",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+      "expected": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"
+    },
+    {
+      "label": "recovery label 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 2",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+      "expected": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"
+    },
+    {
+      "label": "recovery label 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 3",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c",
+      "expected": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"
+    },
+    {
+      "label": "#seed-only",
+      "ok": true,
+      "actual": "Then the same scan with the seed and no index book, as a restored wallet would run it: 13 refund keys (a lookahead of 10), 23 blocks, 4 of 4 payments found, each by its own key.",
+      "expected": "Then the same scan with the seed and no index book, as a restored wallet would run it: 13 refund keys (a lookahead of 10), 23 blocks, 4 of 4 payments found, each by its own key."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

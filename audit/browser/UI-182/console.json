@@ -1,0 +1,62 @@
+[
+  {
+    "time": "2026-10-26T04:10:17.091Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+    "location": {
+      "url": "http://127.0.0.1:8432/.demo/seed",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:17.091Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+    "location": {
+      "url": "http://127.0.0.1:8432/app/.demo/seed",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:17.092Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+    "location": {
+      "url": "http://127.0.0.1:8432/seed",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:17.093Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+    "location": {
+      "url": "http://127.0.0.1:8432/app/seed",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  },
+  {
+    "time": "2026-10-26T04:10:17.094Z",
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+    "location": {
+      "url": "http://127.0.0.1:8432/index-book.json",
+      "line": 0,
+      "column": 0,
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  }
+]

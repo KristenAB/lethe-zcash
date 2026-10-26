@@ -1,0 +1,179 @@
+{
+  "id": "UI-060",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:10:52.205Z",
+  "end": "2026-10-26T04:10:53.540Z",
+  "url": "https://lethe-dashboard.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live dashboard reduced motion and keyboard navigation (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
+  "expected": "In prefers-reduced-motion: reduce mode, animation-name is \"none\" on code.addr and transition-duration is \"0s\" on river li; focusing step button 2 and pressing Enter selects swap 2; pressing Tab to step button 3 and pressing Space selects swap 3.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".addr animationName",
+      "ok": true,
+      "actual": "none",
+      "expected": "none"
+    },
+    {
+      "label": ".river li transitionDuration",
+      "ok": true,
+      "actual": "0s",
+      "expected": "0s"
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.1",
+      "expected": "0.1"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "25.324",
+      "expected": "25.324"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+138 s",
+      "expected": "+138 s"
+    },
+    {
+      "label": "Tab to step 3",
+      "ok": true,
+      "actual": "Swap 3: 0.05 ZEC \u2192 wNEAR",
+      "expected": "Swap 3: 0.05 ZEC \u2192 wNEAR"
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.05",
+      "expected": "0.05"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+278 s",
+      "expected": "+278 s"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "started": "2026-10-26T04:02:53.965Z",
+  "channel": "chrome",
+  "headless": true,
+  "rows": 183,
+  "routePolicy": "Only named error and empty state rows. Loading uses real CDP network latency, no interception.",
+  "securityPolicy": "Status-only browser fetches. No response body reads for security probes. No seed, credentials, wallet or env accessed.",
+  "servers": [],
+  "chromeVersion": "155.0.8059.85",
+  "serverPids": [
+    86941,
+    86987,
+    87035
+  ],
+  "finished": "2026-10-26T04:11:54.874Z",
+  "counts": {
+    "PASS": 134,
+    "FAIL": 49,
+    "UNTESTED": 0
+  },
+  "serverPidsClosed": [
+    80712,
+    80759,
+    80807,
+    51191,
+    51237,
+    51284,
+    86941,
+    86987,
+    87035
+  ],
+  "chromeClosed": true,
+  "heavySlotReleased": true,
+  "sourceOrDeploymentChanges": false,
+  "transactionsSent": 0,
+  "happyPathsRouted": false,
+  "namedErrorEmptyRowsRouted": [
+    101,
+    102,
+    103,
+    136,
+    137,
+    138,
+    162,
+    163,
+    164
+  ],
+  "notes": "One final evidence set per UI row. Selected rows were re-executed after narrowing harness assertions to the exact plan. Live 403 security challenges remain FAIL. All console errors, including errors on intentional denial/404 probes, fail their item."
+}

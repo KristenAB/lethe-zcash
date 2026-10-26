@@ -1,0 +1,113 @@
+{
+  "id": "UI-058",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:10:50.748Z",
+  "end": "2026-10-26T04:10:52.190Z",
+  "url": "https://lethe-dashboard.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live dashboard river list row buttons (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
+  "expected": "Clicking river button 2 switches active swap to swap 2; river button 2 gets aria-current=\"true\" and status text \"shown\"; buttons 1 and 3 get status text \"used once\"; widget reflects swap 2 data.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.1",
+      "expected": "0.1"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "25.324",
+      "expected": "25.324"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+138 s",
+      "expected": "+138 s"
+    },
+    {
+      "label": "river statuses",
+      "ok": true,
+      "actual": [
+        "used once",
+        "shown",
+        "used once"
+      ],
+      "expected": [
+        "used once",
+        "shown",
+        "used once"
+      ]
+    },
+    {
+      "label": ".river li:nth-child(2) button @aria-current",
+      "ok": true,
+      "actual": "true",
+      "expected": "true"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

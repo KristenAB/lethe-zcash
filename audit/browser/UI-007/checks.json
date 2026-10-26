@@ -1,0 +1,297 @@
+{
+  "id": "UI-007",
+  "status": "FAIL",
+  "notes": "Exact decimal precision differs: e.g. 0.2 displayed where 0.20000000 is required. 25.324 displayed where 25.3240 is required.",
+  "start": "2026-10-26T04:03:19.916Z",
+  "end": "2026-10-26T04:03:28.504Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing pass-2 widget click each swap (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "Selecting step buttons 1, 2 and 3 displays, respectively, swap 1: 0.20000000 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s; swap 2: 0.10000000 ZEC, 25.3240 wNEAR, key #6 refundTo `u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j`, account #6 recipient `3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada`, Sent at +138 s; swap 3: 0.05000000 ZEC, 12.6482 wNEAR, key #7 refundTo `u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr`, account #7 recipient `4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d`, Sent at +278 s. Only the selected step has aria-pressed=\"true\". Manual selection stops autoplay; the active swap stays unchanged after 5000 ms.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": false,
+      "actual": "0.2",
+      "expected": "0.20000000"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": false,
+      "actual": "0.1",
+      "expected": "0.10000000"
+    },
+    {
+      "label": "output amount exact",
+      "ok": false,
+      "actual": "25.324",
+      "expected": "25.3240"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +138 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": false,
+      "actual": "0.05",
+      "expected": "0.05000000"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": false,
+      "actual": "0.05",
+      "expected": "0.05000000"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}
