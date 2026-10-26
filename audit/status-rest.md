@@ -20,6 +20,16 @@
 | CH-018 | UNTESTED | [CH-018](rest/CH-018.txt) | Actual own-destination and explicit-token reads passed; token-only extension requires a funded derived recipient, unavailable without prohibited funding. |
 | CH-019 | PASS | [CH-019](rest/CH-019.txt) |  |
 | CH-020 | PASS | [CH-020](rest/CH-020.txt) | Real silent TCP endpoint; no response synthesized; CLI and MCP both failed explicitly. |
+| CH-021 | UNTESTED | [CH-021](rest/CH-021.txt) | Live indexer returned a valid token list; needs real HTTP 502 and malformed-200 indexer responses. No mock or substituted payload used. |
+| CH-022 | UNTESTED | [CH-022](rest/CH-022.txt) | Real invalid-account and missing-FT-contract queries failed explicitly; non-object HTTP 200 branch needs an actual malformed RPC response. No synthetic RPC answers used. |
+| CH-023 | UNTESTED | [CH-023](rest/CH-023.txt) | Runtime defaults, real stalled connection timeout, real connection refusal, live provider rejection, and bounded snippet checked.; Body-read timeout and reset subcases not induced against real providers; needs a real stalled-body/reset response. Other row subcases executed, no partial PASS. |
+| CH-024 | PASS | [CH-024](rest/CH-024.txt) | Read-only recorded run; packages/examples never executed. |
+| CH-025 | PASS | [CH-025](rest/CH-025.txt) | Read-only recorded pass2; no scheduling or example process. |
+| CH-026 | PASS | [CH-026](rest/CH-026.txt) | Read-only recorded pass3; no example process or schedule. |
+| CH-027 | PASS | [CH-027](rest/CH-027.txt) | Real zswap swap process refused before any HTTP or broadcast. |
+| CH-028 | UNTESTED | [CH-028](rest/CH-028.txt) | Real CLI sweep warning and read-only queries observed. Token-only action requires an actually token-funded derived recipient; no funding permitted. |
+| CH-029 | UNTESTED | [CH-029](rest/CH-029.txt) | Real default 1Click returned a valid quote object; needs actual provider HTTP 200 non-object/HTML response. No fabricated provider body used. |
+| CH-030 | UNTESTED | [CH-030](rest/CH-030.txt) | Real default token endpoint returned a valid JSON list; needs actual provider HTTP 200 without an array. No stub endpoint or payload used. |
 | MCP-001 | PASS | [MCP-001](rest/MCP-001.txt) | Real stdio initialization and discovery; every stdout line parsed as JSON-RPC. |
 | MCP-002 | PASS | [MCP-002](rest/MCP-002.txt) |  |
 | MCP-003 | PASS | [MCP-003](rest/MCP-003.txt) | Unset log startup and existing 0666 file tightened to 0600. |
