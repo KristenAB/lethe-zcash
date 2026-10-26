@@ -10,6 +10,16 @@
 | CH-008 | PASS | [CH-008](rest/CH-008.txt) | Real tip reads with native scanner default and explicit ZSWAP_LWD_URL forwarded by CLI library. No transaction operation. TLS implementation not inferred as runtime proof from source. |
 | CH-009 | PASS | [CH-009](rest/CH-009.txt) | Published viewing keys loaded internally from deployment record; only authorized 23 compact blocks scanned. All four txids matched exactly one key. |
 | CH-010 | PASS | [CH-010](rest/CH-010.txt) | Published viewing key loaded internally; saved evidence contains verdict only. Key exclusivity observed by CH-009 scan. |
+| CH-011 | PASS | [CH-011](rest/CH-011.txt) | Published viewing key loaded internally; saved evidence contains verdict only. Key exclusivity observed by CH-009 scan. |
+| CH-012 | PASS | [CH-012](rest/CH-012.txt) | Published viewing key loaded internally; saved evidence contains verdict only. Key exclusivity observed by CH-009 scan. |
+| CH-013 | PASS | [CH-013](rest/CH-013.txt) | Published viewing key loaded internally; saved evidence contains verdict only. Key exclusivity observed by CH-009 scan. |
+| CH-014 | PASS | [CH-014](rest/CH-014.txt) | Authorized read-only deployment-record exception; no seed was loaded or regenerated. |
+| CH-015 | PASS | [CH-015](rest/CH-015.txt) |  |
+| CH-016 | PASS | [CH-016](rest/CH-016.txt) |  |
+| CH-017 | UNTESTED | [CH-017](rest/CH-017.txt) | Real UNKNOWN_ACCOUNT mapping observed. Positive FT-only/indexed-only use needs a real account in that state; no transaction/funding allowed. |
+| CH-018 | UNTESTED | [CH-018](rest/CH-018.txt) | Actual own-destination and explicit-token reads passed; token-only extension requires a funded derived recipient, unavailable without prohibited funding. |
+| CH-019 | PASS | [CH-019](rest/CH-019.txt) |  |
+| CH-020 | PASS | [CH-020](rest/CH-020.txt) | Real silent TCP endpoint; no response synthesized; CLI and MCP both failed explicitly. |
 | MCP-001 | PASS | [MCP-001](rest/MCP-001.txt) | Real stdio initialization and discovery; every stdout line parsed as JSON-RPC. |
 | MCP-002 | PASS | [MCP-002](rest/MCP-002.txt) |  |
 | MCP-003 | PASS | [MCP-003](rest/MCP-003.txt) | Unset log startup and existing 0666 file tightened to 0600. |
