@@ -38,15 +38,17 @@ requests differently (`page.route`); nothing else is stubbed, and no flow calls 
 
 | Project | Tests | Pass | Fail |
 |---|---|---|---|
-| desktop | 30 | 28 | 2 |
-| mobile | 30 | 28 | 2 |
-| **Total** | **60** | **56** | **4** |
+| desktop | 30 | 30 | 0 |
+| mobile | 30 | 30 | 0 |
+| **Total** | **60** | **60** | **0** |
 
-Oct 26, 2026 handback: `pnpm test:e2e` exited 1: **56 passed, 4 failed** (3.0 min).
-On desktop and mobile, the dashboard security test requires files in this checkout’s
-`.demo/` folder but found none (`dashboard.spec.ts:293`), and the landing numbers test
-expected the current package total of 112 but the page still displays 105
-(`landing.spec.ts:409`). Product code was not changed.
+Oct 26, 2026 handback: `pnpm test:e2e` exited 0: **60 passed, 0 failed**
+(desktop 30/30, mobile 30/30; Playwright 2.5 min, full command 155.232 s).
+The two previously failing tests passed first on both projects: **4 passed, 0 failed**
+(5.2 s). The landing now displays 112 tests. The dashboard security test always checks
+`.demo/seed` and `.demo/index-book.json`, even when absent, plus every discovered real
+`.demo/` file and existing wallet source path; all three `/@fs` forms return 403.
+Only response statuses are checked; bodies are never read, and no wallet files are created.
 
 Oct 25, 2026: the landing became a one-screen overview (`index.html`: headline, two buttons, the pass-2
 widget alone, three steps, the latest batch's numbers, what is live) and the full page moved to
@@ -60,7 +62,8 @@ links, measured" with all three batches (first run, pass 2, pass 3, each request
 the autoplay staying silent for screen readers after a pick and Play, recovery, seed-only recovery, BLOCKED, Run it, skip link and every link; the dashboard
 (loading, every swap button and refund-address row, reduced motion and keyboard, link audit, both
 batches, pass-2 per-swap NEAR recipients, the pass-3 batch and its parts, recovery, BLOCKED, error, empty, no pass 2, every link); no
-control labelled "log" on either page; from the browser, 403 for every file under `.demo/` and for the
+control labelled "log" on either page; from the browser, 403 for `.demo/seed` and
+`.demo/index-book.json` whether present or absent, every real file found under `.demo/`, and the
 wallet source (`lib.ts`, `recipient.ts`, `main.ts`, the MCP tools, the hoisted `@zswap/cli` link), 200
 for the published run and `decorrelate.ts` (status only, bodies never read).
 
@@ -98,11 +101,12 @@ not occur. These 13 rows remain UNTESTED; no partial results were marked PASS. T
 tested happy paths have no mock standing in for a live result.
 
 Handback verification on Oct 26: `pnpm test` exited 0 with **112 tests plus 1 doc test**
-(Rust 12 + doc, CLI 73, MCP 14, dashboard 13), 0 failed and 0 skipped. After acquiring
-the `lethe-handback` heavy slot, `pnpm test:e2e` exited 1 with **56 passed, 4 failed**;
-the failures are recorded above. All tracked E2E PIDs ended and the heavy slot was released.
-The suite failure stops handback: no commit, fetch, push, deployment or Pages workflow
-was attempted. Only `AUDIT.md` and `TESTING.md` changed.
+(Rust 12 + doc, CLI 73, MCP 14, dashboard 13), 0 failed and 0 skipped. The follow-up
+`lethe-e2e` run fixed both browser failures and passed the focused checks and full suite
+as recorded above. UI-093 was reverified in local Google Chrome with facts 0 / 75 / 112,
+a clean console and network, and a refreshed JPEG under 200 KB. All started Chrome and
+dev-server PIDs ended and the heavy slot was released. No `.demo/` directory or seed
+was created. The live landing remains at 105; no deployment or Pages workflow was invoked.
 
 The earlier re-verification evidence is under 10 MB; every screenshot is JPEG at or
 below 200 KB. During that earlier pass, temporary wallet files were under /tmp and
