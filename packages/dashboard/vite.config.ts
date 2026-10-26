@@ -25,6 +25,14 @@ function realPathGuard(): Plugin {
           res.end('Bad request');
           return;
         }
+        // Deny wallet paths before touching disk: absent files would otherwise reach the SPA
+        // fallback and return 200, and filenames alone must be restricted outside .demo/ too.
+        const filename = path.split('/').at(-1);
+        if (path.includes('/.demo/') || filename === 'seed' || filename === 'index-book.json') {
+          res.statusCode = 403;
+          res.end('Restricted');
+          return;
+        }
         const abs = path.startsWith('/@fs/') ? path.slice('/@fs'.length) : resolve(server.config.root, `.${path}`);
         let real: string;
         try {

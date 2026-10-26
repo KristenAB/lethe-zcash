@@ -18,7 +18,7 @@ const get = async (abs: string) => (await fetch(`${base}/@fs${encodeURI(abs)}?ra
 
 beforeAll(async () => {
   mkdirSync(probeDir, { recursive: true });
-  writeFileSync(resolve(probeDir, 'seed'), 'probe, not a seed');
+  writeFileSync(resolve(probeDir, 'access-probe.txt'), 'public access probe');
   symlinkSync(resolve(ROOT, 'packages/cli/src'), linkToCli);
   symlinkSync(probeDir, linkToDemo);
   server = await createServer({ configFile: resolve(__dirname, '../vite.config.ts'), root: resolve(__dirname, '..'), logLevel: 'silent', server: { port: 0, strictPort: false } });
@@ -36,9 +36,22 @@ afterAll(async () => {
 describe('dashboard dev server file access', () => {
   it('serves the published run', async () => {
     expect(await get(resolve(ROOT, 'deployments/testnet.json'))).toBe(200);
+    expect((await fetch(`${base}/testnet.json`)).status).toBe(200);
   });
-  it('refuses wallet files under .demo/ (seed, index book, keys)', async () => {
-    expect(await get(resolve(probeDir, 'seed'))).toBe(403);
+  it('refuses files under .demo/', async () => {
+    expect(await get(resolve(probeDir, 'access-probe.txt'))).toBe(403);
+  });
+  it.each([
+    `/@fs${encodeURI(resolve(probeDir, 'missing', 'seed'))}`,
+    `/@fs${encodeURI(resolve(probeDir, 'missing', 'index-book.json'))}`,
+    `/@fs${encodeURI(resolve(probeDir, 'missing', 'anything.txt'))}`,
+    '/%2Edemo/missing.txt',
+    '/missing/%73eed',
+    '/missing/index%2Dbook.json',
+  ])('refuses absent wallet paths before the SPA fallback: %s', async (path) => {
+    const response = await fetch(`${base}${path}?raw`);
+    expect(response.status).toBe(403);
+    expect(await response.text()).toBe('Restricted');
   });
   it('refuses other repo files outside the dashboard and the published run', async () => {
     expect(await get(resolve(ROOT, 'README.md'))).toBe(403);
@@ -53,7 +66,7 @@ describe('dashboard dev server file access', () => {
   it('refuses denied files reached through a symlink inside node_modules (checked by real path)', async () => {
     expect(await get(resolve(linkToCli, 'lib.ts'))).toBe(403);
     expect(await get(resolve(linkToCli, 'recipient.ts'))).toBe(403);
-    expect(await get(resolve(linkToDemo, 'seed'))).toBe(403);
+    expect(await get(resolve(linkToDemo, 'access-probe.txt'))).toBe(403);
     if (existsSync(hoisted)) {
       expect(await get(resolve(hoisted, 'src/lib.ts'))).toBe(403);
       expect(await get(resolve(hoisted, 'src/recipient.ts'))).toBe(403);

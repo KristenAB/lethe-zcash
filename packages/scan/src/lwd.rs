@@ -9,6 +9,7 @@ use zcash_client_backend::proto::service::{
 use zcash_protocol::{consensus::BlockHeight, TxId};
 
 pub const DEFAULT_LWD_URL: &str = "https://testnet.zec.rocks:443";
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub type Client = CompactTxStreamerClient<Channel>;
 
@@ -35,14 +36,19 @@ impl std::error::Error for LwdError {}
 pub async fn connect(url: &str) -> Result<Client, LwdError> {
     let mut ep = Endpoint::from_shared(url.to_string())
         .map_err(|e| LwdError::BadUrl(e.to_string()))?
-        .connect_timeout(Duration::from_secs(10))
+        .connect_timeout(CONNECT_TIMEOUT)
         .timeout(Duration::from_secs(60));
     if url.starts_with("https://") {
         ep = ep
             .tls_config(ClientTlsConfig::new().with_webpki_roots())
             .map_err(|e| LwdError::Connect(e.to_string()))?;
     }
-    let channel = ep.connect().await.map_err(|e| LwdError::Connect(format!("{url}: {e}")))?;
+    // Endpoint's connector timeout does not cover every phase (notably a stalled TLS
+    // handshake). Bound the whole eager connection, including DNS, TCP and TLS.
+    let channel = tokio::time::timeout(CONNECT_TIMEOUT, ep.connect())
+        .await
+        .map_err(|_| LwdError::Connect(format!("{url}: connection did not finish in 10 s")))?
+        .map_err(|e| LwdError::Connect(format!("{url}: {e}")))?;
     Ok(CompactTxStreamerClient::new(channel).max_decoding_message_size(32 * 1024 * 1024))
 }
 
@@ -120,4 +126,28 @@ fn is_not_found(s: &tonic::Status) -> bool {
 /// Parse a display-order (block-explorer) txid.
 pub fn parse_txid(s: &str) -> Option<TxId> {
     TxId::from_hex(s.trim())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn stalled_tls_handshake_obeys_connection_timeout() {
+        // Accept a real TCP connection and leave TLS unanswered; no wallet/key or RPC is needed.
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("https://localhost:{}", listener.local_addr().unwrap().port());
+        let started = tokio::time::Instant::now();
+        let attempt = tokio::spawn(async move { connect(&url).await });
+        let (_socket, _) = tokio::time::timeout(Duration::from_secs(5), listener.accept()).await.unwrap().unwrap();
+        let result = tokio::time::timeout(CONNECT_TIMEOUT + Duration::from_secs(3), attempt).await.unwrap().unwrap();
+        let error = match result {
+            Err(error) => error,
+            Ok(_) => panic!("an unanswered TLS handshake must not connect"),
+        };
+        assert!(matches!(error, LwdError::Connect(_)));
+        assert!(error.to_string().contains("connection did not finish in 10 s"));
+        assert!(started.elapsed() >= CONNECT_TIMEOUT);
+        assert!(started.elapsed() < CONNECT_TIMEOUT + Duration::from_secs(3));
+    }
 }
