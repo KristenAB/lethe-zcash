@@ -1,5 +1,15 @@
 | ID | status | evidence | notes |
 | --- | --- | --- | --- |
+| CH-001 | PASS | [CH-001](rest/CH-001.txt) | Authorized repository search; matches are read methods and BLOCKED refusals, no contract deployment/call execution flow. |
+| CH-002 | PASS | [CH-002](rest/CH-002.txt) |  |
+| CH-003 | FAIL | [CH-003](rest/CH-003.txt) | HTTP 200 |
+| CH-004 | PASS | [CH-004](rest/CH-004.txt) |  |
+| CH-005 | PASS | [CH-005](rest/CH-005.txt) | Real public echo and real invalid-JWT confidential request; request observer records authorization presence only. Both recipient and refund fields reach provider. |
+| CH-006 | PASS | [CH-006](rest/CH-006.txt) |  |
+| CH-007 | PASS | [CH-007](rest/CH-007.txt) | Direct dry API helper uses quote() and exits 1 on the actual provider error; CLI has no refund-address override. |
+| CH-008 | PASS | [CH-008](rest/CH-008.txt) | Real tip reads with native scanner default and explicit ZSWAP_LWD_URL forwarded by CLI library. No transaction operation. TLS implementation not inferred as runtime proof from source. |
+| CH-009 | PASS | [CH-009](rest/CH-009.txt) | Published viewing keys loaded internally from deployment record; only authorized 23 compact blocks scanned. All four txids matched exactly one key. |
+| CH-010 | PASS | [CH-010](rest/CH-010.txt) | Published viewing key loaded internally; saved evidence contains verdict only. Key exclusivity observed by CH-009 scan. |
 | MCP-001 | PASS | [MCP-001](rest/MCP-001.txt) | Real stdio initialization and discovery; every stdout line parsed as JSON-RPC. |
 | MCP-002 | PASS | [MCP-002](rest/MCP-002.txt) |  |
 | MCP-003 | PASS | [MCP-003](rest/MCP-003.txt) | Unset log startup and existing 0666 file tightened to 0600. |

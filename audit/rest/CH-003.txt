@@ -1,0 +1,17 @@
+ID: CH-003
+Observed at: 2026-10-26T05:11:20.500Z
+Status: FAIL
+Notes: HTTP 200
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const input={\"amountZat\":\"10000000\",\"destinationAsset\":\"nep141:wrap.near\",\"recipient\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"refundTo\":\"u1xqse697w6tkwd790pzd982sgkq6mgfq030yzy2288j8gsmpq6ffl72rhsqgpcfcfzeektl6vnq2fntpzm56af370snkhdgg2wu7wxfh9\",\"confidentiality\":\"public\"};input.amountZat=BigInt(input.amountZat);try{const q=await l.quote(input);console.log(JSON.stringify(q))}catch(e){console.error(e.message);console.log(JSON.stringify({outcome:l.requestOutcome(e)}));process.exit(e instanceof l.SetupRequiredError?2:1)}"]
+pid: 55108
+stdout:
+{"quote":{"amountIn":"10000000","amountInFormatted":"0.1","amountInUsd":"120.366000000000","minAmountIn":"10000000","amountOut":"26595191412601237180755000","amountOutFormatted":"26.595191412601237180755","amountOutUsd":"119.944313270832","minAmountOut":"26395727477006727901899337","timeEstimate":455,"refundFee":"32000","withdrawFee":"0"},"quoteRequest":{"dry":true,"depositMode":"SIMPLE","swapType":"EXACT_INPUT","slippageTolerance":75,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u1xqse697w6tkwd790pzd982sgkq6mgfq030yzy2288j8gsmpq6ffl72rhsqgpcfcfzeektl6vnq2fntpzm56af370snkhdgg2wu7wxfh9","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T06:06:24.318Z","confidentiality":"public","quoteWaitingTimeMs":2907,"insured":false,"appFees":[{"recipient":"5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd","fee":20}]},"signature":"ed25519:xLx2FfXJ8hTfb3LGdXs7mSuun9X5ZjPJf7iG13msiTbuQgLxZ69ytBM1ncfXPLF2dDc5bfs1aSd6HT9V5w1Y8GF","timestamp":"2026-10-26T05:11:17.516Z","correlationId":"95916de6-b649-4ed7-bfd2-6072c3bd6e28"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:11:17.320Z","url":"https://1click.chaindefuser.com/v0/quote","method":"POST","body":{"dry":true,"swapType":"EXACT_INPUT","slippageTolerance":75,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u1xqse697w6tkwd790pzd982sgkq6mgfq030yzy2288j8gsmpq6ffl72rhsqgpcfcfzeektl6vnq2fntpzm56af370snkhdgg2wu7wxfh9","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T06:06:24.318Z","quoteWaitingTimeMs":2907,"confidentiality":"public"},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://1click.chaindefuser.com/v0/quote","status":201}
+
+exit_code: 0
+

@@ -1,0 +1,18 @@
+ID: CH-006
+Observed at: 2026-10-26T05:11:36.030Z
+Status: PASS
+Notes: 
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const input={\"amountZat\":\"10000000\",\"destinationAsset\":\"nep141:wrap.near\",\"recipient\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"refundTo\":\"u1xqse697w6tkwd790pzd982sgkq6mgfq030yzy2288j8gsmpq6ffl72rhsqgpcfcfzeektl6vnq2fntpzm56af370snkhdgg2wu7wxfh9\",\"confidentiality\":\"basic\"};input.amountZat=BigInt(input.amountZat);try{const q=await l.quote(input);console.log(JSON.stringify(q))}catch(e){console.error(e.message);console.log(JSON.stringify({outcome:l.requestOutcome(e)}));process.exit(e instanceof l.SetupRequiredError?2:1)}"]
+pid: 61742
+stdout:
+{"outcome":"refused"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:11:35.771Z","url":"https://1click.chaindefuser.com/v0/quote","method":"POST","body":{"dry":true,"swapType":"EXACT_INPUT","slippageTolerance":95,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u1xqse697w6tkwd790pzd982sgkq6mgfq030yzy2288j8gsmpq6ffl72rhsqgpcfcfzeektl6vnq2fntpzm56af370snkhdgg2wu7wxfh9","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T06:07:05.770Z","quoteWaitingTimeMs":2987,"confidentiality":"basic"},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://1click.chaindefuser.com/v0/quote","status":401}
+Setup required: ONECLICK_JWT (1Click: User authentication is required for confidential intent quotes (HTTP 401); basic quotes need a 1Click partner JWT)
+
+exit_code: 2
+

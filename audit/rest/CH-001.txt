@@ -1,0 +1,24 @@
+ID: CH-001
+Observed at: 2026-10-26T05:11:10.539Z
+Status: PASS
+Notes: Authorized repository search; matches are read methods and BLOCKED refusals, no contract deployment/call execution flow.
+
+PROCESS 1
+command: ["rg","-n","--glob","*.ts","--glob","*.rs","--glob","!**/test/**","--glob","!**/tests/**","signAndSend|signTransaction|broadcast_tx|sendTransaction|deployContract|functionCall\\(|sendRawTransaction|quicksend|SendTransaction|BLOCKED|view_account|ft_balance_of|scan_range|GetTransaction","packages/cli/src","packages/mcp/src","packages/scan/src","packages/wallet-core/src"]
+pid: 53449
+stdout:
+packages/scan/src/main.rs:86:            let (hits, blocks) = zpay_verify::scan_range(&mut c, &keys, from, to).await.unwrap_or_else(|err| fail(2, err));
+packages/scan/src/lib.rs:311:pub async fn scan_range(c: &mut lwd::Client, keys: &[(String, UnifiedIncomingViewingKey)], from: u64, to: u64) -> Result<(Vec<Hit>, u64), VerifyError> {
+packages/cli/src/main.ts:21://   zswap swap ...                               BLOCKED (mainnet ZEC, live deposit address)
+packages/cli/src/main.ts:62:    throw new BlockedError('BLOCKED: a real swap sends mainnet ZEC to a live 1Click deposit address. Needs Nick’s OK and funds; zakura-one-time-ivk also says not to issue live addresses before review.');
+packages/cli/src/recipient.ts:99:  const v = await rpc({ request_type: 'view_account', account_id: accountId });
+packages/cli/src/recipient.ts:105:  } else if (v.error?.cause?.name !== 'UNKNOWN_ACCOUNT') throw new Error(`NEAR RPC view_account ${accountId}: ${JSON.stringify(v.error).slice(0, 200)}`);
+packages/cli/src/recipient.ts:108:    const c = await rpc({ request_type: 'call_function', account_id: contract, method_name: 'ft_balance_of', args_base64: Buffer.from(JSON.stringify({ account_id: accountId })).toString('base64') });
+packages/cli/src/recipient.ts:109:    if (!c.result) throw new Error(`NEAR RPC ft_balance_of on ${contract}: ${JSON.stringify(c.error).slice(0, 200)}`);
+packages/scan/src/lwd.rs:95:/// `GetTransaction` by txid. lightwalletd and Zaino both report an unknown txid as an RPC
+packages/cli/src/lib.ts:509:  if (q.dry === false) throw new BlockedError('BLOCKED: a live (dry=false) quote creates a mainnet deposit address; it needs mainnet ZEC and Nick’s OK, and zakura-one-time-ivk is not yet reviewed for live addresses');
+
+stderr:
+
+exit_code: 0
+
