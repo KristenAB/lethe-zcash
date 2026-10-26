@@ -96,3 +96,18 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | RS-006 | PASS | [RS-006.txt](cli/RS-006.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
 | RS-007 | PASS | [RS-007.txt](cli/RS-007.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | RS-008 | PASS | [RS-008.txt](cli/RS-008.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-009 | PASS | [RS-009.txt](cli/RS-009.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-010 | PASS | [RS-010.txt](cli/RS-010.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-011 | PASS | [RS-011.txt](cli/RS-011.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-012 | PASS | [RS-012.txt](cli/RS-012.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-013 | PASS | [RS-013.txt](cli/RS-013.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-014 | PASS | [RS-014.txt](cli/RS-014.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-015 | PASS | [RS-015.txt](cli/RS-015.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-016 | PASS | [RS-016.txt](cli/RS-016.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
+| RS-017 | PASS | [RS-017.txt](cli/RS-017.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
+| RS-018 | PASS | [RS-018.txt](cli/RS-018.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
+| RS-019 | PASS | [RS-019.txt](cli/RS-019.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-020 | PASS | [RS-020.txt](cli/RS-020.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-021 | PASS | [RS-021.txt](cli/RS-021.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
+| RS-022 | PASS | [RS-022.txt](cli/RS-022.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-023 | PASS | [RS-023.txt](cli/RS-023.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |

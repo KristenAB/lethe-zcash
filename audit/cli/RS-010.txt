@@ -1,0 +1,109 @@
+ROW RS-010
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-010"]
+MODE source review
+
+STDOUT
+| RS-010 | NEAR derivation library, source/test-contract review | SLIP-0010 ed25519 vector 1 master/child/five-level cases match existing expected results; 64 recipient public IDs are distinct and deterministic and differ for another wallet; no vector secret or signing bytes enter audit evidence. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd767a43f83883311071efd9b6f82d25ccf L18-L64
+18: const HARDENED: u32 = 0x8000_0000;
+19: /// `m/44'/397'/1'`: BIP 44, NEAR, the account set aside for per-swap recipients.
+20: pub const NEAR_RECIPIENT_BRANCH: [u32; 3] = [44, 397, 1];
+21: 
+22: /// SLIP-0010 ed25519 derivation (hardened only). Returns the 32-byte private key.
+23: pub fn slip10_ed25519(seed: &[u8], path: &[u32]) -> [u8; 32] {
+24:     let mut mac = Hmac::<Sha512>::new_from_slice(b"ed25519 seed").expect("any key length");
+25:     mac.update(seed);
+26:     let mut i = mac.finalize().into_bytes();
+27:     for &c in path {
+28:         let (key, chain) = i.split_at(32);
+29:         let mut mac = Hmac::<Sha512>::new_from_slice(chain).expect("any key length");
+30:         mac.update(&[0u8]);
+31:         mac.update(key);
+32:         mac.update(&(c | HARDENED).to_be_bytes());
+33:         i = mac.finalize().into_bytes();
+34:     }
+35:     i[..32].try_into().expect("32 bytes")
+36: }
+37: 
+38: /// The path string of recipient `index`, e.g. `m/44'/397'/1'/3'`.
+39: pub fn near_path(index: u32) -> String {
+40:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
+41:     format!("m/{a}'/{b}'/{c}'/{index}'")
+42: }
+43: 
+44: /// The signing key of per-swap NEAR recipient `index`.
+45: pub fn near_signing_key(seed: &[u8], index: u32) -> SigningKey {
+46:     if index >= HARDENED {
+47:         panic!("recipient index must be below 2^31");
+48:     }
+49:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
+50:     SigningKey::from_bytes(&slip10_ed25519(seed, &[a, b, c, index]))
+51: }
+52: 
+53: /// The NEAR implicit account id (64 lowercase hex characters) and public key (`ed25519:<base58>`).
+54: pub fn near_recipient(seed: &[u8], index: u32) -> (String, String) {
+55:     let pk = near_signing_key(seed, index).verifying_key().to_bytes();
+56:     (hex::encode(pk), format!("ed25519:{}", bs58::encode(pk).into_string()))
+57: }
+58: 
+59: /// near-cli's credentials JSON (`~/.near-credentials/mainnet/<account>.json`) for recipient `index`.
+60: /// The NEAR private key encoding is base58 of the 64-byte `secret ‖ public` keypair.
+61: pub fn near_credentials_json(seed: &[u8], index: u32) -> String {
+62:     let sk = near_signing_key(seed, index);
+63:     let (account_id, public_key) = near_recipient(seed, index);
+64:     let private_key = format!("ed25519:{}", bs58::encode(sk.to_keypair_bytes()).into_string());
+
+SOURCE packages/wallet-core/tests/near_recipient.rs SHA256 ef5cbdcd0900a53b0bfac0a22c81030023a95474ca14a39209d56eb7b993a5a4 L1-L37
+1: use std::collections::HashSet;
+2: use zswap_core::near::{near_signing_key, slip10_ed25519};
+3: use zswap_core::*;
+4: 
+5: [public test seed/vector literal omitted; assertion inspected locally]
+6: 
+7: #[test]
+8: fn slip10_ed25519_matches_the_published_test_vector() {
+9:     // SLIP-0010 test vector 1 (ed25519), seed 000102…0f
+10: [public test seed/vector literal omitted; assertion inspected locally]
+11: [public test seed/vector literal omitted; assertion inspected locally]
+12: [public test seed/vector literal omitted; assertion inspected locally]
+13: [public test seed/vector literal omitted; assertion inspected locally]
+14: }
+15: 
+16: #[test]
+17: fn every_swap_gets_its_own_near_implicit_account_and_the_seed_alone_rederives_it() {
+18:     let mut ids = HashSet::new();
+19:     for i in 0..64u32 {
+20:         let (id, pk) = near_recipient(&SEED, i);
+21:         assert_eq!(id.len(), 64);
+22:         assert!(id.chars().all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()), "implicit ids are lowercase hex");
+23:         assert_eq!(hex::decode(&id).unwrap(), bs58::decode(pk.strip_prefix("ed25519:").unwrap()).into_vec().unwrap(), "id = hex(public key)");
+24:         assert!(ids.insert(id), "index {i} repeats a recipient");
+25:         assert_eq!(near_recipient(&SEED, i), near_recipient(&SEED, i), "deterministic");
+26:     }
+27: [public test seed/vector literal omitted; assertion inspected locally]
+28:     assert_eq!(near_path(3), "m/44'/397'/1'/3'");
+29: }
+30: 
+31: #[test]
+32: fn credentials_file_holds_the_matching_keypair() {
+33:     let j: serde_json::Value = serde_json::from_str(&near_credentials_json(&SEED, 5)).unwrap();
+34:     let (id, pk) = near_recipient(&SEED, 5);
+35:     assert_eq!(j["account_id"], id);
+36:     assert_eq!(j["public_key"], pk);
+37:     let kp = bs58::decode(j["private_key"].as_str().unwrap().strip_prefix("ed25519:").unwrap()).into_vec().unwrap();
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.027
+CLEANUP: isolated TMPDIR removed after command.
