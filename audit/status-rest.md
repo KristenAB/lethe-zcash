@@ -20,3 +20,13 @@
 | MCP-018 | UNTESTED | [MCP-018](rest/MCP-018.txt) | Live MCP recovery scans to current tip beyond 4522730; safety guard refused before scan. Needs an authorized bounded end-height option or historical node. |
 | MCP-019 | PASS | [MCP-019](rest/MCP-019.txt) |  |
 | MCP-020 | PASS | [MCP-020](rest/MCP-020.txt) |  |
+| MCP-021 | PASS | [MCP-021](rest/MCP-021.txt) | Real silent TCP listener; concurrent plan 3ms; recovery 3010ms; scanner timeout uses SIGKILL. |
+| MCP-022 | UNTESTED | [MCP-022](rest/MCP-022.txt) | Real recover lookup called; scanner refused current tip beyond authorized range. No completed both-chain result. |
+| MCP-023 | PASS | [MCP-023](rest/MCP-023.txt) |  |
+| MCP-024 | PASS | [MCP-024](rest/MCP-024.txt) |  |
+| MCP-025 | UNTESTED | [MCP-025](rest/MCP-025.txt) | Gap lookup and local advancement observed; extension past a used account needs a funded derived recipient, prohibited in this run. |
+| MCP-026 | PASS | [MCP-026](rest/MCP-026.txt) |  |
+| MCP-027 | UNTESTED | [MCP-027](rest/MCP-027.txt) | Common-destination warning observed; token-only warning needs a real token-funded derived account. No funding allowed. |
+| MCP-028 | PASS | [MCP-028](rest/MCP-028.txt) | Tool ran without ZSWAP_SEED; no wallet required. |
+| MCP-029 | PASS | [MCP-029](rest/MCP-029.txt) |  |
+| MCP-030 | PASS | [MCP-030](rest/MCP-030.txt) |  |
