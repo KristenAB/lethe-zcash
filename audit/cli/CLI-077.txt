@@ -1,83 +1,63 @@
 ROW CLI-077
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-077"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-077"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-077 | `recover`: three reserved indices plus lookahead, source/test contract | Gap 2 returns account plus refund indices 0–4; default gap returns account plus indices 0–12; existing `next` never decreases; a no-hit default scan advances `next` to 10. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","recover","4522708","4522730","--gap","2"]
+{"exit_code":0,"signal":null,"elapsed_ms":580,"stdout_bytes":205,"stderr_bytes":0}
+STDOUT {
+  "blocks": 23,
+  "from": 4522708,
+  "hits": [],
+  "keys": [
+    "account",
+    "refund-0",
+    "refund-1",
+    "refund-2",
+    "refund-3",
+    "refund-4"
+  ],
+  "to": 4522730,
+  "gap": 2,
+  "next": 3
+}
+ASSERT three reservations gap 2 scans refund 0..4; next remains 3 PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","recover","4522708","4522730"]
+{"exit_code":0,"signal":null,"elapsed_ms":600,"stdout_bytes":338,"stderr_bytes":0}
+STDOUT {
+  "blocks": 23,
+  "from": 4522708,
+  "hits": [],
+  "keys": [
+    "account",
+    "refund-0",
+    "refund-1",
+    "refund-2",
+    "refund-3",
+    "refund-4",
+    "refund-5",
+    "refund-6",
+    "refund-7",
+    "refund-8",
+    "refund-9",
+    "refund-10",
+    "refund-11",
+    "refund-12"
+  ],
+  "to": 4522730,
+  "gap": 10,
+  "next": 10
+}
+ASSERT real 23-block no-hit recovery exact default labels gap 10 next 10 PASS
+ASSERT restored book bound mode 0600 PASS
+ASSERT next reservation at least 10 PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0,0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L581-L625
-581: export const RECOVERY_GAP = 10;
-582:
-583: /**
-584:  * Recovery: the account key plus one-time keys 0..n, scanned over a range. n covers every reserved
-585:  * index plus `gap` more, so a wallet restored from its seed alone (no index book) still finds refunds
-586:  * to the first indices; a hit inside the lookahead extends it and the range is scanned again.
-587:  */
-588: export function recover(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
-589:   const s = recoverySteps(seedFile, book, gap);
-590:   for (;;) {
-591:     const done = s.after(scanRange(s.keys(), from, to));
-592:     if (done) return done;
-593:   }
-594: }
-595: /** recover without blocking the event loop, each scan bounded by ZSWAP_SCAN_TIMEOUT_MS: for the MCP server. */
-596: export async function recoverAsync(seedFile: string, book: IndexBook, from: number, to: number, gap = RECOVERY_GAP) {
-597:   const s = recoverySteps(seedFile, book, gap);
-598:   for (;;) {
-599:     const done = s.after(await scanRangeAsync(s.keys(), from, to));
-600:     if (done) return done;
-601:   }
-602: }
-603: /** The recovery loop of recover / recoverAsync: which keys to scan next, and whether a scan's hits close the window. */
-604: function recoverySteps(seedFile: string, book: IndexBook, gap: number) {
-605:   if (!Number.isSafeInteger(gap) || gap < 0) throw new Error('gap must be a whole number');
-606:   const derived: Record<string, string> = { account: accountKey(seedFile).uivk };
-607:   let upTo = book.readFor(seedFile).next + gap;
-608:   let keys: Record<string, string> = {};
-609:   return {
-610:     keys() {
-611:       for (let i = 0; i < upTo; i++) derived[`refund-${i}`] ??= deriveRefund(seedFile, i).testnet.uivk;
-612:       keys = Object.fromEntries(Object.entries(derived).filter(([l]) => l === 'account' || Number(l.slice('refund-'.length)) < upTo));
-613:       return keys;
-614:     },
-615:     after(out: { blocks: number; hits: Hit[] }) {
-616:       const highest = Math.max(-1, ...out.hits.filter((h) => h.key.startsWith('refund-')).map((h) => Number(h.key.slice('refund-'.length))));
-617:       if (highest + 1 + gap <= upTo) {
-618:         const next = book.advance(seedFile, highest + 1 + gap);
-619:         return { ...out, keys: Object.keys(keys), gap, next };
-620:       }
-621:       upTo = highest + 1 + gap;
-622:       return undefined;
-623:     },
-624:   };
-625: }
+HELPER_STDERR
 
-SOURCE packages/cli/test/recover-gap.test.ts SHA256 51ccbb5bc0644f5caebdd38f04573a8f1fc5cabf27abd194512d4cea504f6a23 L26-L49
-26:
-27:   it('with a book, it scans every reserved index plus the lookahead past it', () => {
-28:     const book = new IndexBook(join(dir, 'book.json'));
-29:     book.create(seed);
-30:     for (let i = 0; i < 3; i++) book.reserve(seed);
-31:     const tip = chainTip();
-32:     expect(recover(seed, book, tip - 1, tip, 2).keys).toEqual(['account', ...labels(5)]);
-33:     expect(book.read().next).toBe(3);
-34:     expect(recover(seed, book, tip - 1, tip).keys).toEqual(['account', ...labels(13)]);
-35:     // after looking at 0..9, the book moves past them (it is at 10, the lookahead end with no hit)
-36:     expect(book.read().next).toBe(10);
-37:     expect(book.reserve(seed).r.index).toBe(10);
-38:   });
-39: });
-
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 1.42
+CLEANUP isolated TMPDIR removed

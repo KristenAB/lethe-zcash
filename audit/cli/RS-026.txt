@@ -1,85 +1,36 @@
 ROW RS-026
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-026"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-026"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-026 | Scanner range implementation and RPC bounds, source review | Stream processes inclusive `from..=to`, increments actual block count, reverses compact transaction bytes to display txid, scans Orchard/Ironwood actions with local prepared incoming keys; connect timeout is 10 s and RPC timeout 60 s; decode limit is 32 MiB. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","scan-range","4522708","4522730"]
+{"exit_code":0,"signal":null,"elapsed_ms":361,"stdout_bytes":627,"stderr_bytes":0}
+STDOUT {"blocks":23,"from":4522708,"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}],"keys":4,"to":4522730}
+ASSERT inclusive 23-block real scan locally decrypts recorded Ironwood actions with expected display-order txids PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","scan-range","4522708","4522730"]
+ASSERT scanner uses GetBlockRange PASS
+ASSERT gRPC inclusive start/end are exactly 4522708..4522730 PASS
+ASSERT compact-block request contains no viewing key PASS
+{"exit_code":0,"signal":null,"elapsed_ms":5,"stdout_bytes":60,"stderr_bytes":0}
+STDOUT {"blocks":2,"from":4522708,"hits":[],"keys":4,"to":4522730}
+ASSERT actual streamed block count is 2 for sparse two-block stream PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","scan-range","4522708","4522730"]
+{"exit_code":2,"signal":null,"elapsed_ms":8,"stdout_bytes":0,"stderr_bytes":136}
+STDERR error: lightwalletd RPC failed: OutOfRange: Error, decoded message length too large: found 33554433 bytes, the limit is: 33554432 bytes
+ASSERT decode limit rejects message above 32 MiB PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","scan-range","4522708","4522730"]
+{"exit_code":null,"signal":"SIGKILL","elapsed_ms":20005,"stdout_bytes":0,"stderr_bytes":0}
+{"connection_timeout_expected_ms":10000,"observed_elapsed_ms":20005,"observed_exit_code":null,"observed_signal":"SIGKILL","connection_bound_matches":false}
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify","scan-range","4522708","4522730"]
+{"exit_code":2,"signal":null,"elapsed_ms":60013,"stdout_bytes":0,"stderr_bytes":59}
+STDERR error: lightwalletd RPC failed: Cancelled: Timeout expired
+ASSERT unanswered RPC bounded at 60 seconds PASS
+ASSERTIONS FAIL connection setup including TLS obeys expected 10-second bound
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3d42cec9dd6e26867d4ee391 L286-L334
-286: /// A note found in a compact block by one of the keys.
-287: #[derive(Debug, Clone, Serialize)]
-288: pub struct Hit {
-289:     pub key: String,
-290:     pub height: u64,
-291:     pub txid: String,
-292:     pub pool: &'static str,
-293:     pub value: u64,
-294: }
-295:
-296: fn compact_hits<V: DomainVersion>(pool: &'static str, height: u64, txid: &str, actions: &[zcash_client_backend::proto::compact_formats::CompactOrchardAction], keys: &[(String, orchard::keys::PreparedIncomingViewingKey)], out: &mut Vec<Hit>) {
-297:     for a in actions {
-298:         let Ok(ca) = orchard::note_encryption::CompactAction::try_from(a) else { continue };
-299:         let d = NoteEncryptionDomain::<V>::for_compact_action(&ca);
-300:         for (label, ivk) in keys {
-301:             if let Some((note, _)) = zcash_note_encryption::try_compact_note_decryption(&d, ivk, &ca) {
-302:                 out.push(Hit { key: label.clone(), height, txid: txid.to_string(), pool, value: note.value().inner() });
-303:             }
-304:         }
-305:     }
-306: }
-307:
-308: /// Streams compact blocks `from..=to` from lightwalletd and trial-decrypts every Orchard and Ironwood
-309: /// action with each key's Orchard-family incoming viewing key. This is how a restored wallet finds
-310: /// payments to one-time addresses without asking anyone which transactions to look at.
-311: pub async fn scan_range(c: &mut lwd::Client, keys: &[(String, UnifiedIncomingViewingKey)], from: u64, to: u64) -> Result<(Vec<Hit>, u64), VerifyError> {
-312:     use zcash_client_backend::proto::service::{BlockId, BlockRange};
-313:     let prepared: Vec<(String, orchard::keys::PreparedIncomingViewingKey)> = keys
-314:         .iter()
-315:         .filter_map(|(l, k)| k.orchard().as_ref().map(|ivk| (l.clone(), orchard::keys::PreparedIncomingViewingKey::new(ivk))))
-316:         .collect();
-317:     let range = BlockRange { start: Some(BlockId { height: from, hash: vec![] }), end: Some(BlockId { height: to, hash: vec![] }), pool_types: vec![] };
-318:     let mut stream = c.get_block_range(range).await.map_err(|s| VerifyError::Lwd(lwd::LwdError::Rpc(s)))?.into_inner();
-319:     let mut hits = Vec::new();
-320:     let mut blocks = 0u64;
-321:     while let Some(block) = stream.message().await.map_err(|s| VerifyError::Lwd(lwd::LwdError::Rpc(s)))? {
-322:         blocks += 1;
-323:         for tx in &block.vtx {
-324:             let mut id = tx.txid.clone();
-325:             id.reverse();
-326:             let txid = id.iter().map(|b| format!("{b:02x}")).collect::<String>();
-327:             compact_hits::<OrchardVersion>("Orchard", block.height, &txid, &tx.actions, &prepared, &mut hits);
-328:             compact_hits::<IronwoodVersion>("Ironwood", block.height, &txid, &tx.ironwood_actions, &prepared, &mut hits);
-329:         }
-330:     }
-331:     Ok((hits, blocks))
-332: }
+HELPER_STDERR
 
-SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5230f9747858543207cc5a39 L34-L47
-34: /// Connect eagerly so an unreachable server fails here, not on the first request.
-35: pub async fn connect(url: &str) -> Result<Client, LwdError> {
-36:     let mut ep = Endpoint::from_shared(url.to_string())
-37:         .map_err(|e| LwdError::BadUrl(e.to_string()))?
-38:         .connect_timeout(Duration::from_secs(10))
-39:         .timeout(Duration::from_secs(60));
-40:     if url.starts_with("https://") {
-41:         ep = ep
-42:             .tls_config(ClientTlsConfig::new().with_webpki_roots())
-43:             .map_err(|e| LwdError::Connect(e.to_string()))?;
-44:     }
-45:     let channel = ep.connect().await.map_err(|e| LwdError::Connect(format!("{url}: {e}")))?;
-46:     Ok(CompactTxStreamerClient::new(channel).max_decoding_message_size(32 * 1024 * 1024))
-47: }
-
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 1
+ELAPSED_SECONDS 81.538
+CLEANUP isolated TMPDIR removed

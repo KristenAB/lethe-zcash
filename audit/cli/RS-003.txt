@@ -1,34 +1,26 @@
 ROW RS-003
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-003"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-003"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-003 | `zswap-keys` seed-dependent failures, source contract only | Missing file exits 2 with `error: Setup required: seed file`; non-32-byte input exits 2 with `is not a 32-byte seed`; neither failure prints seed bytes. No seed is opened for this review. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","account","/tmp/lethe-rerun-KlyEbA/seed"]
+{"exit_code":2,"signal":null,"elapsed_ms":4,"stdout_bytes":0,"stderr_bytes":109}
+STDERR error: Setup required: seed file /tmp/lethe-rerun-KlyEbA/seed (zswap-keys init /tmp/lethe-rerun-KlyEbA/seed)
+ASSERT exit code 2 PASS
+ASSERT stderr prefix error: Setup required: seed file PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","account","/tmp/lethe-rerun-KlyEbA/seed"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":58}
+STDERR error: /tmp/lethe-rerun-KlyEbA/seed is not a 32-byte seed
+ASSERT exit code 2 PASS
+ASSERT stderr prefix error: /tmp/lethe-rerun-KlyEbA/seed is not a 32-byte seed PASS
+ASSERT seed failure has no stdout PASS
+ASSERTIONS PASS
+{"child_exit_codes":[2,2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L23
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-16:
-17: fn seed(path: &str) -> Vec<u8> {
-18:     let s = fs::read(path).unwrap_or_else(|_| fail(format!("Setup required: seed file {path} (zswap-keys init {path})")));
-19:     if s.len() != 32 {
-20:         fail(format!("{path} is not a 32-byte seed"));
-21:     }
-22:     s
-23: }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.137
+CLEANUP isolated TMPDIR removed

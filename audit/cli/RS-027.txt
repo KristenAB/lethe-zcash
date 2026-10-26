@@ -1,81 +1,30 @@
 ROW RS-027
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-027"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-027"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-027 | Async scanner wrapper failure/timeout, source contract | Default bound is 300000 ms, invalid override falls back to that bound; timeout kills child with SIGKILL and error contains `did not finish in` plus `Nothing was changed`; other failure includes stderr capped at 300 characters; MCP event loop stays responsive. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+ASSERT default/invalid scanner timeout undefined equals 300000 ms PASS
+ASSERT default/invalid scanner timeout bad equals 300000 ms PASS
+ASSERT default/invalid scanner timeout 0 equals 300000 ms PASS
+ASSERT default/invalid scanner timeout -1 equals 300000 ms PASS
+ASSERT default/invalid scanner timeout Infinity equals 300000 ms PASS
+ASSERT timeout exact text contains duration and Nothing was changed PASS
+ASSERT timed-out child killed and event loop remained responsive PASS
+{"command":"scanRangeAsync({}, 4522708, 4522730)","exit_code":"SIGKILL","timer_ticks":89}
+ASSERT other scanner failure retains exactly 300 stderr characters PASS
+{"command":"chainTipAsync()","exit_code":2,"stderr_retained":300}
+ASSERT throwaway seed and book modes 0600 PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/mcp/src/main.ts"]
+ASSERT MCP plan answers while recover scan is pending PASS
+ASSERT MCP bounded recovery failure exact text PASS
+{"mcp_plan_ms":4,"mcp_recover_error":"block scan 4522708..4522730 did not finish in 1.5 s (ZSWAP_SCAN_TIMEOUT_MS); is lightwalletd at the default URL answering? Nothing was changed"}
+ASSERTIONS PASS
+{"child_exit_codes":[]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L548-L579
-548: /** How long one block scan or tip request may take when run asynchronously: ZSWAP_SCAN_TIMEOUT_MS, default 5 min. */
-549: export function scanTimeoutMs(): number {
-550:   const v = Number(process.env.ZSWAP_SCAN_TIMEOUT_MS ?? 300_000);
-551:   return Number.isFinite(v) && v > 0 ? v : 300_000;
-552: }
-553: /** Runs the scanner without blocking the event loop (the MCP server keeps answering), killed after the timeout. */
-554: function scanner(args: string[], env: Record<string, string>, what: string): Promise<string> {
-555:   const ms = scanTimeoutMs();
-556:   return new Promise((done, fail) => {
-557:     execFile(scanBin(), args, { env, maxBuffer: 16 << 20, timeout: ms, killSignal: 'SIGKILL' }, (e, stdout, stderr) => {
-558:       if (!e) return done(stdout.toString());
-559:       if ((e as { killed?: boolean }).killed) return fail(new Error(`${what} did not finish in ${ms / 1000} s (ZSWAP_SCAN_TIMEOUT_MS); is lightwalletd at ${process.env.ZSWAP_LWD_URL ?? 'the default URL'} answering? Nothing was changed`));
-560:       fail(new Error(`${what} failed: ${String(stderr).trim().slice(0, 300) || e.message}`));
-561:     });
-562:   });
-563: }
-564: const lwdEnv = (extra: Record<string, string> = {}) => {
-565:   const env: Record<string, string> = { PATH: process.env.PATH ?? '', ...extra };
-566:   if (process.env.ZSWAP_LWD_URL) env.ZPV_LWD_URL = process.env.ZSWAP_LWD_URL;
-567:   return env;
-568: };
-569: /** scanRange without blocking: for the MCP server. */
-570: export async function scanRangeAsync(keys: Record<string, string>, from: number, to: number): Promise<{ blocks: number; hits: Hit[] }> {
-571:   return JSON.parse(await scanner(['scan-range', String(from), String(to)], lwdEnv({ ZPV_UIVKS: Object.entries(keys).map(([l, k]) => `${l}=${k}`).join(',') }), `block scan ${from}..${to}`));
-572: }
-573: /** chainTip without blocking: for the MCP server. */
-574: export async function chainTipAsync(): Promise<number> {
-575:   const tip = Number((await scanner(['tip'], lwdEnv(), 'chain tip request')).trim());
-576:   if (!Number.isSafeInteger(tip)) throw new Error('chain tip request: lightwalletd returned no height');
-577:   return tip;
-578: }
-579:
+HELPER_STDERR
 
-SOURCE packages/mcp/test/mcp.test.ts SHA256 d8834de72078e25b845a577edd8fafaa41328a1ff44f8fce83e2c3bbf9b572ad L214-L241
-214:   it('a lightwalletd that never answers: recover fails after ZSWAP_SCAN_TIMEOUT_MS, and other tools answer meanwhile (the scan used to block the whole server)', async () => {
-215:     const held: Socket[] = [];
-216:     const silent = tcpServer((sock) => held.push(sock)); // accepts, never answers
-217:     await new Promise<void>((r) => silent.listen(0, '127.0.0.1', r));
-218:     const lwd = `http://127.0.0.1:${(silent.address() as { port: number }).port}`;
-219:     newBook('b7.json');
-220:     const c = await connect({ ZSWAP_SEED: join(dir, 'seed'), ZSWAP_BOOK: join(dir, 'b7.json'), ZSWAP_LWD_URL: lwd, ZSWAP_SCAN_TIMEOUT_MS: '3000' });
-221:     const t0 = Date.now();
-222:     const rec = call(c, 'recover', { from_height: 3_000_000 });
-223:     await new Promise((r) => setTimeout(r, 300));
-224:     const p0 = Date.now();
-225:     const plan = await call(c, 'plan_batch', { amount_zec: 0.3, destination_asset: 'nep141:wrap.near', split: true });
-226:     const planMs = Date.now() - p0;
-227:     const r = await rec;
-228:     const recMs = Date.now() - t0;
-229:     await c.close();
-230:     for (const s of held) s.destroy();
-231:     await new Promise((done) => silent.close(done));
-232:     expect(plan.isError).toBeUndefined();
-233:     expect(planMs).toBeLessThan(1500);
-234:     expect(r.isError).toBe(true);
-235:     expect(r.text).toMatch(/chain tip request did not finish in 3 s \(ZSWAP_SCAN_TIMEOUT_MS\)/);
-236:     expect(recMs).toBeLessThan(10_000);
-237:   });
-238: });
-
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 3.889
+CLEANUP isolated TMPDIR removed

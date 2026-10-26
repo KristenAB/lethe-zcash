@@ -1,44 +1,30 @@
 ROW RS-011
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-011"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-011"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-011 | `zswap-keys near-key`, source contract only | Exclusive 0600 file creation writes near-cli fields `account_id`, `public_key`, `private_key` internally; stdout is only `index`, `account_id`, `written`; existing output exits 2 with `refusing to overwrite an existing file`. No export or credentials inspection occurs here. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-Q3WBUi/seed","3","/tmp/lethe-rerun-Q3WBUi/credential"]
+{"exit_code":0,"signal":null,"elapsed_ms":3,"stdout_bytes":139,"stderr_bytes":0}
+RAW_STDOUT memory only; no raw stdout file created; values never emitted
+ASSERT seed mode 0600 PASS
+{"json_fields":{"account_id":{"type":"string","length":64,"nonempty":true},"index":{"type":"number"},"written":{"type":"string","length":34,"nonempty":true}},"stderr":"","secret_fields_nonempty":{},"raw_stdout_deleted":true}
+ASSERT near-key exit 0 exact stdout fields and empty stderr PASS
+ASSERT credential exists mode 0600 PASS
+{"json_fields":{"account_id":{"type":"string","length":64,"nonempty":true},"index":{"type":"number"},"written":{"type":"string","length":34,"nonempty":true}},"file_exists":true,"file_mode":"0600","private_key_on_stdout":false}
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-Q3WBUi/seed","3","/tmp/lethe-rerun-Q3WBUi/credential"]
+{"exit_code":2,"signal":null,"elapsed_ms":1,"stdout_bytes":0,"stderr_bytes":110}
+STDERR error: /tmp/lethe-rerun-Q3WBUi/credential: File exists (os error 17) (refusing to overwrite an existing file)
+ASSERT exit code 2 PASS
+ASSERT stderr prefix error: /tmp/lethe-rerun-Q3WBUi/credential PASS
+ASSERT exclusive creation refuses overwrite PASS
+credential deleted without reading
+ASSERTIONS PASS
+{"child_exit_codes":[0,2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L77-L88
-77:         Some("near-key") if a.len() == 4 => {
-78:             let s = seed(&a[1]);
-79:             let i = near_index(&a[2]);
-80:             let mut f = fs::OpenOptions::new()
-81:                 .write(true)
-82:                 .create_new(true)
-83:                 .mode(0o600)
-84:                 .open(&a[3])
-85:                 .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
-86:             f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
-87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
-88:         }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd767a43f83883311071efd9b6f82d25ccf L59-L67
-59: /// near-cli's credentials JSON (`~/.near-credentials/mainnet/<account>.json`) for recipient `index`.
-60: /// The NEAR private key encoding is base58 of the 64-byte `secret ‖ public` keypair.
-61: pub fn near_credentials_json(seed: &[u8], index: u32) -> String {
-62:     let sk = near_signing_key(seed, index);
-63:     let (account_id, public_key) = near_recipient(seed, index);
-64:     let private_key = format!("ed25519:{}", bs58::encode(sk.to_keypair_bytes()).into_string());
-65:     serde_json::json!({ "account_id": account_id, "public_key": public_key, "private_key": private_key }).to_string()
-66: }
-
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.144
+CLEANUP isolated TMPDIR removed
