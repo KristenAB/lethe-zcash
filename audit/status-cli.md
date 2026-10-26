@@ -51,3 +51,18 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | CLI-043 | PASS | [CLI-043.txt](cli/CLI-043.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
 | CLI-044 | PASS | [CLI-044.txt](cli/CLI-044.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
 | CLI-045 | PASS | [CLI-045.txt](cli/CLI-045.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-046 | PASS | [CLI-046.txt](cli/CLI-046.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-047 | PASS | [CLI-047.txt](cli/CLI-047.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-048 | PASS | [CLI-048.txt](cli/CLI-048.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-049 | PASS | [CLI-049.txt](cli/CLI-049.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-050 | PASS | [CLI-050.txt](cli/CLI-050.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-051 | PASS | [CLI-051.txt](cli/CLI-051.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-052 | PASS | [CLI-052.txt](cli/CLI-052.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-053 | PASS | [CLI-053.txt](cli/CLI-053.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-054 | PASS | [CLI-054.txt](cli/CLI-054.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-055 | PASS | [CLI-055.txt](cli/CLI-055.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-056 | PASS | [CLI-056.txt](cli/CLI-056.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-057 | PASS | [CLI-057.txt](cli/CLI-057.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-058 | PASS | [CLI-058.txt](cli/CLI-058.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-059 | PASS | [CLI-059.txt](cli/CLI-059.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-060 | PASS | [CLI-060.txt](cli/CLI-060.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |

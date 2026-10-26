@@ -1,0 +1,25 @@
+ROW CLI-060
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-060"]
+MODE source review
+
+STDOUT
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L31-L37
+31: export function writeNearCredentials(seedFile: string, index: number, outFile: string): { index: number; account_id: string; written: string } {
+32:   if (!existsSync(seedFile)) throw new SetupRequiredError(seedFile, 'run `zswap init`');
+33:   return JSON.parse(execFileSync(keysBin(), ['near-key', seedFile, String(index), outFile]).toString());
+34: }
+35: 
+36: let tokenList: Promise<{ assetId: string; blockchain: string; symbol: string; contractAddress?: string }[]> | undefined;
+37: /**
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L92-L105
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.022
+CLEANUP: isolated TMPDIR removed after command.
