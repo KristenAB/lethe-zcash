@@ -1,0 +1,37 @@
+ID: CH-015
+Observed at: 2026-10-26T05:11:55.309Z
+Status: PASS
+Notes: 
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";console.log(JSON.stringify({RPC:l.NEAR_RPC,indexer:l.NEAR_FT_INDEXER}));console.log(JSON.stringify(await l.nearAccountState('wrap.near',['wrap.near'])));"]
+pid: 72884
+stdout:
+{"RPC":"https://rpc.mainnet.fastnear.com","indexer":"https://api.fastnear.com"}
+{"account_id":"wrap.near","exists":true,"amountYocto":"34680737757668891586065540425308","ft":{"wrap.near":"107550764923243453203839068"},"ftIndexed":["wrap.near","kusama-airdrop.near","shit.tkn.near","usdt.tether-token.near","token.sweat","nearrewards.near","usmeme.tg","lonkrewards.near","fexu.tkn.near","angl.tkn.near","fehu.tkn.near","gp.token0.near","17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1","wnear.gra-fun.near","wrap.gra-fun.near"]}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:11:54.048Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"wrap.near"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:11:54.374Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoid3JhcC5uZWFyIn0="}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:11:54.569Z","url":"https://api.fastnear.com/v1/account/wrap.near/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/wrap.near/ft","status":200}
+
+exit_code: 0
+
+
+PROCESS 2
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";console.log(JSON.stringify(await l.nearAccountState('wrap.near')));"]
+pid: 72885
+stdout:
+{"account_id":"wrap.near","exists":true,"amountYocto":"34680737757668891586065540425308","ft":{},"ftIndexed":["wrap.near","kusama-airdrop.near","shit.tkn.near","usdt.tether-token.near","token.sweat","nearrewards.near","usmeme.tg","lonkrewards.near","fexu.tkn.near","angl.tkn.near","fehu.tkn.near","gp.token0.near","17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1","wnear.gra-fun.near","wrap.gra-fun.near"]}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:11:54.847Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"wrap.near"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:11:55.101Z","url":"https://api.fastnear.com/v1/account/wrap.near/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/wrap.near/ft","status":200}
+
+exit_code: 0
+

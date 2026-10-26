@@ -1,0 +1,15 @@
+ID: CH-026
+Observed at: 2026-10-26T05:12:33.481Z
+Status: PASS
+Notes: Read-only recorded pass3; no example process or schedule.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--input-type=module","-e","import fs from 'node:fs';import assert from 'node:assert/strict';const d=JSON.parse(fs.readFileSync(\"deployments/pass3.json\",'utf8'));assert.deepEqual(d.quotes.map(q=>q.index),[8,9,10]);assert.deepEqual(d.quotes.map(q=>q.quoteRequest.amount),['20000000','5000000','10000000']);const times=d.quotes.map(q=>Date.parse(q.timestamp));const gaps=times.slice(1).map((x,i)=>(x-times[i])/1000);assert.ok(gaps.every(x=>x>=660));for(const f of ['slippageTolerance','quoteWaitingTimeMs','deadline'])assert.equal(new Set(d.quotes.map(q=>q.quoteRequest[f])).size,3);assert.equal(d.report.score,75);assert.deepEqual(d.seedOnlyRecovery.found.map(r=>[r.index,r.foundFromSeedAlone]),[[8,true],[9,true],[10,false]]);assert.deepEqual(d.seedOnlyRecovery.outsideWindow,[10]);console.log(JSON.stringify({quotes:d.quotes.map(q=>({index:q.index,amount:q.quoteRequest.amount,timestamp:q.timestamp,parameters:{slippageTolerance:q.quoteRequest.slippageTolerance,quoteWaitingTimeMs:q.quoteRequest.quoteWaitingTimeMs,deadline:q.quoteRequest.deadline}})),gaps,score:d.report.score,seedOnlyRecovery:d.seedOnlyRecovery}));"]
+pid: 84278
+stdout:
+{"quotes":[{"index":8,"amount":"20000000","timestamp":"2026-10-22T21:42:13.660Z","parameters":{"slippageTolerance":88,"quoteWaitingTimeMs":3233,"deadline":"2026-10-22T22:57:10.495Z"}},{"index":9,"amount":"5000000","timestamp":"2026-10-22T21:53:30.652Z","parameters":{"slippageTolerance":73,"quoteWaitingTimeMs":3104,"deadline":"2026-10-22T23:23:37.500Z"}},{"index":10,"amount":"10000000","timestamp":"2026-10-22T22:06:25.830Z","parameters":{"slippageTolerance":80,"quoteWaitingTimeMs":2657,"deadline":"2026-10-22T23:33:24.494Z"}}],"gaps":[676.992,775.178],"score":75,"seedOnlyRecovery":{"book":"none (seed only)","gap":10,"derived":10,"checked":10,"nearRpc":"mainnet, read-only","found":[{"index":8,"recipient":"378796e522448ff7dc47ef42a64f1356fdc58056c3b92612f39900514be69dd5","foundFromSeedAlone":true,"state":{"account_id":"378796e522448ff7dc47ef42a64f1356fdc58056c3b92612f39900514be69dd5","exists":false,"amountYocto":"0","ft":{},"ftIndexed":[]}},{"index":9,"recipient":"06a81826563040b240cb0bb468ba8d6db046a70287cf857af5bab6cc7f0f955d","foundFromSeedAlone":true,"state":{"account_id":"06a81826563040b240cb0bb468ba8d6db046a70287cf857af5bab6cc7f0f955d","exists":false,"amountYocto":"0","ft":{},"ftIndexed":[]}},{"index":10,"recipient":"f7b04ef09cfd435c0a0eff562f7239ef708211417cf22697645903ec60bd7b3f","foundFromSeedAlone":false}],"outsideWindow":[10],"windowNote":"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes."}}
+
+stderr:
+
+exit_code: 0
+
