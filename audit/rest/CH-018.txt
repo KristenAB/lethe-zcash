@@ -1,11 +1,11 @@
 ID: CH-018
-Observed at: 2026-10-26T05:11:57.912Z
+Observed at: 2026-10-26T05:31:38.818Z
 Status: UNTESTED
 Notes: Actual own-destination and explicit-token reads passed; token-only extension requires a funded derived recipient, unavailable without prohibited funding.
 
 PROCESS 1
-command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const b=new l.IndexBook(\"/tmp/lethe-rest-qdoxFH/ft-read-book.json\");if(!b.exists())b.create(process.env.ZSWAP_SEED);for(let i=0;i<1;i++)b.reserve(process.env.ZSWAP_SEED,{freshRecipient:true,destinationAsset:'nep141:wrap.near'});console.log(JSON.stringify({next:b.read().next}));"]
-pid: 73070
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const b=new l.IndexBook(\"/tmp/lethe-rest-93l6lz/ft-read-book.json\");if(!b.exists())b.create(process.env.ZSWAP_SEED);for(let i=0;i<1;i++)b.reserve(process.env.ZSWAP_SEED,{freshRecipient:true,destinationAsset:'nep141:wrap.near'});console.log(JSON.stringify({next:b.read().next}));"]
+pid: 26316
 stdout:
 {"next":1}
 
@@ -15,20 +15,20 @@ exit_code: 0
 
 
 PROCESS 2
-command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const r=await l.recoverRecipients(process.env.ZSWAP_SEED,new l.IndexBook(process.env.ZSWAP_BOOK),{gap:0,lookup:true,tokens:['usdt.tether-token.near']});console.log(JSON.stringify(r));"]
-pid: 73170
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const r=await l.recoverRecipients(process.env.ZSWAP_SEED,new l.IndexBook(process.env.ZSWAP_BOOK),{gap:0,lookup:true,tokens:['usdt.tether-token.near']});console.log(JSON.stringify(r));"]
+pid: 26320
 stdout:
-{"gap":0,"recipients":[{"account_id":"476a9136248c6a2157dfd84c4d623b0ed80d8650f938de97802cc9b5c5b8df99","index":0,"path":"m/44'/397'/1'/0'","public_key":"ed25519:5onCKTUKAxZgRsgMQKK6kKKq8aA2Kv5jnPhUFXUyriUp","inBook":true,"state":{"account_id":"476a9136248c6a2157dfd84c4d623b0ed80d8650f938de97802cc9b5c5b8df99","exists":false,"amountYocto":"0","ft":{"wrap.near":"0","usdt.tether-token.near":"0"},"ftIndexed":[]}}],"used":[],"checked":1,"next":1}
+{"gap":0,"recipients":[{"account_id":"39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae","index":0,"path":"m/44'/397'/1'/0'","public_key":"ed25519:4qtMWuDghjcRb2mPV9YmK1ZoCZLNcZaGJk4YDhoqmMFK","inBook":true,"state":{"account_id":"39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae","exists":false,"amountYocto":"0","ft":{"wrap.near":"0","usdt.tether-token.near":"0"},"ftIndexed":[]}}],"used":[],"checked":1,"next":1}
 
 stderr:
-AUDIT_HTTP {"at":"2026-10-26T05:11:57.134Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"476a9136248c6a2157dfd84c4d623b0ed80d8650f938de97802cc9b5c5b8df99"}},"authorizationPresent":false}
+AUDIT_HTTP {"at":"2026-10-26T05:31:37.654Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae"}},"authorizationPresent":false}
 AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
-AUDIT_HTTP {"at":"2026-10-26T05:11:57.355Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiNDc2YTkxMzYyNDhjNmEyMTU3ZGZkODRjNGQ2MjNiMGVkODBkODY1MGY5MzhkZTk3ODAyY2M5YjVjNWI4ZGY5OSJ9"}},"authorizationPresent":false}
+AUDIT_HTTP {"at":"2026-10-26T05:31:37.886Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiMzkxOTAxNjRlZWIwMWZlNjc0MDNhOTIxMGY2MjE3NDJjYmY5NTViNmRlZWNkOGFlNDRkZDhlOWI1OWY5NDdhZSJ9"}},"authorizationPresent":false}
 AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
-AUDIT_HTTP {"at":"2026-10-26T05:11:57.524Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"usdt.tether-token.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiNDc2YTkxMzYyNDhjNmEyMTU3ZGZkODRjNGQ2MjNiMGVkODBkODY1MGY5MzhkZTk3ODAyY2M5YjVjNWI4ZGY5OSJ9"}},"authorizationPresent":false}
+AUDIT_HTTP {"at":"2026-10-26T05:31:38.428Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"usdt.tether-token.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiMzkxOTAxNjRlZWIwMWZlNjc0MDNhOTIxMGY2MjE3NDJjYmY5NTViNmRlZWNkOGFlNDRkZDhlOWI1OWY5NDdhZSJ9"}},"authorizationPresent":false}
 AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
-AUDIT_HTTP {"at":"2026-10-26T05:11:57.709Z","url":"https://api.fastnear.com/v1/account/476a9136248c6a2157dfd84c4d623b0ed80d8650f938de97802cc9b5c5b8df99/ft","method":"GET","body":null,"authorizationPresent":false}
-AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/476a9136248c6a2157dfd84c4d623b0ed80d8650f938de97802cc9b5c5b8df99/ft","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:38.613Z","url":"https://api.fastnear.com/v1/account/39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae/ft","status":200}
 
 exit_code: 0
 

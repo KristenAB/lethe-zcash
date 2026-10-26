@@ -1,9 +1,9 @@
 {
   "id": "UI-046",
-  "status": "FAIL",
-  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-128: PASS. redeploy blocked: this run must not deploy",
-  "start": "2026-10-26T04:10:46.506Z",
-  "end": "2026-10-26T04:10:50.734Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:38.008Z",
+  "end": "2026-10-26T05:31:39.367Z",
   "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
   "viewport": "375x812",
   "flow": "Live evidence Found again section (375x812 mobile) - https://lethe-landing-sooty.vercel.app/evidence.html",
@@ -11,24 +11,94 @@
   "checks": [
     {
       "label": "initial document HTTP",
-      "ok": false,
-      "actual": 403,
+      "ok": true,
+      "actual": 200,
       "expected": 200
     },
     {
-      "label": "flow execution",
-      "ok": false,
-      "actual": "locator.evaluate: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#recover .rows li').first()\u001b[22m\n"
+      "label": "#recover .rows li one computed column",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer links truncate with ellipsis",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover a within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover a bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "A",
+          "left": 169,
+          "right": 306,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 166,
+          "right": 303,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 168,
+          "right": 305,
+          "width": 137
+        },
+        {
+          "tag": "A",
+          "left": 16,
+          "right": 321,
+          "width": 305
+        }
+      ]
+    },
+    {
+      "label": "#recover within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#recover bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "SECTION",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
     },
     {
       "label": "console/page/network errors (all origins, no exemptions for console errors)",
-      "ok": false,
-      "actual": [
-        "HTTP 403 https://lethe-landing-sooty.vercel.app/evidence.html",
-        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/evidence.html",
-        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
-        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
-      ],
+      "ok": true,
+      "actual": [],
       "expected": []
     }
   ]

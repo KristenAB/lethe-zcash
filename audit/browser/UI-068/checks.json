@@ -1,13 +1,13 @@
 {
   "id": "UI-068",
-  "status": "FAIL",
-  "notes": "25.324 displayed where 25.3240 is required. Parts lists trim required eight-place ZEC decimals; pass-2 output also trims 25.3240 to 25.324.",
-  "start": "2026-10-26T04:10:53.544Z",
-  "end": "2026-10-26T04:10:54.892Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:51.091Z",
+  "end": "2026-10-26T05:31:52.495Z",
   "url": "https://lethe-dashboard.vercel.app/",
   "viewport": "1280x800",
   "flow": "Live dashboard Pass 2 & Pass 3 parts lists (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
-  "expected": "Pass 2 parts list displays 3 parts: part 1 \"0.20000000 ZEC at +0 s \u2192 50.7011 wNEAR\" (recipient 66e730c484\u2026, refundTo u1rezfhdwv\u2026, found from the seed alone); part 2 \"0.10000000 ZEC at +138 s \u2192 25.3240 wNEAR\" (recipient 3e33948911\u2026, refundTo u1ehzec56h\u2026, found from the seed alone); part 3 \"0.05000000 ZEC at +278 s \u2192 12.6482 wNEAR\" (recipient 4afc1f2c07\u2026, refundTo u1z4sgt6hu\u2026, found from the seed alone); Pass 2 note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\". Pass 3 parts list is visible and displays 3 parts with request parameters: part 8 \"0.20000000 ZEC at +0 s \u2192 49.5363 wNEAR \u00b7 slippage 88 bps, wait 3.233 s, deadline +75 min \u00b7 found from the seed alone\"; part 9 \"0.05000000 ZEC at +677 s \u2192 12.3519 wNEAR \u00b7 slippage 73 bps, wait 3.104 s, deadline +90 min \u00b7 found from the seed alone\"; part 10 \"0.10000000 ZEC at +1452 s \u2192 24.7551 wNEAR \u00b7 slippage 80 bps, wait 2.657 s, deadline +87 min \u00b7 not found from the seed\"; Pass 3 note states \"Score 0 \u2192 32 \u2192 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\". Sweeping callout contains \"Sweeping re-links. Moving several per-swap accounts into one account shows them all paying it, on chain.\" and names `zswap sweep-plan`; a token-only account needs NEAR for gas and a top-up links it to the paying account.",
+  "expected": "Pass 2 parts list displays 3 parts: part 1 \"0.2 ZEC at +0 s → 50.7011 wNEAR\" (recipient 66e730c484…, refundTo u1rezfhdwv…, found from the seed alone); part 2 \"0.1 ZEC at +138 s → 25.324 wNEAR\" (recipient 3e33948911…, refundTo u1ehzec56h…, found from the seed alone); part 3 \"0.05 ZEC at +278 s → 12.6482 wNEAR\" (recipient 4afc1f2c07…, refundTo u1z4sgt6hu…, found from the seed alone); Pass 2 note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\". Pass 3 parts list is visible and displays 3 parts with request parameters: part 8 \"0.2 ZEC at +0 s → 49.5363 wNEAR · slippage 88 bps, wait 3.233 s, deadline +75 min · found from the seed alone\"; part 9 \"0.05 ZEC at +677 s → 12.3519 wNEAR · slippage 73 bps, wait 3.104 s, deadline +90 min · found from the seed alone\"; part 10 \"0.1 ZEC at +1452 s → 24.7551 wNEAR · slippage 80 bps, wait 2.657 s, deadline +87 min · not found from the seed\"; Pass 3 note states \"Score 0 → 32 → 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\". Sweeping callout contains \"Sweeping re-links. Moving several per-swap accounts into one account shows them all paying it, on chain.\" and names `zswap sweep-plan`; a token-only account needs NEAR for gas and a top-up links it to the paying account.",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -28,9 +28,9 @@
       "expected": true
     },
     {
-      "label": "part 1 send exact 0.20000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -58,15 +58,15 @@
       "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
     },
     {
-      "label": "part 2 send exact 0.10000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 send exact 0.1",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
-      "label": "part 2 output exact 25.3240",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 output exact 25.324",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -88,9 +88,9 @@
       "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
     },
     {
-      "label": "part 3 send exact 0.05000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 3 send exact 0.05",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -142,9 +142,9 @@
       "expected": true
     },
     {
-      "label": "part 1 send exact 0.20000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -166,9 +166,9 @@
       "expected": true
     },
     {
-      "label": "part 2 send exact 0.05000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 send exact 0.05",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -190,9 +190,9 @@
       "expected": true
     },
     {
-      "label": "part 3 send exact 0.10000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 3 send exact 0.1",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {

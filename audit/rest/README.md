@@ -1,3 +1,7 @@
+Re-verification on Oct 26, 2026: current combined MCP/CH status is 48 PASS, 1 FAIL, 11 UNTESTED. See `reverify-results.json` and `../reverify-summary.json`. MCP-018 and MCP-022 now pass with a fresh temporary wallet, from_height=tip−4 and the actual current chain tip; a 30-block guard prevents a broad scan. The prior historical-range restriction below was part of the earlier runner, not a product limitation. Remaining dependencies and the HTTP-201/expected-200 mismatch were rechecked. All re-verification temporary files and processes were cleaned up.
+
+The following describes the earlier full run:
+
 This run executed the MCP and chain rows on 2026-10-26 using the built TypeScript CLI/server and existing native binaries. Results: 46 PASS, 1 FAIL, 13 UNTESTED. See ../status-rest.md for all 60 rows. Each row has its own raw process stdout, stderr, and exit status; CH-010 through CH-013 contain only the four requested verdict fields, as instructed.
 
 CH-003 fails the exact expectation because the live default 1Click provider returned HTTP 201 with a valid dry quote, while AUDIT.md specifies HTTP 200. Source and AUDIT.md were not changed.

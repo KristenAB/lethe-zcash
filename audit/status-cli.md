@@ -1,6 +1,6 @@
 # CLI and Rust audit status
 
-Results: **106 PASS, 1 FAIL, 2 UNTESTED** (CLI-022 and CLI-023: needs ONECLICK_JWT).
+Results: **107 PASS, 0 FAIL, 2 UNTESTED** (CLI-022 and CLI-023: needs ONECLICK_JWT).
 
 All 109 CLI-/RS- rows from AUDIT.md. The 35 rows previously recorded as source/test-contract review have now been executed individually. Their expected-result columns, rather than the erroneous planning restrictions, determine the result. All other row statuses, notes, and evidence logs are unchanged.
 
@@ -31,8 +31,8 @@ Recovery scans stayed within 4522708–4522730. Recorded payment checks were rea
 | CLI-019 | PASS | [CLI-019.txt](cli/CLI-019.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Real public dry 1Click path, no JWT. |
 | CLI-020 | PASS | [CLI-020.txt](cli/CLI-020.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-021 | PASS | [CLI-021.txt](cli/CLI-021.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
-| CLI-022 | UNTESTED | [CLI-022.txt](cli/CLI-022.txt) | needs ONECLICK_JWT |
-| CLI-023 | UNTESTED | [CLI-023.txt](cli/CLI-023.txt) | needs ONECLICK_JWT |
+| CLI-022 | UNTESTED | [CLI-022.txt](cli/CLI-022.txt) | Dependency: ONECLICK_JWT; authenticated mode remains UNTESTED. |
+| CLI-023 | UNTESTED | [CLI-023.txt](cli/CLI-023.txt) | Dependency: ONECLICK_JWT; authenticated mode remains UNTESTED. |
 | CLI-024 | PASS | [CLI-024.txt](cli/CLI-024.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-025 | PASS | [CLI-025.txt](cli/CLI-025.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-026 | PASS | [CLI-026.txt](cli/CLI-026.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
@@ -117,5 +117,5 @@ Recovery scans stayed within 4522708–4522730. Recorded payment checks were rea
 | RS-023 | PASS | [RS-023.txt](cli/RS-023.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | RS-024 | PASS | [RS-024.txt](cli/RS-024.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
 | RS-025 | PASS | [RS-025.txt](cli/RS-025.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
-| RS-026 | FAIL | [RS-026.txt](cli/RS-026.txt) | Ran `zpay-verify scan-range`, exits 0 and 2; TLS-blackhole connection required SIGKILL after 20005 ms instead of the expected 10-second bound. Inclusive scan, block count, 32 MiB decoding limit and 60-second RPC timeout passed; helper exit 1. |
+| RS-026 | PASS | [RS-026.txt](cli/RS-026.txt) | fix(scan): bound full lightwalletd connection setup; current-source build reverified: 23 real blocks, four recorded hits, stalled TLS fails at 10009 ms. |
 | RS-027 | PASS | [RS-027.txt](cli/RS-027.txt) | Ran `scanRangeAsync` (child SIGKILL), `chainTipAsync` (child exit 2), and MCP recover/plan commands; helper exit 0; timeout defaults, 300-character stderr cap and responsiveness verified. |

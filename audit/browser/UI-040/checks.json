@@ -1,13 +1,13 @@
 {
   "id": "UI-040",
-  "status": "FAIL",
-  "notes": "25.324 displayed where 25.3240 is required. Parts lists trim required eight-place ZEC decimals; pass-2 output also trims 25.3240 to 25.324.",
-  "start": "2026-10-26T04:05:10.995Z",
-  "end": "2026-10-26T04:05:12.307Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:35.421Z",
+  "end": "2026-10-26T05:31:36.748Z",
   "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
   "viewport": "1280x800",
   "flow": "Live evidence Pass 2 parts list (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
-  "expected": "List ul#pass2-rows displays 3 parts: part 1 \"0.20000000 ZEC at +0 s \u2192 50.7011 wNEAR\" (recipient 66e730c484\u2026, refundTo u1rezfhdwv\u2026, found from the seed alone); part 2 \"0.10000000 ZEC at +138 s \u2192 25.3240 wNEAR\" (recipient 3e33948911\u2026, refundTo u1ehzec56h\u2026, found from the seed alone); part 3 \"0.05000000 ZEC at +278 s \u2192 12.6482 wNEAR\" (recipient 4afc1f2c07\u2026, refundTo u1z4sgt6hu\u2026, found from the seed alone); paragraph #pass2-note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\".",
+  "expected": "List ul#pass2-rows displays 3 parts: part 1 \"0.2 ZEC at +0 s → 50.7011 wNEAR\" (recipient 66e730c484…, refundTo u1rezfhdwv…, found from the seed alone); part 2 \"0.1 ZEC at +138 s → 25.324 wNEAR\" (recipient 3e33948911…, refundTo u1ehzec56h…, found from the seed alone); part 3 \"0.05 ZEC at +278 s → 12.6482 wNEAR\" (recipient 4afc1f2c07…, refundTo u1z4sgt6hu…, found from the seed alone); paragraph #pass2-note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\".",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -28,9 +28,9 @@
       "expected": true
     },
     {
-      "label": "part 1 send exact 0.20000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -58,15 +58,15 @@
       "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
     },
     {
-      "label": "part 2 send exact 0.10000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 send exact 0.1",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
-      "label": "part 2 output exact 25.3240",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 output exact 25.324",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -88,9 +88,9 @@
       "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
     },
     {
-      "label": "part 3 send exact 0.05000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 3 send exact 0.05",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {

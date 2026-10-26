@@ -1,0 +1,81 @@
+{
+  "rows": [
+    {
+      "id": "CH-003",
+      "status": "FAIL",
+      "note": "Actual provider HTTP 201; exact expected status is HTTP 200. Valid dry quote object was returned."
+    },
+    {
+      "id": "CH-017",
+      "status": "UNTESTED",
+      "note": "Real UNKNOWN_ACCOUNT mapping observed. Positive FT-only/indexed-only use needs a real account in that state; no transaction/funding allowed."
+    },
+    {
+      "id": "CH-018",
+      "status": "UNTESTED",
+      "note": "Actual own-destination and explicit-token reads passed; token-only extension requires a funded derived recipient, unavailable without prohibited funding."
+    },
+    {
+      "id": "CH-021",
+      "status": "UNTESTED",
+      "note": "Live indexer returned a valid token list; needs real HTTP 502 and malformed-200 indexer responses. No mock or substituted payload used."
+    },
+    {
+      "id": "CH-022",
+      "status": "UNTESTED",
+      "note": "Real invalid-account and missing-FT-contract queries failed explicitly; non-object HTTP 200 branch needs an actual malformed RPC response. No synthetic RPC answers used."
+    },
+    {
+      "id": "CH-023",
+      "status": "UNTESTED",
+      "note": "Runtime defaults, real stalled connection timeout, real connection refusal, live provider rejection, and bounded snippet checked.; Body-read timeout and reset subcases not induced against real providers; needs a real stalled-body/reset response. Other row subcases executed, no partial PASS."
+    },
+    {
+      "id": "CH-027",
+      "status": "PASS",
+      "note": "Real zswap swap process refused before any HTTP or broadcast."
+    },
+    {
+      "id": "CH-028",
+      "status": "UNTESTED",
+      "note": "Real CLI sweep warning and read-only queries observed. Token-only action requires an actually token-funded derived recipient; no funding permitted."
+    },
+    {
+      "id": "CH-029",
+      "status": "UNTESTED",
+      "note": "Real default 1Click returned a valid quote object; needs actual provider HTTP 200 non-object/HTML response. No fabricated provider body used."
+    },
+    {
+      "id": "CH-030",
+      "status": "UNTESTED",
+      "note": "Real default token endpoint returned a valid JSON list; needs actual provider HTTP 200 without an array. No stub endpoint or payload used."
+    },
+    {
+      "id": "MCP-012",
+      "status": "UNTESTED",
+      "note": "needs ONECLICK_JWT"
+    },
+    {
+      "id": "MCP-018",
+      "status": "PASS",
+      "note": ""
+    },
+    {
+      "id": "MCP-022",
+      "status": "PASS",
+      "note": ""
+    },
+    {
+      "id": "MCP-025",
+      "status": "UNTESTED",
+      "note": "Gap lookup and local advancement observed; extension past a used account needs a funded derived recipient, prohibited in this run."
+    },
+    {
+      "id": "MCP-027",
+      "status": "UNTESTED",
+      "note": "Common-destination warning observed; token-only warning needs a real token-funded derived account. No funding allowed."
+    }
+  ],
+  "at": "2026-10-26T05:31:50.338Z",
+  "temporaryWalletDeleted": true
+}

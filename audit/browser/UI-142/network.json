@@ -45,19 +45,19 @@
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c87bc556"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c78a6374"
   },
   {
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react.js?v=c87bc556"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react.js?v=c78a6374"
   },
   {
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=d50268be"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=7f8e2d79"
   },
   {
     "event": "request",
@@ -70,18 +70,6 @@
     "method": "GET",
     "type": "script",
     "url": "http://127.0.0.1:5182/src/styles.css"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/@vite/client"
-  },
-  {
-    "event": "request",
-    "method": "GET",
-    "type": "script",
-    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/node_modules/.pnpm/vite@7.3.7_@types+node@22.20.5_tsx@4.23.15/node_modules/vite/dist/client/env.mjs"
   },
   {
     "event": "response",
@@ -93,31 +81,13 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c87bc556"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=c78a6374"
   },
   {
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-LX5RNMDH.js?v=c782bf14"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react.js?v=c87bc556"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/node_modules/.pnpm/vite@7.3.7_@types+node@22.20.5_tsx@4.23.15/node_modules/vite/dist/client/env.mjs"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-LX5RNMDH.js?v=c782bf14"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-LX5RNMDH.js?v=8ee8bb3a"
   },
   {
     "event": "response",
@@ -129,37 +99,67 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react.js?v=c78a6374"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-LX5RNMDH.js?v=8ee8bb3a"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:5182/@vite/client"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "script",
+    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/node_modules/.pnpm/vite@7.3.7_@types+node@22.20.5_tsx@4.23.15/node_modules/vite/dist/client/env.mjs"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
     "url": "http://127.0.0.1:5182/src/App.tsx"
   },
   {
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/packages/cli/src/decorrelate.ts"
+    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/src/decorrelate.ts"
   },
   {
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/packages/cli/src/decorrelate.ts"
+    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/src/decorrelate.ts"
   },
   {
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=d50268be"
+    "url": "http://127.0.0.1:5182/@fs/Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/node_modules/.pnpm/vite@7.3.7_@types+node@22.20.5_tsx@4.23.15/node_modules/vite/dist/client/env.mjs"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=7f8e2d79"
   },
   {
     "event": "request",
     "method": "GET",
     "type": "script",
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-ZQ7ALBIT.js?v=c782bf14"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-ZQ7ALBIT.js?v=8ee8bb3a"
   },
   {
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-ZQ7ALBIT.js?v=c782bf14"
+    "url": "http://127.0.0.1:5182/node_modules/.vite/deps/chunk-ZQ7ALBIT.js?v=8ee8bb3a"
   },
   {
     "event": "response",
@@ -186,6 +186,12 @@
     "url": "http://127.0.0.1:5182/testnet.json"
   },
   {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "http://127.0.0.1:5182/recovery-seed-only.json"
+  },
+  {
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
@@ -198,12 +204,6 @@
     "url": "http://127.0.0.1:5182/recovery-seed-only.json"
   },
   {
-    "event": "request",
-    "method": "GET",
-    "type": "fetch",
-    "url": "http://127.0.0.1:5182/recovery-seed-only.json"
-  },
-  {
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
@@ -249,12 +249,6 @@
     "event": "request",
     "method": "GET",
     "type": "fetch",
-    "url": "http://127.0.0.1:5182/pass3.json"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
     "url": "http://127.0.0.1:5182/pass3.json"
   },
   {
@@ -274,6 +268,12 @@
     "method": "GET",
     "type": "font",
     "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "http://127.0.0.1:5182/pass3.json"
   },
   {
     "event": "response",

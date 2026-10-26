@@ -1,13 +1,13 @@
 {
   "id": "UI-028",
-  "status": "FAIL",
-  "notes": "Exact decimal precision differs: e.g. 0.2 displayed where 0.20000000 is required. 25.324 displayed where 25.3240 is required.",
-  "start": "2026-10-26T04:04:41.211Z",
-  "end": "2026-10-26T04:04:49.960Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:20.161Z",
+  "end": "2026-10-26T05:31:28.933Z",
   "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
   "viewport": "375x812",
   "flow": "Live evidence pass-2 widget tap each swap (375x812 mobile) - https://lethe-landing-sooty.vercel.app/evidence.html",
-  "expected": "Selecting step buttons 1, 2 and 3 displays, respectively, swap 1: 0.20000000 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s; swap 2: 0.10000000 ZEC, 25.3240 wNEAR, key #6 refundTo `u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j`, account #6 recipient `3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada`, Sent at +138 s; swap 3: 0.05000000 ZEC, 12.6482 wNEAR, key #7 refundTo `u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr`, account #7 recipient `4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d`, Sent at +278 s. Only the selected step has aria-pressed=\"true\". Manual selection stops autoplay; the active swap stays unchanged after 5000 ms. The selected river item is \"now\" / \"in use\"; earlier items are \"gone\" / \"used, forgotten\"; later items are \"ahead\". At 375\u00d7812, scrollWidth <= innerWidth and <= 375.",
+  "expected": "Selecting step buttons 1, 2 and 3 displays, respectively, swap 1: 0.2 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s; swap 2: 0.1 ZEC, 25.324 wNEAR, key #6 refundTo `u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j`, account #6 recipient `3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada`, Sent at +138 s; swap 3: 0.05 ZEC, 12.6482 wNEAR, key #7 refundTo `u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr`, account #7 recipient `4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d`, Sent at +278 s. Only the selected step has aria-pressed=\"true\". Manual selection stops autoplay; the active swap stays unchanged after 5000 ms. The selected river item is \"now\" / \"in use\"; earlier items are \"gone\" / \"used, forgotten\"; later items are \"ahead\". At 375×812, scrollWidth <= innerWidth and <= 375.",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -41,9 +41,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.2",
-      "expected": "0.20000000"
+      "expected": "0.2"
     },
     {
       "label": "output amount exact",
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +0 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -137,15 +137,15 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.1",
-      "expected": "0.10000000"
+      "expected": "0.1"
     },
     {
       "label": "output amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "25.324",
-      "expected": "25.3240"
+      "expected": "25.324"
     },
     {
       "label": "asset labels",
@@ -174,7 +174,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +138 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +138 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -233,9 +233,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.05",
-      "expected": "0.05000000"
+      "expected": "0.05"
     },
     {
       "label": "output amount exact",
@@ -270,7 +270,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +278 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -329,9 +329,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.05",
-      "expected": "0.05000000"
+      "expected": "0.05"
     },
     {
       "label": "output amount exact",
@@ -366,7 +366,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +278 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true

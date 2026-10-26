@@ -1,9 +1,9 @@
 {
   "id": "UI-081",
-  "status": "FAIL",
-  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-173: PASS. redeploy blocked: this run must not deploy",
-  "start": "2026-10-26T04:06:22.514Z",
-  "end": "2026-10-26T04:06:23.758Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:02.178Z",
+  "end": "2026-10-26T05:32:03.541Z",
   "url": "https://lethe-landing-sooty.vercel.app/app/",
   "viewport": "1280x800",
   "flow": "Live landing host /app/ no control labelled \"log\" - https://lethe-landing-sooty.vercel.app/app/",
@@ -11,8 +11,8 @@
   "checks": [
     {
       "label": "initial document HTTP",
-      "ok": false,
-      "actual": 403,
+      "ok": true,
+      "actual": 200,
       "expected": 200
     },
     {
@@ -23,13 +23,8 @@
     },
     {
       "label": "console/page/network errors (all origins, no exemptions for console errors)",
-      "ok": false,
-      "actual": [
-        "HTTP 403 https://lethe-landing-sooty.vercel.app/app/",
-        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/app/",
-        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
-        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
-      ],
+      "ok": true,
+      "actual": [],
       "expected": []
     }
   ]

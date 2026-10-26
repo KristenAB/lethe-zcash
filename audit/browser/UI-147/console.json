@@ -1,6 +1,6 @@
 [
   {
-    "time": "2026-10-26T04:09:26.095Z",
+    "time": "2026-10-26T05:33:08.149Z",
     "type": "debug",
     "text": "[vite] connecting...",
     "location": {
@@ -12,11 +12,11 @@
     }
   },
   {
-    "time": "2026-10-26T04:09:26.123Z",
+    "time": "2026-10-26T05:33:08.179Z",
     "type": "info",
     "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
     "location": {
-      "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=d50268be",
+      "url": "http://127.0.0.1:5182/node_modules/.vite/deps/react-dom_client.js?v=7f8e2d79",
       "line": 22162,
       "column": 53,
       "lineNumber": 22162,
@@ -24,7 +24,7 @@
     }
   },
   {
-    "time": "2026-10-26T04:09:26.142Z",
+    "time": "2026-10-26T05:33:08.190Z",
     "type": "debug",
     "text": "[vite] connected.",
     "location": {

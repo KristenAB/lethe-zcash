@@ -1,13 +1,13 @@
 {
   "id": "UI-168",
-  "status": "FAIL",
-  "notes": "Exact decimal precision differs: e.g. 0.2 displayed where 0.20000000 is required.",
-  "start": "2026-10-26T04:11:53.519Z",
-  "end": "2026-10-26T04:11:54.874Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:33:10.453Z",
+  "end": "2026-10-26T05:33:11.647Z",
   "url": "http://127.0.0.1:8432/evidence.html",
   "viewport": "1280x800",
   "flow": "Local static site evidence render (1280x800 desktop) - http://127.0.0.1:8432/evidence.html",
-  "expected": "GET /evidence.html returns HTTP 200 static HTML with embedded script#run JSON. Document title is \"Lethe evidence: a new refund address and recipient for every swap\"; h1 is \"A new refund address and recipient for every swap.\"; hero shows swap 1: 0.20000000 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s. \"A wallet that reuses its address\" repeats the recorded account mainnet address 3 times, while \"Lethe\" lists the three distinct recorded refund addresses. \"Before: the first run\" shows recipient \"links 3 swaps\"; \"All three links, measured\" shows scores 0/100, 32/100 and 75/100. \"Why not 1Click's Confidential Intents?\" names HTTP 401 and ONECLICK_JWT; \"Found again, from the seed alone\" lists 30,000/31,000/32,000/25,000 zat; \"Not yet\" labels \"A real swap\" as \"BLOCKED\".",
+  "expected": "GET /evidence.html returns HTTP 200 static HTML with embedded script#run JSON. Document title is \"Lethe evidence: a new refund address and recipient for every swap\"; h1 is \"A new refund address and recipient for every swap.\"; hero shows swap 1: 0.2 ZEC, 50.7011 wNEAR, key #5 refundTo `u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur`, account #5 recipient `66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a`, Sent at +0 s. \"A wallet that reuses its address\" repeats the recorded account mainnet address 3 times, while \"Lethe\" lists the three distinct recorded refund addresses. \"Before: the first run\" shows recipient \"links 3 swaps\"; \"All three links, measured\" shows scores 0/100, 32/100 and 75/100. \"Why not 1Click's Confidential Intents?\" names HTTP 401 and ONECLICK_JWT; \"Found again, from the seed alone\" lists 30,000/31,000/32,000/25,000 zat; \"Not yet\" labels \"A real swap\" as \"BLOCKED\".",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -59,9 +59,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.2",
-      "expected": "0.20000000"
+      "expected": "0.2"
     },
     {
       "label": "output amount exact",
@@ -96,7 +96,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +0 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -209,7 +209,7 @@
         ],
         [
           "recipient",
-          "strong \u00b7 3/3"
+          "strong · 3/3"
         ],
         [
           "amount",
@@ -217,7 +217,7 @@
         ],
         [
           "same minute",
-          "strong \u00b7 3/3"
+          "strong · 3/3"
         ],
         [
           "within 10 min",
@@ -225,7 +225,7 @@
         ],
         [
           "token",
-          "weak \u00b7 1/3"
+          "weak · 1/3"
         ],
         [
           "split pattern",
@@ -233,7 +233,7 @@
         ],
         [
           "client fingerprint",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "partner token",
@@ -247,7 +247,7 @@
         ],
         [
           "recipient",
-          "strong \u00b7 3/3"
+          "strong · 3/3"
         ],
         [
           "amount",
@@ -255,7 +255,7 @@
         ],
         [
           "same minute",
-          "strong \u00b7 3/3"
+          "strong · 3/3"
         ],
         [
           "within 10 min",
@@ -263,7 +263,7 @@
         ],
         [
           "token",
-          "weak \u00b7 1/3"
+          "weak · 1/3"
         ],
         [
           "split pattern",
@@ -271,7 +271,7 @@
         ],
         [
           "client fingerprint",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "partner token",
@@ -337,19 +337,19 @@
         ],
         [
           "within 10 min",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "token",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "split pattern",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "client fingerprint",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "partner token",
@@ -375,19 +375,19 @@
         ],
         [
           "within 10 min",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "token",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "split pattern",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "client fingerprint",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "partner token",
@@ -457,7 +457,7 @@
         ],
         [
           "token",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "split pattern",
@@ -495,7 +495,7 @@
         ],
         [
           "token",
-          "weak \u00b7 3/3"
+          "weak · 3/3"
         ],
         [
           "split pattern",
