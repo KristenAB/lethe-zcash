@@ -1,0 +1,93 @@
+ROW CLI-062
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-062"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","plan","0.35","nep141:wrap.near","--split","--window","180"]
+STDOUT
+{
+  "swaps": [
+    {
+      "part": 0,
+      "amountZat": "5000000",
+      "offsetS": 4327,
+      "at": "2026-10-26T05:47:19.955Z",
+      "recipient": "fresh recipient #0",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #0",
+      "jwt": false
+    },
+    {
+      "part": 1,
+      "amountZat": "10000000",
+      "offsetS": 5421,
+      "at": "2026-10-26T06:05:33.955Z",
+      "recipient": "fresh recipient #1",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #1",
+      "jwt": false
+    },
+    {
+      "part": 2,
+      "amountZat": "20000000",
+      "offsetS": 10609,
+      "at": "2026-10-26T07:32:01.955Z",
+      "recipient": "fresh recipient #2",
+      "destinationAsset": "nep141:wrap.near",
+      "refundTo": "one-time refund #2",
+      "jwt": false
+    }
+  ],
+  "tradeOffs": [
+    "split: 3 swaps instead of 1: about 0.0002 ZEC more in deposit fees (ZIP 317 minimum per transaction), each part priced and slipped separately. Each part needs its own refund address, recipient and time, or the parts link each other.",
+    "delay: the last swap leaves up to 180 min later; each one is quoted at its own time, so prices move between them, and the wallet must stay online (or be re-run) to send them",
+    "fresh recipient: each part goes to its own NEAR account; sweeping them into one account later re-links them (zswap sweep-plan)"
+  ],
+  "report": {
+    "swaps": 3,
+    "pairs": 3,
+    "links": [
+      {
+        "field": "token",
+        "strength": "weak",
+        "pairs": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "why": "the same destination token"
+      }
+    ],
+    "sharedFields": 0,
+    "strongLinkedPairs": 0,
+    "weakOnlyPairs": 3,
+    "score": 75,
+    "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+    "verdict": "no public field links any pair; 3 pair(s) share only weak hints",
+    "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+  }
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 109
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.265
+CLEANUP: isolated TMPDIR removed after command.

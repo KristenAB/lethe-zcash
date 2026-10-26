@@ -66,3 +66,18 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | CLI-058 | PASS | [CLI-058.txt](cli/CLI-058.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-059 | PASS | [CLI-059.txt](cli/CLI-059.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
 | CLI-060 | PASS | [CLI-060.txt](cli/CLI-060.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-061 | PASS | [CLI-061.txt](cli/CLI-061.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-062 | PASS | [CLI-062.txt](cli/CLI-062.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-063 | PASS | [CLI-063.txt](cli/CLI-063.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-064 | PASS | [CLI-064.txt](cli/CLI-064.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-065 | PASS | [CLI-065.txt](cli/CLI-065.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-066 | PASS | [CLI-066.txt](cli/CLI-066.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-067 | PASS | [CLI-067.txt](cli/CLI-067.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-068 | PASS | [CLI-068.txt](cli/CLI-068.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-069 | PASS | [CLI-069.txt](cli/CLI-069.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-070 | PASS | [CLI-070.txt](cli/CLI-070.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-071 | PASS | [CLI-071.txt](cli/CLI-071.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-072 | PASS | [CLI-072.txt](cli/CLI-072.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-073 | PASS | [CLI-073.txt](cli/CLI-073.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-074 | PASS | [CLI-074.txt](cli/CLI-074.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| CLI-075 | PASS | [CLI-075.txt](cli/CLI-075.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |

@@ -5,21 +5,38 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L31-L37
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L101-L105
+101:     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
+102:   } else if (cmd === 'book')
+103:     out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.destinationAsset ? { destinationAsset: r.destinationAsset } : {}), quoted: !!r.quote, ...(r.quoteError ? { quoteError: r.quoteError.outcome } : {}), reservedAt: r.reservedAt })));
+104:   else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup [--probe-ahead]] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book');
+105: } catch (e) {
+
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L29-L34
+29: 
+30: /** Writes recipient `index`'s near-cli credentials file (0600, new file only). The key is not printed. */
 31: export function writeNearCredentials(seedFile: string, index: number, outFile: string): { index: number; account_id: string; written: string } {
 32:   if (!existsSync(seedFile)) throw new SetupRequiredError(seedFile, 'run `zswap init`');
 33:   return JSON.parse(execFileSync(keysBin(), ['near-key', seedFile, String(index), outFile]).toString());
 34: }
-35: 
-36: let tokenList: Promise<{ assetId: string; blockchain: string; symbol: string; contractAddress?: string }[]> | undefined;
-37: /**
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L92-L105
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L77-L88
+77:         Some("near-key") if a.len() == 4 => {
+78:             let s = seed(&a[1]);
+79:             let i = near_index(&a[2]);
+80:             let mut f = fs::OpenOptions::new()
+81:                 .write(true)
+82:                 .create_new(true)
+83:                 .mode(0o600)
+84:                 .open(&a[3])
+85:                 .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
+86:             f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
+87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
+88:         }
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

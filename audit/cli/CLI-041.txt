@@ -5,8 +5,7 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L327-L419
-327:   }
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L328-L401
 328:   private locked<T>(fn: () => T): T {
 329:     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
 330:     const lock = `${this.path}.lock`;
@@ -81,24 +80,6 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 399:       return { r, key };
 400:     });
 401:   }
-402:   attach(index: number, quote: unknown) {
-403:     this.locked(() => {
-404:       const b = this.read();
-405:       const r = b.reservations.find((x) => x.index === index);
-406:       if (!r) throw new Error(`index ${index} is not reserved`);
-407:       r.quote = quote;
-408:       delete r.quoteError;
-409:       this.write(b);
-410:     });
-411:   }
-412:   /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
-413:   failed(index: number, error: unknown) {
-414:     this.locked(() => {
-415:       const b = this.read();
-416:       const r = b.reservations.find((x) => x.index === index);
-417:       if (!r) throw new Error(`index ${index} is not reserved`);
-418:       r.quoteError = { outcome: requestOutcome(error), message: String((error as Error)?.message ?? error).slice(0, 300), at: new Date().toISOString() };
-419:       this.write(b);
 
 SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275db94d3d5d18dd05b70304aa653833968a97 L1-L36
 1: // Two wallet processes (CLI and MCP, or two agents) reserving at the same moment must never get the
@@ -143,5 +124,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.024
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

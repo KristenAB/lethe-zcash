@@ -5,29 +5,30 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L226-L245
-226:  */
-227: export class IndexBook {
-228:   constructor(readonly path: string) {}
-229:   exists(): boolean {
-230:     return existsSync(this.path);
-231:   }
-232:   read(): Book {
-233:     return existsSync(this.path) ? JSON.parse(readFileSync(this.path, 'utf8')) : { next: 0, reservations: [] };
-234:   }
-235:   /**
-236:    * Refuses a book written for another seed: its indices say nothing about this seed's, and reserving
-237:    * from it would hand out indices this seed already put on public quotes. A book from before the
-238:    * binding is checked by re-deriving its first refundTo, then bound.
-239:    */
-240:   private bind(b: Book, seedFile: string): Book {
-241:     const id = seedId(seedFile);
-242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
-243:     if (b.fvk_id !== undefined) {
-244:       if (b.fvk_id !== id) throw other();
-245:       return b;
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L206-L216
+206: /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
+207: export const STALE_LOCK_MS = 15_000;
+208: /** A waiter waits longer than a lock takes to go stale, so a crashed holder never makes reserving fail. */
+209: export const LOCK_WAIT_MS = 45_000;
+210: const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+211: const readToken = (f: string) => {
+212:   try {
+213:     return readFileSync(f, 'utf8');
+214:   } catch {
+215:     return undefined;
+216:   }
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L310-L367
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L300-L361
+300:   /**
+301:    * Breaks `lock` if it is still the stale lock this process saw (same token, still old). Only one
+302:    * breaker at a time (`<lock>.break`, O_EXCL); a break lock older than STALE_LOCK_MS is itself left by
+303:    * a crashed breaker and removed.
+304:    */
+305:   private breakStale(lock: string, seen: string | undefined) {
+306:     const brk = `${lock}.break`;
+307:     let fd: number;
+308:     try {
+309:       fd = openSync(brk, 'wx', 0o600);
 310:     } catch (e) {
 311:       if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
 312:       try {
@@ -80,12 +81,6 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 359:       if (readToken(lock) === token) unlinkSync(lock);
 360:     }
 361:   }
-362:   /** Reserve the next index. With `recipient`, refuse (before reserving) if an earlier swap went to it. */
-363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
-364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
-365:     return this.locked(() => {
-366:       if (!existsSync(this.path))
-367:         throw new SetupRequiredError(
 
 SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275db94d3d5d18dd05b70304aa653833968a97 L37-L75
 37:   it('six processes meeting a stale lock left by a crashed process still get six different indices (30 rounds)', async () => {
@@ -116,5 +111,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.023
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

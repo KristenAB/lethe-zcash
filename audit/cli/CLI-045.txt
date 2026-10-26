@@ -5,39 +5,49 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L197-L226
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L163-L200
+163: export interface Reservation {
+164:   index: number;
+165:   purpose: 'refund';
+166:   reservedAt: string;
+167:   refundTo: string;
+168:   testnetAddress: string;
+169:   /** destination recipient of this swap (sent in clear with the quote) */
+170:   recipient?: string;
+171:   /** set when the caller accepted reusing a recipient of an earlier swap */
+172:   linkedRecipient?: true;
+173:   /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
+174:   freshRecipient?: true;
+175:   /** the quote's destination asset: a recovery checks that token on this swap's NEAR recipient */
+176:   destinationAsset?: string;
+177:   quote?: unknown;
+178:   /** the quote did not come back; `unsent` means the request provably never reached 1Click */
+179:   quoteError?: { outcome: RequestOutcome; message: string; at: string };
+180:   /** times a never-sent request was retried with this same reservation */
+181:   retries?: number;
+182: }
+183: export interface ReserveOptions {
+184:   recipient?: string;
+185:   allowLinkedRecipient?: boolean;
+186:   /** use this swap's own NEAR implicit account (derived from the seed at the same index) as recipient */
+187:   freshRecipient?: boolean;
+188:   destinationAsset?: string;
+189: }
+190: /** The quote request of this reservation provably never left this machine: 1Click never saw its fields. */
+191: const neverSent = (r: Reservation) => !r.quote && r.quoteError?.outcome === 'unsent';
+192: /** Whether a failed quote request could have reached 1Click. */
+193: export const requestOutcome = (e: unknown): RequestOutcome =>
+194:   e instanceof HttpError ? e.outcome : e instanceof SetupRequiredError ? (e.outcome ?? 'unsent') : e instanceof BlockedError ? 'unsent' : 'no-answer';
+195: const recipientOf = (r: Reservation) => r.recipient ?? (r.quote as { quoteRequest?: { recipient?: string } } | undefined)?.quoteRequest?.recipient;
+196: export interface Book {
 197:   next: number;
 198:   reservations: Reservation[];
 199:   /** the seed this book belongs to: fvk_id of its account key (a hash, not a key) */
 200:   fvk_id?: string;
-201: }
-202: 
-203: const fvkIds = new Map<string, string>();
-204: const seedId = (seedFile: string) => fvkIds.get(seedFile) ?? fvkIds.set(seedFile, accountKey(seedFile).fvk_id).get(seedFile)!;
-205: 
-206: /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
-207: export const STALE_LOCK_MS = 15_000;
-208: /** A waiter waits longer than a lock takes to go stale, so a crashed holder never makes reserving fail. */
-209: export const LOCK_WAIT_MS = 45_000;
-210: const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-211: const readToken = (f: string) => {
-212:   try {
-213:     return readFileSync(f, 'utf8');
-214:   } catch {
-215:     return undefined;
-216:   }
-217: };
-218: 
-219: /**
-220:  * The index book: an index is written down (and fsynced, file and folder) before its address is shown
-221:  * to anyone. Every read-modify-write holds an exclusive lock file (`<book>.lock`, O_CREAT|O_EXCL) that
-222:  * carries its holder's token, so two wallet processes (the CLI and the MCP server, or two agents) never
-223:  * hand out the same index, which would put the same refundTo on two public quotes. A lock left by a
-224:  * crashed process is broken only under a second lock (`<book>.lock.break`), after checking again that
-225:  * the lock is still the same stale one, so a waiter can never delete a lock another waiter just took.
-226:  */
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L365-L480
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L451
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
 365:     return this.locked(() => {
 366:       if (!existsSync(this.path))
 367:         throw new SetupRequiredError(
@@ -125,40 +135,10 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 449:   }
 450:   book.attach(r.index, q);
 451:   return { r, q };
-452: }
-453: 
-454: /**
-455:  * 1Click's request visibility. `public` (its default) publishes the quote request; `basic` and
-456:  * `advanced` are Confidential Intents, answered only for an authenticated partner (ONECLICK_JWT). In
-457:  * every mode 1Click and its solvers still see refundTo and recipient, and the deposit, refund and
-458:  * delivery are still on public chains.
-459:  */
-460: export type Confidentiality = 'public' | 'basic' | 'advanced';
-461: export const CONFIDENTIALITY: readonly Confidentiality[] = ['public', 'basic', 'advanced'];
-462: 
-463: export interface QuoteInput {
-464:   amountZat: bigint;
-465:   destinationAsset: string;
-466:   recipient: string;
-467:   refundTo: string;
-468:   slippageBps?: number;
-469:   dry?: boolean;
-470:   /** passed through to 1Click when set; basic/advanced need ONECLICK_JWT */
-471:   confidentiality?: Confidentiality;
-472: }
-473: 
-474: /** The deadline is 40 to 120 minutes after the request, to the second, chosen per quote. */
-475: export const DEADLINE_RANGE_S = [40 * 60, 120 * 60] as const;
-476: /** The solver wait is 2 to 4 seconds, to the millisecond, chosen per quote. */
-477: export const WAIT_RANGE_MS = [2000, 4000] as const;
-478: const between = (lo: number, hi: number, rng: Rng) => lo + Math.floor(rng() * (hi - lo + 1));
-479: 
-480: /**
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.023
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

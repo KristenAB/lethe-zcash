@@ -5,7 +5,14 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L145-L177
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L138-L161
+138: /** Creates a 32-byte seed (0600) if missing, and its folder (0700). Returns whether it was created. */
+139: export function initSeed(seedFile: string): boolean {
+140:   mkdirSync(dirname(seedFile), { recursive: true, mode: 0o700 });
+141:   return JSON.parse(execFileSync(keysBin(), ['init', seedFile]).toString()).created;
+142: }
+143: 
+144: /**
 145:  * A new wallet: the seed and its empty index book, bound to each other. For a seed that already exists
 146:  * without a book, the book is created only with `assertNew` (the caller says this seed never quoted a
 147:  * swap); otherwise its indices may already be public, and `zswap recover` must rebuild the book first.
@@ -23,24 +30,45 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 159:   }
 160:   return { seedCreated, bookCreated, seed: seedFile, book: book.path };
 161: }
-162: 
-163: export interface Reservation {
-164:   index: number;
-165:   purpose: 'refund';
-166:   reservedAt: string;
-167:   refundTo: string;
-168:   testnetAddress: string;
-169:   /** destination recipient of this swap (sent in clear with the quote) */
-170:   recipient?: string;
-171:   /** set when the caller accepted reusing a recipient of an earlier swap */
-172:   linkedRecipient?: true;
-173:   /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
-174:   freshRecipient?: true;
-175:   /** the quote's destination asset: a recovery checks that token on this swap's NEAR recipient */
-176:   destinationAsset?: string;
-177:   quote?: unknown;
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L277-L309
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L240-L299
+240:   private bind(b: Book, seedFile: string): Book {
+241:     const id = seedId(seedFile);
+242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+243:     if (b.fvk_id !== undefined) {
+244:       if (b.fvk_id !== id) throw other();
+245:       return b;
+246:     }
+247:     const first = b.reservations[0];
+248:     if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
+249:     b.fvk_id = id;
+250:     return b;
+251:   }
+252:   /** The read-only view of this seed's book (refuses another seed's). */
+253:   readFor(seedFile: string): Book {
+254:     return this.bind(this.read(), seedFile);
+255:   }
+256:   /** Creates the empty book bound to `seedFile`; false if it already exists. */
+257:   create(seedFile: string): boolean {
+258:     return this.locked(() => {
+259:       if (existsSync(this.path)) {
+260:         this.bind(this.read(), seedFile);
+261:         return false;
+262:       }
+263:       this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
+264:       return true;
+265:     });
+266:   }
+267:   /**
+268:    * After a recovery: never hand out an index that recovery looked at. Indices inside the lookahead may
+269:    * have been named in public quotes with nothing ever paid to them, so `next` moves past them. Creates
+270:    * the book (bound to the seed) for a wallet restored from its seed alone.
+271:    */
+272:   advance(seedFile: string, next: number): number {
+273:     return this.locked(() => {
+274:       const b = existsSync(this.path) ? this.bind(this.read(), seedFile) : { next: 0, reservations: [], fvk_id: seedId(seedFile) };
+275:       b.next = Math.max(b.next, next);
+276:       this.write(b);
 277:       return b.next;
 278:     });
 279:   }
@@ -64,37 +92,23 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 297:       closeSync(d);
 298:     }
 299:   }
-300:   /**
-301:    * Breaks `lock` if it is still the stale lock this process saw (same token, still old). Only one
-302:    * breaker at a time (`<lock>.break`, O_EXCL); a break lock older than STALE_LOCK_MS is itself left by
-303:    * a crashed breaker and removed.
-304:    */
-305:   private breakStale(lock: string, seen: string | undefined) {
-306:     const brk = `${lock}.break`;
-307:     let fd: number;
-308:     try {
-309:       fd = openSync(brk, 'wx', 0o600);
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L38-L51
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L32-L42
+32:         Some("init") if a.len() == 2 => {
+33:             if fs::metadata(&a[1]).is_ok() {
+34:                 println!("{{\"created\":false}}");
+35:                 return;
+36:             }
+37:             let mut s = [0u8; 32];
 38:             rand::fill(&mut s);
 39:             let mut f = fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(&a[1]).unwrap_or_else(|e| fail(e));
 40:             f.write_all(&s).unwrap_or_else(|e| fail(e));
 41:             println!("{{\"created\":true}}");
 42:         }
-43:         Some("account") if a.len() == 2 => {
-44:             let s = seed(&a[1]);
-45:             let acct = account(&s, COIN_TESTNET).unwrap_or_else(|e| fail(e));
-46:             let main = account(&s, COIN_MAINNET).unwrap_or_else(|e| fail(e));
-47:             let net = network(COIN_TESTNET);
-48:             println!(
-49:                 "{}",
-50:                 serde_json::json!({ "address": address(&acct, net).unwrap_or_else(|e| fail(e)), "uivk": uivk(&acct, net).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&acct), "mainnet_address": address(&main, network(COIN_MAINNET)).unwrap_or_else(|e| fail(e)) })
-51:             );
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.023
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

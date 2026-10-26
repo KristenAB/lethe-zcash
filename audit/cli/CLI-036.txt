@@ -5,7 +5,9 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L365-L415
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L401
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
 365:     return this.locked(() => {
 366:       if (!existsSync(this.path))
 367:         throw new SetupRequiredError(
@@ -43,56 +45,34 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 399:       return { r, key };
 400:     });
 401:   }
-402:   attach(index: number, quote: unknown) {
-403:     this.locked(() => {
-404:       const b = this.read();
-405:       const r = b.reservations.find((x) => x.index === index);
-406:       if (!r) throw new Error(`index ${index} is not reserved`);
-407:       r.quote = quote;
-408:       delete r.quoteError;
-409:       this.write(b);
-410:     });
-411:   }
-412:   /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
-413:   failed(index: number, error: unknown) {
-414:     this.locked(() => {
-415:       const b = this.read();
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L452-L480
-452: }
-453: 
-454: /**
-455:  * 1Click's request visibility. `public` (its default) publishes the quote request; `basic` and
-456:  * `advanced` are Confidential Intents, answered only for an authenticated partner (ONECLICK_JWT). In
-457:  * every mode 1Click and its solvers still see refundTo and recipient, and the deposit, refund and
-458:  * delivery are still on public chains.
-459:  */
-460: export type Confidentiality = 'public' | 'basic' | 'advanced';
-461: export const CONFIDENTIALITY: readonly Confidentiality[] = ['public', 'basic', 'advanced'];
-462: 
-463: export interface QuoteInput {
-464:   amountZat: bigint;
-465:   destinationAsset: string;
-466:   recipient: string;
-467:   refundTo: string;
-468:   slippageBps?: number;
-469:   dry?: boolean;
-470:   /** passed through to 1Click when set; basic/advanced need ONECLICK_JWT */
-471:   confidentiality?: Confidentiality;
-472: }
-473: 
-474: /** The deadline is 40 to 120 minutes after the request, to the second, chosen per quote. */
-475: export const DEADLINE_RANGE_S = [40 * 60, 120 * 60] as const;
-476: /** The solver wait is 2 to 4 seconds, to the millisecond, chosen per quote. */
-477: export const WAIT_RANGE_MS = [2000, 4000] as const;
-478: const between = (lo: number, hi: number, rng: Rng) => lo + Math.floor(rng() * (hi - lo + 1));
-479: 
-480: /**
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L430-L451
+430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
+433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
+436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+437:   const { r } = book.reserve(
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+446:   } catch (e) {
+447:     book.failed(r.index, e);
+448:     throw e;
+449:   }
+450:   book.attach(r.index, q);
+451:   return { r, q };
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.

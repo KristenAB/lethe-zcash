@@ -5,35 +5,23 @@ MODE source review
 STDOUT
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L252-L277
-252:   /** The read-only view of this seed's book (refuses another seed's). */
-253:   readFor(seedFile: string): Book {
-254:     return this.bind(this.read(), seedFile);
-255:   }
-256:   /** Creates the empty book bound to `seedFile`; false if it already exists. */
-257:   create(seedFile: string): boolean {
-258:     return this.locked(() => {
-259:       if (existsSync(this.path)) {
-260:         this.bind(this.read(), seedFile);
-261:         return false;
-262:       }
-263:       this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
-264:       return true;
-265:     });
-266:   }
-267:   /**
-268:    * After a recovery: never hand out an index that recovery looked at. Indices inside the lookahead may
-269:    * have been named in public quotes with nothing ever paid to them, so `next` moves past them. Creates
-270:    * the book (bound to the seed) for a wallet restored from its seed alone.
-271:    */
-272:   advance(seedFile: string, next: number): number {
-273:     return this.locked(() => {
-274:       const b = existsSync(this.path) ? this.bind(this.read(), seedFile) : { next: 0, reservations: [], fvk_id: seedId(seedFile) };
-275:       b.next = Math.max(b.next, next);
-276:       this.write(b);
-277:       return b.next;
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L240-L251
+240:   private bind(b: Book, seedFile: string): Book {
+241:     const id = seedId(seedFile);
+242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
+243:     if (b.fvk_id !== undefined) {
+244:       if (b.fvk_id !== id) throw other();
+245:       return b;
+246:     }
+247:     const first = b.reservations[0];
+248:     if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
+249:     b.fvk_id = id;
+250:     return b;
+251:   }
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L365-L420
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L401
+363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
+364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
 365:     return this.locked(() => {
 366:       if (!existsSync(this.path))
 367:         throw new SetupRequiredError(
@@ -71,25 +59,6 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 399:       return { r, key };
 400:     });
 401:   }
-402:   attach(index: number, quote: unknown) {
-403:     this.locked(() => {
-404:       const b = this.read();
-405:       const r = b.reservations.find((x) => x.index === index);
-406:       if (!r) throw new Error(`index ${index} is not reserved`);
-407:       r.quote = quote;
-408:       delete r.quoteError;
-409:       this.write(b);
-410:     });
-411:   }
-412:   /** Records why a reservation's quote did not come back, and whether 1Click could have seen the request. */
-413:   failed(index: number, error: unknown) {
-414:     this.locked(() => {
-415:       const b = this.read();
-416:       const r = b.reservations.find((x) => x.index === index);
-417:       if (!r) throw new Error(`index ${index} is not reserved`);
-418:       r.quoteError = { outcome: requestOutcome(error), message: String((error as Error)?.message ?? error).slice(0, 300), at: new Date().toISOString() };
-419:       this.write(b);
-420:     });
 
 SOURCE packages/cli/test/wallet-binding.test.ts SHA256 13b3fcf8458626f77bf4254732b2910a50089e8f3aa6678ea9d855d83060bd69 L26-L43
 26:   it('refuses another seed’s book, and binds a book from before the binding only if its first refundTo is this seed’s', () => {
@@ -116,5 +85,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.021
-CLEANUP: isolated TMPDIR removed after command.
+Evidence excerpts checked against current line numbers.
