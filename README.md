@@ -153,7 +153,7 @@ pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180  
 pnpm --filter @zswap/cli zswap recipients --lookup                     # recipients from the seed, read-only NEAR lookup of the booked ones (see Honest limits)
 ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover 4522708 4522730 --lookup   # a restored wallet
 pnpm --filter @zswap/dashboard dev   # http://localhost:5182
-pnpm test                          # 105 + doc: 11 Rust (+ doc), 73 cli, 14 mcp, 7 dashboard; live 1Click, testnet, NEAR RPC (TESTING.md)
+pnpm test                          # 112 + doc: Rust 12 + doc, cli 73, mcp 14, dashboard 13; live 1Click, testnet, NEAR RPC (TESTING.md)
 pnpm test:e2e                      # 60 browser tests in Google Chrome, 30 desktop + 30 mobile (TESTING.md)
 pnpm build:site                    # static site in site/ (landing /, dashboard /app/)
 ZSWAP_FUNDER_WALLET=<demo wallet> pnpm --filter @zswap/examples run-live
