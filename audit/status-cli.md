@@ -81,3 +81,18 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | CLI-073 | PASS | [CLI-073.txt](cli/CLI-073.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
 | CLI-074 | PASS | [CLI-074.txt](cli/CLI-074.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
 | CLI-075 | PASS | [CLI-075.txt](cli/CLI-075.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-076 | PASS | [CLI-076.txt](cli/CLI-076.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-077 | PASS | [CLI-077.txt](cli/CLI-077.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-078 | PASS | [CLI-078.txt](cli/CLI-078.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-079 | PASS | [CLI-079.txt](cli/CLI-079.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| CLI-080 | PASS | [CLI-080.txt](cli/CLI-080.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-081 | PASS | [CLI-081.txt](cli/CLI-081.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| CLI-082 | PASS | [CLI-082.txt](cli/CLI-082.txt) | Single existing vitest file, selected contract(s); isolated TMPDIR and cleanup. |
+| RS-001 | PASS | [RS-001.txt](cli/RS-001.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-002 | PASS | [RS-002.txt](cli/RS-002.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-003 | PASS | [RS-003.txt](cli/RS-003.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-004 | PASS | [RS-004.txt](cli/RS-004.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-005 | PASS | [RS-005.txt](cli/RS-005.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-006 | PASS | [RS-006.txt](cli/RS-006.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-007 | PASS | [RS-007.txt](cli/RS-007.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-008 | PASS | [RS-008.txt](cli/RS-008.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |

@@ -1,0 +1,35 @@
+ROW RS-003
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-003"]
+MODE source review
+
+STDOUT
+| RS-003 | `zswap-keys` seed-dependent failures, source contract only | Missing file exits 2 with `error: Setup required: seed file`; non-32-byte input exits 2 with `is not a 32-byte seed`; neither failure prints seed bytes. No seed is opened for this review. | PLANNED |  |  |
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L23
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+16: 
+17: fn seed(path: &str) -> Vec<u8> {
+18:     let s = fs::read(path).unwrap_or_else(|_| fail(format!("Setup required: seed file {path} (zswap-keys init {path})")));
+19:     if s.len() != 32 {
+20:         fail(format!("{path} is not a 32-byte seed"));
+21:     }
+22:     s
+23: }
+
+SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
+12: fn fail(msg: impl std::fmt::Display) -> ! {
+13:     eprintln!("error: {msg}");
+14:     std::process::exit(2)
+15: }
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.022
+CLEANUP: isolated TMPDIR removed after command.
