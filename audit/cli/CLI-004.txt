@@ -1,0 +1,63 @@
+ROW CLI-004
+COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-004"]
+MODE source review
+
+STDOUT
+MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L145-L177
+145:  * A new wallet: the seed and its empty index book, bound to each other. For a seed that already exists
+146:  * without a book, the book is created only with `assertNew` (the caller says this seed never quoted a
+147:  * swap); otherwise its indices may already be public, and `zswap recover` must rebuild the book first.
+148:  */
+149: export function initWallet(seedFile: string, book: IndexBook, opts: { assertNew?: boolean } = {}): { seedCreated: boolean; bookCreated: boolean; seed: string; book: string } {
+150:   const seedCreated = initSeed(seedFile);
+151:   let bookCreated = false;
+152:   if (!book.exists()) {
+153:     if (!seedCreated && !opts.assertNew)
+154:       throw new SetupRequiredError(
+155:         `index book for the existing seed ${seedFile}`,
+156:         `expected at ${book.path}. Run \`zswap recover <birthday-height>\` to rebuild it from the chain, or \`zswap init --new\` if this seed has never quoted a swap`,
+157:       );
+158:     bookCreated = book.create(seedFile);
+159:   }
+160:   return { seedCreated, bookCreated, seed: seedFile, book: book.path };
+161: }
+162: 
+163: export interface Reservation {
+164:   index: number;
+165:   purpose: 'refund';
+166:   reservedAt: string;
+167:   refundTo: string;
+168:   testnetAddress: string;
+169:   /** destination recipient of this swap (sent in clear with the quote) */
+170:   recipient?: string;
+171:   /** set when the caller accepted reusing a recipient of an earlier swap */
+172:   linkedRecipient?: true;
+173:   /** the recipient is this swap's own NEAR implicit account (seed path m/44'/397'/1'/index') */
+174:   freshRecipient?: true;
+175:   /** the quote's destination asset: a recovery checks that token on this swap's NEAR recipient */
+176:   destinationAsset?: string;
+177:   quote?: unknown;
+
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L277-L288
+277:       return b.next;
+278:     });
+279:   }
+280:   /** Write to a temporary file, fsync it, rename it over the book, then fsync the folder: on disk, not in a cache. */
+281:   private write(b: Book) {
+282:     const dir = dirname(this.path);
+283:     mkdirSync(dir, { recursive: true, mode: 0o700 });
+284:     const tmp = `${this.path}.${process.pid}.tmp`;
+285:     const fd = openSync(tmp, 'w', 0o600);
+286:     try {
+287:       writeSync(fd, JSON.stringify(b, null, 2));
+288:       fsyncSync(fd);
+
+REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.022
+CLEANUP: isolated TMPDIR removed after command.
