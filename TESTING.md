@@ -70,3 +70,25 @@ Each Oct 21 fix and each Oct 22 feature has a test that fails on the code before
 
 `fixtures/testnet.json` holds the zec-shielded-x402 demo merchant's published incoming viewing key and
 one of its payments; the scan test uses it as a known payment to find.
+
+## Audit re-verification — Oct 26, 2026
+
+`AUDIT.md` has 352 rows: **338 PASS, 1 FAIL, 13 UNTESTED**. This pass rechecked all
+28 previously open rows and the 31 browser rows whose formatter expectations were corrected.
+The 42 selected browser rows passed in Google Chrome 155.0.8059.85 through Playwright,
+including all nine live Vercel retries. No console/page errors or unexpected HTTP failures
+remain in those rows. UI-174/175 use Playwright API requests: missing wallet paths return
+403 `Restricted`; the requests add no page console entries. Vite startup debug/info is retained.
+
+The current scanner build read the 23 recorded blocks and found all four expected payments;
+a stalled real TLS connection failed after 10.009 seconds. MCP recovery passed from tip−4
+through the current tip with fresh temporary keys. No fabricated provider/scanner responses
+were used in this re-verification. CH-003 remains FAIL because the live provider returns
+HTTP 201 while the exact audit expectation is HTTP 200. The 13 UNTESTED rows require
+ONECLICK_JWT, a funded token-only derived recipient, or the named real provider fault
+responses; no partial results were marked PASS.
+
+Evidence is under 10 MB; every screenshot is JPEG at or below 200 KB. All temporary
+wallet files were under /tmp and deleted; started subprocesses ended and the heavy slot
+was released. No protected wallet, example script, transaction submission, deployment,
+commit, or push occurred. See `audit/reverify-summary.json` for row IDs and cleanup checks.

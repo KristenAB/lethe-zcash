@@ -33,7 +33,7 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "https://lethe-dashboard.vercel.app/assets/index-CkVPFEeW.css"
+    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
   },
   {
     "event": "response",
@@ -45,7 +45,7 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
+    "url": "https://lethe-dashboard.vercel.app/assets/index-CkVPFEeW.css"
   },
   {
     "event": "request",
@@ -105,12 +105,6 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "https://lethe-dashboard.vercel.app/pass3.json"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
     "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
   },
   {
@@ -118,5 +112,11 @@
     "status": 200,
     "expectedErrorStatus": false,
     "url": "https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-dashboard.vercel.app/pass3.json"
   }
 ]

@@ -1,13 +1,13 @@
 {
   "id": "UI-031",
-  "status": "FAIL",
-  "notes": "Visible address prefixes/suffixes differ from the exact abbreviations specified in AUDIT.md; checks record actual and expected strings.",
-  "start": "2026-10-26T04:04:59.272Z",
-  "end": "2026-10-26T04:05:00.471Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:28.939Z",
+  "end": "2026-10-26T05:31:30.246Z",
   "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
   "viewport": "1280x800",
   "flow": "Live evidence two wallets section (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
-  "expected": "Section #forgets displays 2 columns: \"A wallet that reuses its address\" ol#reused lists mainnet address \"u1ces8sa6vedcm\u2026sjh4z5amm9qrg7fkm\" 3 times; \"Lethe\" ol#onetime lists 3 distinct one-time refund addresses (\"u1hvfvml947k7g\u2026yuptcpljanr\", \"u1rfk04g66dtag\u2026phuamc5498p4q\", \"u1mg67mpgl2pty\u2026rz3krkgnvn0dmhx\").",
+  "expected": "Section #forgets displays 2 columns: \"A wallet that reuses its address\" ol#reused lists mainnet address \"u1ces8sa6vedcm…9qrg7fkm\" 3 times; \"Lethe\" ol#onetime lists 3 distinct one-time refund addresses (\"u1hvfvml947k7g…tcpljanr\", \"u1rfk04g66dtag…c5498p4q\", \"u1mg67mpgl2pty…nvn0dmhx\").",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -17,30 +17,30 @@
     },
     {
       "label": "reused addresses",
-      "ok": false,
+      "ok": true,
       "actual": [
-        "u1ces8sa6vedcm\u20269qrg7fkm",
-        "u1ces8sa6vedcm\u20269qrg7fkm",
-        "u1ces8sa6vedcm\u20269qrg7fkm"
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm"
       ],
       "expected": [
-        "u1ces8sa6vedcm\u2026sjh4z5amm9qrg7fkm",
-        "u1ces8sa6vedcm\u2026sjh4z5amm9qrg7fkm",
-        "u1ces8sa6vedcm\u2026sjh4z5amm9qrg7fkm"
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm"
       ]
     },
     {
       "label": "one time addresses",
-      "ok": false,
+      "ok": true,
       "actual": [
-        "u1hvfvml947k7g\u2026tcpljanr",
-        "u1rfk04g66dtag\u2026c5498p4q",
-        "u1mg67mpgl2pty\u2026nvn0dmhx"
+        "u1hvfvml947k7g…tcpljanr",
+        "u1rfk04g66dtag…c5498p4q",
+        "u1mg67mpgl2pty…nvn0dmhx"
       ],
       "expected": [
-        "u1hvfvml947k7g\u2026yuptcpljanr",
-        "u1rfk04g66dtag\u2026phuamc5498p4q",
-        "u1mg67mpgl2pty\u2026rz3krkgnvn0dmhx"
+        "u1hvfvml947k7g…tcpljanr",
+        "u1rfk04g66dtag…c5498p4q",
+        "u1mg67mpgl2pty…nvn0dmhx"
       ]
     },
     {

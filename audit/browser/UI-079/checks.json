@@ -1,9 +1,9 @@
 {
   "id": "UI-079",
-  "status": "FAIL",
-  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-172: FAIL. redeploy blocked: this run must not deploy",
-  "start": "2026-10-26T04:06:14.018Z",
-  "end": "2026-10-26T04:06:18.299Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:56.118Z",
+  "end": "2026-10-26T05:32:00.820Z",
   "url": "https://lethe-landing-sooty.vercel.app/app/",
   "viewport": "1280x800",
   "flow": "Live landing host /app/ swap widget & river interaction - https://lethe-landing-sooty.vercel.app/app/",
@@ -11,24 +11,506 @@
   "checks": [
     {
       "label": "initial document HTTP",
-      "ok": false,
-      "actual": 403,
+      "ok": true,
+      "actual": 200,
       "expected": 200
     },
     {
-      "label": "flow execution",
-      "ok": false,
-      "actual": "locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.steps button').first()\u001b[22m\n"
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+0 s",
+      "expected": "+0 s"
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.1",
+      "expected": "0.1"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "25.324",
+      "expected": "25.324"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+138 s",
+      "expected": "+138 s"
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.05",
+      "expected": "0.05"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+278 s",
+      "expected": "+278 s"
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+0 s",
+      "expected": "+0 s"
+    },
+    {
+      "label": "only selected river aria-current",
+      "ok": true,
+      "actual": [
+        "true",
+        null,
+        null
+      ],
+      "expected": [
+        "true",
+        null,
+        null
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "shown",
+        "used once",
+        "used once"
+      ],
+      "expected": [
+        "shown",
+        "used once",
+        "used once"
+      ]
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #6",
+      "expected": "key #6"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #6",
+      "expected": "account #6"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.1",
+      "expected": "0.1"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "25.324",
+      "expected": "25.324"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "true",
+        "false"
+      ],
+      "expected": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+138 s",
+      "expected": "+138 s"
+    },
+    {
+      "label": "only selected river aria-current",
+      "ok": true,
+      "actual": [
+        null,
+        "true",
+        null
+      ],
+      "expected": [
+        null,
+        "true",
+        null
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "used once",
+        "shown",
+        "used once"
+      ],
+      "expected": [
+        "used once",
+        "shown",
+        "used once"
+      ]
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #7",
+      "expected": "key #7"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #7",
+      "expected": "account #7"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.05",
+      "expected": "0.05"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "12.6482",
+      "expected": "12.6482"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "false",
+        "false",
+        "true"
+      ],
+      "expected": [
+        "false",
+        "false",
+        "true"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+278 s",
+      "expected": "+278 s"
+    },
+    {
+      "label": "only selected river aria-current",
+      "ok": true,
+      "actual": [
+        null,
+        null,
+        "true"
+      ],
+      "expected": [
+        null,
+        null,
+        "true"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "used once",
+        "used once",
+        "shown"
+      ],
+      "expected": [
+        "used once",
+        "used once",
+        "shown"
+      ]
     },
     {
       "label": "console/page/network errors (all origins, no exemptions for console errors)",
-      "ok": false,
-      "actual": [
-        "HTTP 403 https://lethe-landing-sooty.vercel.app/app/",
-        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/app/",
-        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
-        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
-      ],
+      "ok": true,
+      "actual": [],
       "expected": []
     }
   ]

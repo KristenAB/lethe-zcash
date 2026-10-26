@@ -1,0 +1,15 @@
+{
+  "started": "2026-10-26T05:33:44.481Z",
+  "channel": "chrome",
+  "headless": true,
+  "rows": 183,
+  "routePolicy": "Only named error and empty state rows. Loading uses real CDP network latency, no interception.",
+  "securityPolicy": "UI-174/175 use Playwright API requests to absent paths; only Restricted response body is read. No seed, credentials, wallet or env accessed.",
+  "servers": [],
+  "chromeVersion": "155.0.8059.85",
+  "serverPids": [
+    73088,
+    73134,
+    73183
+  ]
+}

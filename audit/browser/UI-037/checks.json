@@ -1,34 +1,140 @@
 {
   "id": "UI-037",
-  "status": "FAIL",
-  "notes": "Live URL returned Vercel security challenge HTTP 403; challenge request also failed (HTTP 708 / net::ERR_ABORTED). Product flow unavailable. Matching local UI-119: PASS. redeploy blocked: this run must not deploy",
-  "start": "2026-10-26T04:10:42.302Z",
-  "end": "2026-10-26T04:10:46.491Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:34.125Z",
+  "end": "2026-10-26T05:31:35.406Z",
   "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
   "viewport": "1280x800",
   "flow": "Live evidence All three links measured - Pass 3 batch (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
-  "expected": "Batch card \"Pass 3\" shows when \"Oct 22, 2026\", score strong.cut \"0\", text \"shared public fields \u00b7 score 75/100\"; fields list shows token \"weak \u00b7 3/3\", all other 8 fields \"clear\"; verdict displays \"no public field links any pair; 3 pair(s) share only weak hints.\".",
+  "expected": "Batch card \"Pass 3\" shows when \"Oct 22, 2026\", score strong.cut \"0\", text \"shared public fields · score 75/100\"; fields list shows token \"weak · 3/3\", all other 8 fields \"clear\"; verdict displays \"no public field links any pair; 3 pair(s) share only weak hints.\".",
   "checks": [
     {
       "label": "initial document HTTP",
-      "ok": false,
-      "actual": 403,
+      "ok": true,
+      "actual": 200,
       "expected": 200
     },
     {
-      "label": "flow execution",
-      "ok": false,
-      "actual": "locator.textContent: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.batch').nth(2).locator('h3')\u001b[22m\n"
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 3",
+      "expected": "Pass 3"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 22, 2026",
+      "expected": "Oct 22, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
     },
     {
       "label": "console/page/network errors (all origins, no exemptions for console errors)",
-      "ok": false,
-      "actual": [
-        "HTTP 403 https://lethe-landing-sooty.vercel.app/evidence.html",
-        "console: Failed to load resource: the server responded with a status of 403 () https://lethe-landing-sooty.vercel.app/evidence.html",
-        "HTTP 708 https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge",
-        "requestfailed: https://lethe-landing-sooty.vercel.app/.well-known/vercel/security/request-challenge net::ERR_ABORTED"
-      ],
+      "ok": true,
+      "actual": [],
       "expected": []
     }
   ]

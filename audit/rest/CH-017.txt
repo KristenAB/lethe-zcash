@@ -1,21 +1,21 @@
 ID: CH-017
-Observed at: 2026-10-26T05:11:57.001Z
+Observed at: 2026-10-26T05:31:37.517Z
 Status: UNTESTED
 Notes: Real UNKNOWN_ACCOUNT mapping observed. Positive FT-only/indexed-only use needs a real account in that state; no transaction/funding allowed.
 
 PROCESS 1
-command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const a=l.deriveNearRecipient(process.env.ZSWAP_SEED,40).account_id;const s=await l.nearAccountState(a,['wrap.near']);console.log(JSON.stringify({state:s,used:l.isRecipientUsed(s)}));"]
-pid: 72887
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const a=l.deriveNearRecipient(process.env.ZSWAP_SEED,40).account_id;const s=await l.nearAccountState(a,['wrap.near']);console.log(JSON.stringify({state:s,used:l.isRecipientUsed(s)}));"]
+pid: 26311
 stdout:
-{"state":{"account_id":"2cb9929aab21ec2e3ab96bfea830b3493cd4d2659ad8008874b60c736ab72ec9","exists":false,"amountYocto":"0","ft":{"wrap.near":"0"},"ftIndexed":[]},"used":false}
+{"state":{"account_id":"9af981033d21f01726026daa9d67134385e2fca7f43682defae2bd7805d95d59","exists":false,"amountYocto":"0","ft":{"wrap.near":"0"},"ftIndexed":[]},"used":false}
 
 stderr:
-AUDIT_HTTP {"at":"2026-10-26T05:11:56.065Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"2cb9929aab21ec2e3ab96bfea830b3493cd4d2659ad8008874b60c736ab72ec9"}},"authorizationPresent":false}
+AUDIT_HTTP {"at":"2026-10-26T05:31:36.168Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"9af981033d21f01726026daa9d67134385e2fca7f43682defae2bd7805d95d59"}},"authorizationPresent":false}
 AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
-AUDIT_HTTP {"at":"2026-10-26T05:11:56.588Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiMmNiOTkyOWFhYjIxZWMyZTNhYjk2YmZlYTgzMGIzNDkzY2Q0ZDI2NTlhZDgwMDg4NzRiNjBjNzM2YWI3MmVjOSJ9"}},"authorizationPresent":false}
+AUDIT_HTTP {"at":"2026-10-26T05:31:36.713Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiOWFmOTgxMDMzZDIxZjAxNzI2MDI2ZGFhOWQ2NzEzNDM4NWUyZmNhN2Y0MzY4MmRlZmFlMmJkNzgwNWQ5NWQ1OSJ9"}},"authorizationPresent":false}
 AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
-AUDIT_HTTP {"at":"2026-10-26T05:11:56.782Z","url":"https://api.fastnear.com/v1/account/2cb9929aab21ec2e3ab96bfea830b3493cd4d2659ad8008874b60c736ab72ec9/ft","method":"GET","body":null,"authorizationPresent":false}
-AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/2cb9929aab21ec2e3ab96bfea830b3493cd4d2659ad8008874b60c736ab72ec9/ft","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:37.300Z","url":"https://api.fastnear.com/v1/account/9af981033d21f01726026daa9d67134385e2fca7f43682defae2bd7805d95d59/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/9af981033d21f01726026daa9d67134385e2fca7f43682defae2bd7805d95d59/ft","status":200}
 
 exit_code: 0
 

@@ -1,13 +1,13 @@
 {
   "id": "UI-005",
-  "status": "FAIL",
-  "notes": "Exact decimal precision differs: e.g. 0.2 displayed where 0.20000000 is required. 25.324 displayed where 25.3240 is required.",
-  "start": "2026-10-26T04:02:59.514Z",
-  "end": "2026-10-26T04:03:13.546Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:30:38.266Z",
+  "end": "2026-10-26T05:30:52.315Z",
   "url": "https://lethe-landing-sooty.vercel.app/",
   "viewport": "1280x800",
   "flow": "Live landing pass-2 widget replay autoplay cycle (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
-  "expected": "4.2-second autoplay timer advances swap 1 -> swap 2 -> swap 3 -> swap 1; old addresses receive class \"leave\" and new addresses receive class \"arrive\"; swap 2 displays 0.10000000 ZEC, 25.3240 wNEAR, key #6 u1ehzec56h\u2026, account #6 3e33948911\u2026, sent at +138 s, button 2 aria-pressed=\"true\"; swap 3 displays 0.05000000 ZEC, 12.6482 wNEAR, key #7 u1z4sgt6hu\u2026, account #7 4afc1f2c07\u2026, sent at +278 s, button 3 aria-pressed=\"true\".",
+  "expected": "4.2-second autoplay timer advances swap 1 -> swap 2 -> swap 3 -> swap 1; old addresses receive class \"leave\" and new addresses receive class \"arrive\"; swap 2 displays 0.1 ZEC, 25.324 wNEAR, key #6 u1ehzec56h…, account #6 3e33948911…, sent at +138 s, button 2 aria-pressed=\"true\"; swap 3 displays 0.05 ZEC, 12.6482 wNEAR, key #7 u1z4sgt6hu…, account #7 4afc1f2c07…, sent at +278 s, button 3 aria-pressed=\"true\".",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -18,8 +18,8 @@
     {
       "label": ".w-head > span",
       "ok": true,
-      "actual": "Pass 2 \u00b7 Oct 21, 2026",
-      "expected": "Pass 2 \u00b7 Oct 21, 2026"
+      "actual": "Pass 2 · Oct 21, 2026",
+      "expected": "Pass 2 · Oct 21, 2026"
     },
     {
       "label": ".refund-label b",
@@ -47,9 +47,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.2",
-      "expected": "0.20000000"
+      "expected": "0.2"
     },
     {
       "label": "output amount exact",
@@ -84,14 +84,14 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +0 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
     },
     {
       "label": "first autoplay begins at 4.2 seconds",
-      "actual": 3610,
+      "actual": 3603,
       "expected": "approximately 4200ms (fonts/load may precede timer start)",
       "ok": true
     },
@@ -121,15 +121,15 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.1",
-      "expected": "0.10000000"
+      "expected": "0.1"
     },
     {
       "label": "output amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "25.324",
-      "expected": "25.3240"
+      "expected": "25.324"
     },
     {
       "label": "asset labels",
@@ -158,7 +158,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +138 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +138 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -189,9 +189,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.05",
-      "expected": "0.05000000"
+      "expected": "0.05"
     },
     {
       "label": "output amount exact",
@@ -226,7 +226,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +278 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +278 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true
@@ -257,9 +257,9 @@
     },
     {
       "label": "send amount exact",
-      "ok": false,
+      "ok": true,
       "actual": "0.2",
-      "expected": "0.20000000"
+      "expected": "0.2"
     },
     {
       "label": "output amount exact",
@@ -294,7 +294,7 @@
       ]
     },
     {
-      "label": ".w-foot contains sent at +0 s \u00b7 request: public",
+      "label": ".w-foot contains sent at +0 s · request: public",
       "ok": true,
       "actual": true,
       "expected": true

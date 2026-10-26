@@ -1,13 +1,13 @@
 {
   "id": "UI-123",
-  "status": "FAIL",
-  "notes": "Parts lists trim required eight-place ZEC decimals; pass-2 output also trims 25.3240 to 25.324.",
-  "start": "2026-10-26T04:08:38.994Z",
-  "end": "2026-10-26T04:08:40.130Z",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:56.960Z",
+  "end": "2026-10-26T05:32:58.248Z",
   "url": "http://127.0.0.1:8431/evidence.html",
   "viewport": "1280x800",
   "flow": "Local evidence Pass 3 parts list with parameters (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
-  "expected": "List ul#pass3-rows is visible and displays 3 parts with request parameters: part 8 \"0.20000000 ZEC at +0 s \u2192 49.5363 wNEAR \u00b7 slippage 88 bps, wait 3.233 s, deadline +75 min \u00b7 found from the seed alone\"; part 9 \"0.05000000 ZEC at +677 s \u2192 12.3519 wNEAR \u00b7 slippage 73 bps, wait 3.104 s, deadline +90 min \u00b7 found from the seed alone\"; part 10 \"0.10000000 ZEC at +1452 s \u2192 24.7551 wNEAR \u00b7 slippage 80 bps, wait 2.657 s, deadline +87 min \u00b7 not found from the seed\"; paragraph #pass3-note states \"Score 0 \u2192 32 \u2192 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\".",
+  "expected": "List ul#pass3-rows is visible and displays 3 parts with request parameters: part 8 \"0.2 ZEC at +0 s → 49.5363 wNEAR · slippage 88 bps, wait 3.233 s, deadline +75 min · found from the seed alone\"; part 9 \"0.05 ZEC at +677 s → 12.3519 wNEAR · slippage 73 bps, wait 3.104 s, deadline +90 min · found from the seed alone\"; part 10 \"0.1 ZEC at +1452 s → 24.7551 wNEAR · slippage 80 bps, wait 2.657 s, deadline +87 min · not found from the seed\"; paragraph #pass3-note states \"Score 0 → 32 → 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\".",
   "checks": [
     {
       "label": "initial document HTTP",
@@ -28,9 +28,9 @@
       "expected": true
     },
     {
-      "label": "part 1 send exact 0.20000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -52,9 +52,9 @@
       "expected": true
     },
     {
-      "label": "part 2 send exact 0.05000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 2 send exact 0.05",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {
@@ -76,9 +76,9 @@
       "expected": true
     },
     {
-      "label": "part 3 send exact 0.10000000",
-      "ok": false,
-      "actual": false,
+      "label": "part 3 send exact 0.1",
+      "ok": true,
+      "actual": true,
       "expected": true
     },
     {

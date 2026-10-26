@@ -93,18 +93,6 @@
     "event": "response",
     "status": 200,
     "expectedErrorStatus": false,
-    "url": "https://lethe-dashboard.vercel.app/pass2.json"
-  },
-  {
-    "event": "request",
-    "method": "GET",
-    "type": "fetch",
-    "url": "https://lethe-dashboard.vercel.app/pass3.json"
-  },
-  {
-    "event": "response",
-    "status": 200,
-    "expectedErrorStatus": false,
     "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
   },
   {
@@ -112,6 +100,18 @@
     "status": 200,
     "expectedErrorStatus": false,
     "url": "https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-dashboard.vercel.app/pass2.json"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-dashboard.vercel.app/pass3.json"
   },
   {
     "event": "response",
