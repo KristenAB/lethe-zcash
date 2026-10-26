@@ -1,71 +1,22 @@
 ROW RS-008
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-008"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-008"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-008 | `zswap-keys near <index>`, source contract only | Exit 0 JSON has `index`, path `m/44'/397'/1'/i'`, 64 lowercase hex `account_id` equal to public-key bytes and `ed25519:` public key; no signing key appears. No seed is accessed in this run. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near","/tmp/lethe-rerun-a7OdLT/seed","3"]
+{"exit_code":0,"signal":null,"elapsed_ms":2,"stdout_bytes":186,"stderr_bytes":0}
+RAW_STDOUT memory only; no raw stdout file created; values never emitted
+ASSERT seed mode 0600 PASS
+{"json_fields":{"account_id":{"type":"string","length":64,"nonempty":true},"index":{"type":"number"},"path":{"type":"string","length":16,"nonempty":true},"public_key":{"type":"string","length":52,"nonempty":true}},"stderr":"","secret_fields_nonempty":{},"raw_stdout_deleted":true}
+ASSERT key derivation exit 0 PASS
+ASSERT NEAR exact fields path and account ID equals public-key bytes PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L71-L76
-71:         Some("near") if a.len() == 3 => {
-72:             let s = seed(&a[1]);
-73:             let i = near_index(&a[2]);
-74:             let (account_id, public_key) = near_recipient(&s, i);
-75:             println!("{}", serde_json::json!({ "index": i, "path": near_path(i), "account_id": account_id, "public_key": public_key }));
-76:         }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd767a43f83883311071efd9b6f82d25ccf L18-L58
-18: const HARDENED: u32 = 0x8000_0000;
-19: /// `m/44'/397'/1'`: BIP 44, NEAR, the account set aside for per-swap recipients.
-20: pub const NEAR_RECIPIENT_BRANCH: [u32; 3] = [44, 397, 1];
-21:
-22: /// SLIP-0010 ed25519 derivation (hardened only). Returns the 32-byte private key.
-23: pub fn slip10_ed25519(seed: &[u8], path: &[u32]) -> [u8; 32] {
-24:     let mut mac = Hmac::<Sha512>::new_from_slice(b"ed25519 seed").expect("any key length");
-25:     mac.update(seed);
-26:     let mut i = mac.finalize().into_bytes();
-27:     for &c in path {
-28:         let (key, chain) = i.split_at(32);
-29:         let mut mac = Hmac::<Sha512>::new_from_slice(chain).expect("any key length");
-30:         mac.update(&[0u8]);
-31:         mac.update(key);
-32:         mac.update(&(c | HARDENED).to_be_bytes());
-33:         i = mac.finalize().into_bytes();
-34:     }
-35:     i[..32].try_into().expect("32 bytes")
-36: }
-37:
-38: /// The path string of recipient `index`, e.g. `m/44'/397'/1'/3'`.
-39: pub fn near_path(index: u32) -> String {
-40:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
-41:     format!("m/{a}'/{b}'/{c}'/{index}'")
-42: }
-43:
-44: /// The signing key of per-swap NEAR recipient `index`.
-45: pub fn near_signing_key(seed: &[u8], index: u32) -> SigningKey {
-46:     if index >= HARDENED {
-47:         panic!("recipient index must be below 2^31");
-48:     }
-49:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
-50:     SigningKey::from_bytes(&slip10_ed25519(seed, &[a, b, c, index]))
-51: }
-52:
-53: /// The NEAR implicit account id (64 lowercase hex characters) and public key (`ed25519:<base58>`).
-54: pub fn near_recipient(seed: &[u8], index: u32) -> (String, String) {
-55:     let pk = near_signing_key(seed, index).verifying_key().to_bytes();
-56:     (hex::encode(pk), format!("ed25519:{}", bs58::encode(pk).into_string()))
-57: }
-58:
-
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.138
+CLEANUP isolated TMPDIR removed

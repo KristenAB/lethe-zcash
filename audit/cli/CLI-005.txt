@@ -1,94 +1,35 @@
 ROW CLI-005
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-005"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-005"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-005 | `where`: path resolution, source review only for protected default paths | Exit 0; JSON has exactly `seed`, `book`, `seedExists`, `bookExists`; defaults resolve to repo-root wallet paths even under `pnpm --filter`; no file contents appear. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","where"]
+{"exit_code":0,"signal":null,"elapsed_ms":111,"stdout_bytes":330,"stderr_bytes":0}
+STDOUT {
+  "seed": "/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/.demo/seed",
+  "book": "/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/.demo/index-book.json",
+  "seedExists": false,
+  "bookExists": false
+}
+ASSERT where exit 0 exact fields PASS
+ASSERT defaults resolve to repo-root under direct and pnpm CLI PASS
+COMMAND ["pnpm","--silent","--filter","@zswap/cli","zswap","where"]
+{"exit_code":0,"signal":null,"elapsed_ms":301,"stdout_bytes":330,"stderr_bytes":0}
+STDOUT {
+  "seed": "/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/.demo/seed",
+  "book": "/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/.demo/index-book.json",
+  "seedExists": false,
+  "bookExists": false
+}
+ASSERT where exit 0 exact fields PASS
+ASSERT defaults resolve to repo-root under direct and pnpm CLI PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0,0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L99-L118
-99:  * the examples: ZSWAP_SEED, default <repo>/.demo/seed; ZSWAP_BOOK, default the index book next to that
-100:  * seed. A relative path is taken from the directory the command was typed in (pnpm's INIT_CWD).
-101:  */
-102: export function walletPaths(env: NodeJS.ProcessEnv = process.env): { seed: string; book: string } {
-103:   const base = env.INIT_CWD ?? process.cwd();
-104:   const seed = env.ZSWAP_SEED ? resolve(base, env.ZSWAP_SEED) : resolve(ROOT, '.demo/seed');
-105:   const book = env.ZSWAP_BOOK ? resolve(base, env.ZSWAP_BOOK) : join(dirname(seed), 'index-book.json');
-106:   return { seed, book };
-107: }
-108:
-109: function bin(envName: string, rel: string, name: string): string {
-110:   const v = process.env[envName];
-111:   if (v) {
-112:     if (!existsSync(v)) throw new SetupRequiredError(envName, `${v} does not exist`);
-113:     return v;
-114:   }
-115:   const c = [resolve(ROOT, rel, 'target/release', name), process.env.CARGO_TARGET_DIR ? resolve(process.env.CARGO_TARGET_DIR, 'release', name) : ''].find((p) => p && existsSync(p));
-116:   if (!c) throw new SetupRequiredError(envName, `build ${rel} (cargo build --release)`);
-117:   return c;
-118: }
+HELPER_STDERR
 
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L39-L65
-39:   const x = argv[i];
-40:   if (x === '--allow-linked-recipient' || x === '--lookup' || x === '--probe-ahead' || x === '--split' || x === '--new') flags.add(x);
-41:   else if (['--gap', '--to', '--round', '--window', '--min-gap', '--confidentiality'].includes(x)) (opts[x] ??= []).push(argv[++i] ?? '');
-42:   else positional.push(x);
-43: }
-44: const allowLinkedRecipient = flags.has('--allow-linked-recipient');
-45: const gap = opts['--gap'] ? Number(opts['--gap'][0]) : undefined;
-46: const [cmd, ...a] = positional;
-47: const out = (x: unknown) => console.log(JSON.stringify(x, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2));
-48:
-49: try {
-50:   if (cmd === 'init') out(initWallet(seed, book, { assertNew: flags.has('--new') }));
-51:   else if (cmd === 'where') out({ seed, book: book.path, seedExists: existsSync(seed), bookExists: book.exists() });
-52:   else if (cmd === 'quote') {
-53:     const [zec, dest, given] = a;
-54:     if (!zec || !dest) throw new Error('usage: zswap quote <zec> <destinationAsset> [recipient]');
-55:     const zat = parseZec(zec);
-56:     const confidentiality = opts['--confidentiality']?.[0] as Confidentiality | undefined;
-57:     if (confidentiality !== undefined && !CONFIDENTIALITY.includes(confidentiality)) throw new Error('--confidentiality public|basic|advanced');
-58:     const { r, q } = await safeQuote(seed, book, { amountZat: zat, destinationAsset: dest, recipient: given, allowLinkedRecipient, confidentiality });
-59:     const qq = q as { quote: Record<string, string>; quoteRequest: Record<string, unknown>; correlationId: string };
-60:     out({ index: r.index, refundTo: r.refundTo, recipient: r.recipient, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.linkedRecipient ? { warning: 'recipient reused: this swap is linked to an earlier one on the destination chain' } : {}), amountIn: qq.quote.amountInFormatted, amountOut: qq.quote.amountOutFormatted, refundFee: qq.quote.refundFee, confidentiality: qq.quoteRequest.confidentiality, correlationId: qq.correlationId });
-61:   } else if (cmd === 'swap') {
-62:     throw new BlockedError('BLOCKED: a real swap sends mainnet ZEC to a live 1Click deposit address. Needs Nick’s OK and funds; zakura-one-time-ivk also says not to issue live addresses before review.');
-63:   } else if (cmd === 'recover') {
-64:     const from = Number(a[0]);
-65:     const to = a[1] ? Number(a[1]) : chainTip();
-
-SOURCE packages/cli/test/wallet-binding.test.ts SHA256 13b3fcf8458626f77bf4254732b2910a50089e8f3aa6678ea9d855d83060bd69 L57-L77
-57: describe('one wallet location for the CLI, the MCP server and the examples', () => {
-58:   it('defaults: <repo>/.demo/seed and the index book next to it; relative paths from where the command was typed', () => {
-59:     expect(walletPaths({})).toEqual({ seed: resolve(ROOT, '.demo/seed'), book: resolve(ROOT, '.demo/index-book.json') });
-60:     expect(walletPaths({ ZSWAP_SEED: '/w/seed' })).toEqual({ seed: '/w/seed', book: '/w/index-book.json' });
-61:     expect(walletPaths({ ZSWAP_SEED: 'x/seed', ZSWAP_BOOK: 'x/b.json', INIT_CWD: '/home/me' })).toEqual({ seed: '/home/me/x/seed', book: '/home/me/x/b.json' });
-62:   });
-63:
-64:   it('pnpm --filter @zswap/cli zswap (run in packages/cli) uses the repo-root wallet, as the examples do', () => {
-65:     const env = { ...process.env };
-66:     delete env.ZSWAP_SEED;
-67:     delete env.ZSWAP_BOOK;
-68:     const where = JSON.parse(execFileSync('pnpm', ['--silent', '--filter', '@zswap/cli', 'zswap', 'where'], { cwd: ROOT, env }).toString());
-69:     expect(where.seed).toBe(resolve(ROOT, '.demo/seed'));
-70:     expect(where.book).toBe(resolve(ROOT, '.demo/index-book.json'));
-71:     for (const f of ['run.ts', 'run-pass2.ts']) {
-72:       const src = readFileSync(resolve(ROOT, 'packages/examples/src', f), 'utf8');
-73:       expect(src).toMatch(/walletPaths\(\)/);
-74:       expect(src).not.toMatch(/'\.demo'|'seed'|'index-book\.json'/);
-75:     }
-76:   });
-77:
-
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.543
+CLEANUP isolated TMPDIR removed

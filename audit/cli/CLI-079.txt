@@ -1,100 +1,80 @@
 ROW CLI-079
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-079"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-079"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-079 | `recover --lookup`: both-chain recovery, source contract | Stderr includes `privacy:` and `the next 10 unused recipients`; NEAR used-account signals extend the Zcash key window and refund signals extend NEAR lookups; JSON includes `near.used`, `near.checked`; no transaction is signed or broadcast. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","recover","4522708","4522730","--lookup"]
+{"exit_code":0,"signal":null,"elapsed_ms":2223,"stdout_bytes":935,"stderr_bytes":396}
+STDOUT {
+  "blocks": 23,
+  "hits": [
+    {
+      "key": "refund-14",
+      "height": 4522723,
+      "txid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "pool": "Ironwood",
+      "value": 32000
+    }
+  ],
+  "keys": [
+    "account",
+    "refund-0",
+    "refund-1",
+    "refund-2",
+    "refund-3",
+    "refund-4",
+    "refund-5",
+    "refund-6",
+    "refund-7",
+    "refund-8",
+    "refund-9",
+    "refund-10",
+    "refund-11",
+    "refund-12",
+    "refund-13",
+    "refund-14",
+    "refund-15",
+    "refund-16",
+    "refund-17",
+    "refund-18",
+    "refund-19",
+    "refund-20",
+    "refund-21",
+    "refund-22",
+    "refund-23",
+    "refund-24",
+    "refund-25",
+    "refund-26",
+    "refund-27",
+    "refund-28",
+    "refund-29",
+    "refund-30",
+    "refund-31",
+    "refund-32",
+    "refund-33",
+    "refund-34"
+  ],
+  "gap": 10,
+  "next": 25,
+  "near": {
+    "used": [
+      2
+    ],
+    "checked": 35
+  }
+}
+STDERR privacy: a NEAR lookup sends every recipient it checks, plus the next 10 unused recipients ahead of them (accounts of swaps that have not happened yet) from this IP, seconds apart, to 127.0.0.1:49307 (NEAR RPC) and 127.0.0.1:49307 (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.
+ASSERT both-chain recovery privacy warning exit 0 PASS
+ASSERT refund-14 advances next 25 and subsequent NEAR lookups cover refund-extended window PASS
+ASSERT NEAR used index 2 extends Zcash scans and refund signals extend next scans PASS
+ASSERT NEAR lookup covers refund-expanded index 34 PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L63-L68
-63:   } else if (cmd === 'recover') {
-64:     const from = Number(a[0]);
-65:     const to = a[1] ? Number(a[1]) : chainTip();
-66:     if (!Number.isSafeInteger(from)) throw new Error('usage: zswap recover <fromHeight> [toHeight]');
-67:     if (flags.has('--lookup')) console.error(lookupWarning({ probeAhead: true, gap: gap ?? RECOVERY_GAP }));
-68:     out(flags.has('--lookup') ? await recoverAll(seed, book, from, to, { gap }) : recover(seed, book, from, to, gap));
+HELPER_STDERR
 
-SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L138-L185
-138:   } catch {
-139:     return u;
-140:   }
-141: };
-142: /**
-143:  * What a lookup gives away. Every account it checks reaches the NEAR RPC and FT-indexer operator from
-144:  * this IP within seconds, so the operator can cluster them as one wallet's; probing ahead also hands it
-145:  * the recipients of swaps that have not happened yet. The Zcash side does not leak this way: the refund
-146:  * scan trial-decrypts compact blocks locally.
-147:  */
-148: export function lookupWarning(opts: { probeAhead?: boolean; gap?: number } = {}): string {
-149:   const ahead = opts.probeAhead ? `, plus the next ${opts.gap ?? RECOVERY_GAP} unused recipients ahead of them (accounts of swaps that have not happened yet)` : '';
-150:   return `privacy: a NEAR lookup sends every recipient it checks${ahead} from this IP, seconds apart, to ${host(NEAR_RPC)} (NEAR RPC) and ${host(NEAR_FT_INDEXER)} (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.`;
-151: }
-152: const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-153:
-154: /**
-155:  * Finds the per-swap NEAR recipients from the seed: indices 0..(last reserved + gap), derived locally.
-156:  * With `lookup`, the swaps in the book are checked on NEAR mainnet (read-only: exists, any token the FT
-157:  * indexer lists, the swap's own destination token), with a random pause between accounts. Only with
-158:  * `probeAhead` (a wallet restored from its seed, or `recover --lookup`) are the unused indices ahead
-159:  * checked too; a used account then extends the lookahead, like the Zcash refund scan, and the book
-160:  * never hands out an index the lookup looked at. See lookupWarning for what the operator learns.
-161:  */
-162: export async function recoverRecipients(seedFile: string, book: IndexBook, opts: { gap?: number; lookup?: boolean; probeAhead?: boolean; tokens?: string[] } = {}) {
-163:   const gap = opts.gap ?? RECOVERY_GAP;
-164:   if (!Number.isSafeInteger(gap) || gap < 0 || gap > 1000) throw new Error('gap must be a whole number up to 1000');
-165:   const b = book.readFor(seedFile);
-166:   const booked = new Map(b.reservations.map((r) => [r.index, r]));
-167:   const out: RecoveredRecipient[] = [];
-168:   let upTo = b.next + gap;
-169:   let asked = 0;
-170:   for (let i = 0; i < upTo; i++) {
-171:     const r: RecoveredRecipient = { ...deriveNearRecipient(seedFile, i), inBook: booked.has(i) };
-172:     if (opts.lookup && (opts.probeAhead || booked.has(i))) {
-173:       if (asked++ > 0) await sleep(Math.floor(Math.random() * (lookupJitterMs() + 1)));
-174:       // on chain: the swap's own destination token (from the book) and any asked for; the indexer covers the rest
-175:       const own = nearContract(booked.get(i)?.destinationAsset);
-176:       r.state = await nearAccountState(r.account_id, [...new Set([...(own ? [own] : []), ...(opts.tokens ?? [])])]);
-177:       if (opts.probeAhead && used(r.state)) upTo = Math.max(upTo, i + 1 + gap);
-178:     }
-179:     out.push(r);
-180:   }
-181:   const usedIdx = out.filter((r) => used(r.state)).map((r) => r.index);
-182:   // a probing lookup is a recovery: the book never hands out an index it looked at (see IndexBook.advance)
-183:   const next = opts.lookup && opts.probeAhead ? book.advance(seedFile, Math.max(-1, ...usedIdx) + 1 + gap) : b.next;
-184:   return { gap, recipients: out, used: usedIdx, checked: asked, next };
-185: }
-
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L627-L646
-627: /** The end of a recovery's window: every known index, the highest one any signal found, plus the gap. */
-628: export const lookaheadEnd = (next: number, found: number[], gap: number) => Math.max(next, Math.max(-1, ...found) + 1) + gap;
-629:
-630: /**
-631:  * Recovery from every signal at once. A swap leaves a trace on one side only: a failed swap is refunded
-632:  * to its one-time Zcash address, a successful one delivers to its NEAR recipient. So the refund scan and
-633:  * the NEAR lookup feed one lookahead: each persists what it found into the book's `next`, the other then
-634:  * starts past it, until neither finds more. Read-only on both chains.
-635:  */
-636: export async function recoverAll(seedFile: string, book: IndexBook, from: number, to: number, opts: { gap?: number; tokens?: string[] } = {}) {
-637:   // the scan runs without blocking (and bounded), so the MCP server keeps answering other tools meanwhile
-638:   const gap = opts.gap ?? RECOVERY_GAP;
-639:   let before = -1;
-640:   for (;;) {
-641:     const near = await recoverRecipients(seedFile, book, { gap, lookup: true, probeAhead: true, tokens: opts.tokens });
-642:     const zcash = await recoverAsync(seedFile, book, from, to, gap);
-643:     if (zcash.next === before) return { ...zcash, near: { used: near.used, checked: near.checked } };
-644:     before = zcash.next;
-645:   }
-646: }
-
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 2.654
+CLEANUP isolated TMPDIR removed

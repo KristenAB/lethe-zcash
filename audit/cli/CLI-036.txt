@@ -1,85 +1,21 @@
 ROW CLI-036
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-036"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-036"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-036 | Wallet binding: quote with seed but missing book, source contract | Exit 2; stderr starts `Setup required: this seed has no index book`, names `zswap recover <birthday-height>` and `zswap init --new`; no quote POST or reservation occurs. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","quote","0.1","nep141:wrap.near","fresh.near"]
+{"exit_code":2,"signal":null,"elapsed_ms":110,"stdout_bytes":0,"stderr_bytes":209}
+STDERR Setup required: this seed has no index book (/tmp/lethe-rerun-IayVTu/book.json) (run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap)
+ASSERT exit code 2 PASS
+ASSERT stderr prefix Setup required: this seed has no index book PASS
+ASSERT no reservation or HTTP POST; exact setup instructions PASS
+ASSERTIONS PASS
+{"child_exit_codes":[2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L363-L401
-363:   reserve(seedFile: string, opts: ReserveOptions = {}): { r: Reservation; key: RefundKey } {
-364:     if (opts.freshRecipient && opts.recipient !== undefined) throw new Error('pass either a recipient or freshRecipient, not both');
-365:     return this.locked(() => {
-366:       if (!existsSync(this.path))
-367:         throw new SetupRequiredError(
-368:           `this seed has no index book (${this.path})`,
-369:           'run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap',
-370:         );
-371:       const b = this.bind(this.read(), seedFile);
-372:       const given = opts.recipient?.trim();
-373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
-374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
-375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
-376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
-377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
-378:       // a retry of a request that provably never left takes over its reservation: same index, same
-379:       // refundTo, no index burned and no false "already used"
-380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
-381:       if (retry) {
-382:         delete retry.quoteError;
-383:         retry.retries = (retry.retries ?? 0) + 1;
-384:         if (opts.destinationAsset) retry.destinationAsset = opts.destinationAsset;
-385:         this.write(b);
-386:         return { r: retry, key: deriveRefund(seedFile, retry.index) };
-387:       }
-388:       const index = b.next;
-389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
-390:       const key = deriveRefund(seedFile, index);
-391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
-392:       if (recipient !== undefined) r.recipient = recipient;
-393:       if (opts.freshRecipient) r.freshRecipient = true;
-394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
-395:       if (earlier) r.linkedRecipient = true;
-396:       b.next = index + 1;
-397:       b.reservations.push(r);
-398:       this.write(b);
-399:       return { r, key };
-400:     });
-401:   }
+HELPER_STDERR
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L430-L451
-430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
-431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
-432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
-433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
-434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
-435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
-436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
-437:   const { r } = book.reserve(
-438:     seedFile,
-439:     input.recipient === undefined
-440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
-441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
-442:   );
-443:   let q: Record<string, unknown>;
-444:   try {
-445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
-446:   } catch (e) {
-447:     book.failed(r.index, e);
-448:     throw e;
-449:   }
-450:   book.attach(r.index, q);
-451:   return { r, q };
-
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.248
+CLEANUP isolated TMPDIR removed

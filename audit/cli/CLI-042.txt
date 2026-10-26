@@ -1,121 +1,27 @@
 ROW CLI-042
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-042"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-042"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-042 | Book stale-lock recovery: six waiters, 30 rounds, source/test-contract review only | Every round ends with six distinct indices/refund addresses and `next: 6`, with zero `ENOENT unlink` errors; stale breaking rechecks token and age under the exclusive break lock. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/vitest","run","test/book-race.test.ts","-t","six processes meeting a stale lock"]
+{"exit_code":0,"signal":null,"elapsed_ms":83096,"stdout_bytes":560,"stderr_bytes":0}
+STDOUT RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L206-L216
-206: /** Lock held by a crashed process is broken after this long; a reservation takes well under a second. */
-207: export const STALE_LOCK_MS = 15_000;
-208: /** A waiter waits longer than a lock takes to go stale, so a crashed holder never makes reserving fail. */
-209: export const LOCK_WAIT_MS = 45_000;
-210: const pause = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-211: const readToken = (f: string) => {
-212:   try {
-213:     return readFileSync(f, 'utf8');
-214:   } catch {
-215:     return undefined;
-216:   }
+ ✓ test/book-race.test.ts (2 tests | 1 skipped) 82727ms
+   ✓ index book under concurrent wallet processes > six processes meeting a stale lock left by a crashed process still get six different indices (30 rounds)  82727ms
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L300-L361
-300:   /**
-301:    * Breaks `lock` if it is still the stale lock this process saw (same token, still old). Only one
-302:    * breaker at a time (`<lock>.break`, O_EXCL); a break lock older than STALE_LOCK_MS is itself left by
-303:    * a crashed breaker and removed.
-304:    */
-305:   private breakStale(lock: string, seen: string | undefined) {
-306:     const brk = `${lock}.break`;
-307:     let fd: number;
-308:     try {
-309:       fd = openSync(brk, 'wx', 0o600);
-310:     } catch (e) {
-311:       if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
-312:       try {
-313:         if (Date.now() - statSync(brk).mtimeMs > STALE_LOCK_MS) unlinkSync(brk);
-314:       } catch {
-315:         /* the other breaker finished */
-316:       }
-317:       return;
-318:     }
-319:     try {
-320:       if (readToken(lock) === seen && Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) unlinkSync(lock);
-321:     } catch {
-322:       /* released meanwhile */
-323:     } finally {
-324:       closeSync(fd);
-325:       unlinkSync(brk);
-326:     }
-327:   }
-328:   private locked<T>(fn: () => T): T {
-329:     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
-330:     const lock = `${this.path}.lock`;
-331:     const until = Date.now() + LOCK_WAIT_MS;
-332:     const token = `${process.pid}.${randomBytes(8).toString('hex')}`;
-333:     let fd: number | undefined;
-334:     while (fd === undefined) {
-335:       try {
-336:         fd = openSync(lock, 'wx', 0o600);
-337:         writeSync(fd, token);
-338:       } catch (e) {
-339:         if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e;
-340:         const seen = readToken(lock);
-341:         try {
-342:           if (Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) {
-343:             // test hook: widens the window between judging a lock stale and breaking it
-344:             pause(Math.floor(Math.random() * Number(process.env.ZSWAP_LOCK_BREAK_PAUSE_MS ?? 0)));
-345:             this.breakStale(lock, seen);
-346:           }
-347:         } catch {
-348:           /* released meanwhile */
-349:         }
-350:         if (Date.now() > until) throw new Error(`index book ${this.path} is locked by another process (${lock}); refusing to reserve without it`);
-351:         pause(10 + Math.floor(Math.random() * 20));
-352:       }
-353:     }
-354:     try {
-355:       return fn();
-356:     } finally {
-357:       closeSync(fd);
-358:       // remove the lock only while it is still this process's own
-359:       if (readToken(lock) === token) unlinkSync(lock);
-360:     }
-361:   }
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+   Start at  10:38:24
+   Duration  82.86s (transform 35ms, setup 0ms, collect 41ms, tests 82.73s, environment 0ms, prepare 26ms)
+ASSERT selected existing runtime test exit 0 PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275db94d3d5d18dd05b70304aa653833968a97 L37-L75
-37:   it('six processes meeting a stale lock left by a crashed process still get six different indices (30 rounds)', async () => {
-38:     for (let round = 0; round < 30; round++) {
-39:       const dir = mkdtempSync(join(tmpdir(), 'zswap-stale-'));
-40:       const seed = join(dir, 'seed');
-41:       const book = join(dir, 'book.json');
-42:       initSeed(seed);
-43:       new IndexBook(book).create(seed);
-44:       writeFileSync(`${book}.lock`, 'crashed-process');
-45:       const old = (Date.now() - 60_000) / 1000;
-46:       utimesSync(`${book}.lock`, old, old);
-47:       const startAt = Date.now() + 2500;
-48:       const outs = await Promise.allSettled(Array.from({ length: 6 }, () => run(TSX, [WORKER, seed, book, String(startAt)], { env: { ...process.env, ZSWAP_LOCK_BREAK_PAUSE_MS: "80" } })));
-49:       const failed = outs.flatMap((o) => (o.status === 'rejected' ? [String((o.reason as Error).message).split('\n').find((l) => /Error/.test(l))] : []));
-50:       expect(failed, `round ${round}`).toEqual([]);
-51:       const got = outs.map((o) => JSON.parse((o as PromiseFulfilledResult<{ stdout: string }>).value.stdout.trim()) as { index: number; refundTo: string });
-52:       expect(new Set(got.map((g) => g.index)).size, `round ${round}: indices ${got.map((g) => g.index)}`).toBe(6);
-53:       expect(new Set(got.map((g) => g.refundTo)).size, `round ${round}`).toBe(6);
-54:       const b = JSON.parse(readFileSync(book, 'utf8'));
-55:       expect(b.next, `round ${round}`).toBe(6);
-56:     }
-57:   }, 600_000);
-58: });
+HELPER_STDERR
 
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 83.242
+CLEANUP isolated TMPDIR removed

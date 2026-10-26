@@ -1,33 +1,23 @@
 ROW RS-002
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-002"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-002"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-002 | `zswap-keys init`, source contract only | New-file branch exits 0 with exact JSON `{"created":true}`, writes exactly 32 random bytes with create-new mode 0600; existing-file branch exits 0 with `{"created":false}` and no overwrite. No seed is opened or created in this run. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","init","/tmp/lethe-rerun-J7wbzQ/seed"]
+{"exit_code":0,"signal":null,"elapsed_ms":3,"stdout_bytes":17,"stderr_bytes":0}
+STDOUT {"created":true}
+ASSERT new Rust seed exact JSON 32 bytes mode 0600 PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","init","/tmp/lethe-rerun-J7wbzQ/seed"]
+{"exit_code":0,"signal":null,"elapsed_ms":2,"stdout_bytes":18,"stderr_bytes":0}
+STDOUT {"created":false}
+ASSERT existing Rust seed exact JSON and bytes unchanged PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0,0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L32-L42
-32:         Some("init") if a.len() == 2 => {
-33:             if fs::metadata(&a[1]).is_ok() {
-34:                 println!("{{\"created\":false}}");
-35:                 return;
-36:             }
-37:             let mut s = [0u8; 32];
-38:             rand::fill(&mut s);
-39:             let mut f = fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(&a[1]).unwrap_or_else(|e| fail(e));
-40:             f.write_all(&s).unwrap_or_else(|e| fail(e));
-41:             println!("{{\"created\":true}}");
-42:         }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.138
+CLEANUP isolated TMPDIR removed

@@ -1,64 +1,25 @@
 ROW CLI-004
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-004"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-004"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| CLI-004 | `init --new`: explicitly never-used seed, source contract only | Exit 0; JSON contains `seedCreated: false`, `bookCreated: true`; the new empty book is bound to that seed. No existing seed is accessed in this audit run. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","init","--new"]
+{"exit_code":0,"signal":null,"elapsed_ms":129,"stdout_bytes":139,"stderr_bytes":0}
+STDOUT {
+  "seedCreated": false,
+  "bookCreated": true,
+  "seed": "/tmp/lethe-rerun-7Ti01S/seed",
+  "book": "/tmp/lethe-rerun-7Ti01S/book.json"
+}
+ASSERT init --new exact booleans exit 0 PASS
+ASSERT new book bound to throwaway seed PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L149-L161
-149: export function initWallet(seedFile: string, book: IndexBook, opts: { assertNew?: boolean } = {}): { seedCreated: boolean; bookCreated: boolean; seed: string; book: string } {
-150:   const seedCreated = initSeed(seedFile);
-151:   let bookCreated = false;
-152:   if (!book.exists()) {
-153:     if (!seedCreated && !opts.assertNew)
-154:       throw new SetupRequiredError(
-155:         `index book for the existing seed ${seedFile}`,
-156:         `expected at ${book.path}. Run \`zswap recover <birthday-height>\` to rebuild it from the chain, or \`zswap init --new\` if this seed has never quoted a swap`,
-157:       );
-158:     bookCreated = book.create(seedFile);
-159:   }
-160:   return { seedCreated, bookCreated, seed: seedFile, book: book.path };
-161: }
+HELPER_STDERR
 
-SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L240-L266
-240:   private bind(b: Book, seedFile: string): Book {
-241:     const id = seedId(seedFile);
-242:     const other = () => new SetupRequiredError('the index book of this seed', `${this.path} belongs to another seed; point ZSWAP_BOOK at this seed's own book`);
-243:     if (b.fvk_id !== undefined) {
-244:       if (b.fvk_id !== id) throw other();
-245:       return b;
-246:     }
-247:     const first = b.reservations[0];
-248:     if (first && deriveRefund(seedFile, first.index).mainnet.address !== first.refundTo) throw other();
-249:     b.fvk_id = id;
-250:     return b;
-251:   }
-252:   /** The read-only view of this seed's book (refuses another seed's). */
-253:   readFor(seedFile: string): Book {
-254:     return this.bind(this.read(), seedFile);
-255:   }
-256:   /** Creates the empty book bound to `seedFile`; false if it already exists. */
-257:   create(seedFile: string): boolean {
-258:     return this.locked(() => {
-259:       if (existsSync(this.path)) {
-260:         this.bind(this.read(), seedFile);
-261:         return false;
-262:       }
-263:       this.write({ next: 0, reservations: [], fvk_id: seedId(seedFile) });
-264:       return true;
-265:     });
-266:   }
-
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
-105: } catch (e) {
-106:   console.error((e as Error).message);
-107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
-108: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.268
+CLEANUP isolated TMPDIR removed

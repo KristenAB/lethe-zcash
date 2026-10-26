@@ -1,45 +1,63 @@
 ROW RS-009
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-009"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-009"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-009 | `zswap-keys near` / `near-key` invalid index, source contract | Negative, fractional, nonnumeric or index 2147483648 exits 2 with `error: index must be a whole number below 2^31`; no credential output file is created. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near","/tmp/lethe-rerun-n7r91k/seed","-1"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near","/tmp/lethe-rerun-n7r91k/seed","1.5"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near","/tmp/lethe-rerun-n7r91k/seed","bad"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near","/tmp/lethe-rerun-n7r91k/seed","2147483648"]
+{"exit_code":2,"signal":null,"elapsed_ms":1,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-n7r91k/seed","-1","/tmp/lethe-rerun-n7r91k/credential"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-n7r91k/seed","1.5","/tmp/lethe-rerun-n7r91k/credential"]
+{"exit_code":2,"signal":null,"elapsed_ms":1,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-n7r91k/seed","bad","/tmp/lethe-rerun-n7r91k/credential"]
+{"exit_code":2,"signal":null,"elapsed_ms":1,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","near-key","/tmp/lethe-rerun-n7r91k/seed","2147483648","/tmp/lethe-rerun-n7r91k/credential"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":47}
+STDERR error: index must be a whole number below 2^31
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number below 2^31 PASS
+ASSERT invalid index creates no credential PASS
+ASSERTIONS PASS
+{"child_exit_codes":[2,2,2,2,2,2,2,2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L25-L27
-25: fn near_index(s: &str) -> u32 {
-26:     s.parse::<u32>().ok().filter(|i| *i < 0x8000_0000).unwrap_or_else(|| fail("index must be a whole number below 2^31"))
-27: }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L71-L88
-71:         Some("near") if a.len() == 3 => {
-72:             let s = seed(&a[1]);
-73:             let i = near_index(&a[2]);
-74:             let (account_id, public_key) = near_recipient(&s, i);
-75:             println!("{}", serde_json::json!({ "index": i, "path": near_path(i), "account_id": account_id, "public_key": public_key }));
-76:         }
-77:         Some("near-key") if a.len() == 4 => {
-78:             let s = seed(&a[1]);
-79:             let i = near_index(&a[2]);
-80:             let mut f = fs::OpenOptions::new()
-81:                 .write(true)
-82:                 .create_new(true)
-83:                 .mode(0o600)
-84:                 .open(&a[3])
-85:                 .unwrap_or_else(|e| fail(format!("{}: {e} (refusing to overwrite an existing file)", a[3])));
-86:             f.write_all(near_credentials_json(&s, i).as_bytes()).unwrap_or_else(|e| fail(e));
-87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
-88:         }
-
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.146
+CLEANUP isolated TMPDIR removed

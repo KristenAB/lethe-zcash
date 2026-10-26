@@ -1,36 +1,27 @@
 ROW RS-005
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-005"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-005"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-005 | `zswap-keys refund <index>`, source contract only | Exit 0 JSON has `index`, testnet address/UIVK/FVK ID and mainnet address/FVK ID; malformed unsigned index exits 2 with `error: index must be a whole number`; key-bearing output is not collected in this run. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","refund","/tmp/lethe-rerun-SdXmeG/seed","3"]
+{"exit_code":0,"signal":null,"elapsed_ms":9,"stdout_bytes":587,"stderr_bytes":0}
+RAW_STDOUT memory only; no raw stdout file created; values never emitted
+ASSERT seed mode 0600 PASS
+{"json_fields":{"index":{"type":"number"},"mainnet":{"address":{"type":"string","length":106,"nonempty":true},"fvk_id":{"type":"string","length":64,"nonempty":true}},"testnet":{"address":{"type":"string","length":110,"nonempty":true},"fvk_id":{"type":"string","length":64,"nonempty":true},"uivk":{"type":"string","length":147,"nonempty":true}}},"stderr":"","secret_fields_nonempty":{"testnet_uivk":true},"raw_stdout_deleted":true}
+ASSERT key derivation exit 0 PASS
+ASSERT refund exact nested JSON fields and network encodings PASS
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys","refund","/tmp/lethe-rerun-SdXmeG/seed","bad"]
+{"exit_code":2,"signal":null,"elapsed_ms":2,"stdout_bytes":0,"stderr_bytes":36}
+STDERR error: index must be a whole number
+ASSERT exit code 2 PASS
+ASSERT stderr exact match error: index must be a whole number PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0,2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L53-L66
-53:         Some("refund") if a.len() == 3 => {
-54:             let s = seed(&a[1]);
-55:             let i: u64 = a[2].parse().unwrap_or_else(|_| fail("index must be a whole number"));
-56:             let t = one_time(&account(&s, COIN_TESTNET).unwrap_or_else(|e| fail(e)), KeyPurpose::Refund, i).unwrap_or_else(|e| fail(e));
-57:             let m = one_time(&account(&s, COIN_MAINNET).unwrap_or_else(|e| fail(e)), KeyPurpose::Refund, i).unwrap_or_else(|e| fail(e));
-58:             println!(
-59:                 "{}",
-60:                 serde_json::json!({
-61:                     "index": i,
-62:                     "testnet": { "address": address(&t, network(COIN_TESTNET)).unwrap_or_else(|e| fail(e)), "uivk": uivk(&t, network(COIN_TESTNET)).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&t) },
-63:                     "mainnet": { "address": address(&m, network(COIN_MAINNET)).unwrap_or_else(|e| fail(e)), "fvk_id": fvk_id(&m) },
-64:                 })
-65:             );
-66:         }
+HELPER_STDERR
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
-
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
-
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.149
+CLEANUP isolated TMPDIR removed

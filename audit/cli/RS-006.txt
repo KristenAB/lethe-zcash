@@ -1,168 +1,31 @@
 ROW RS-006
-COMMAND ["python3", "/tmp/lethe-audit-review.py", "RS-006"]
-MODE source review
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "RS-006"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
 
-STDOUT
-| RS-006 | Wallet-core one-time derivation invariants, source/test-contract review | Existing 64-index contract requires 64 distinct refund addresses and IVKs, identical account spending authority, deterministic re-derivation, purpose separation, distinct network results and unrelated other-wallet results; no derivation with a seed is executed. | PLANNED |  |  |
-MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/deps/one_time-58c46c1980d50f6e"]
+{"exit_code":0,"signal":null,"elapsed_ms":58,"stdout_bytes":440,"stderr_bytes":0}
+RAW_STDOUT memory only; no raw stdout file created; values never emitted
+ASSERT existing Rust integration tests exit 0 PASS
+TEST_OUTPUT
+running 5 tests
+test refund_memo_round_trips_and_rejects_other_memos ... ok
+test derivation_is_deterministic_and_purposes_are_separate ... ok
+test another_seed_gives_unrelated_keys ... ok
+test testnet_and_mainnet_use_different_accounts_and_encodings ... ok
+test refund_keys_never_share_an_ivk_or_address_and_keep_the_spending_authority ... ok
 
-SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda561146d425404786e41847e7a35bf363c3a81 L1-L56
-1: use std::collections::HashSet;
-2: use zswap_core::*;
-3:
-4: [public test seed/vector literal omitted; assertion inspected locally]
-5:
-6: #[test]
-7: fn refund_keys_never_share_an_ivk_or_address_and_keep_the_spending_authority() {
-8:     let acct = account(&SEED, COIN_TESTNET).unwrap();
-9:     let net = network(COIN_TESTNET);
-10:     let mut ivks = HashSet::from([uivk(&acct, net).unwrap()]);
-11:     let mut addrs = HashSet::from([address(&acct, net).unwrap()]);
-12:     for i in 0..64u64 {
-13:         let k = one_time(&acct, KeyPurpose::Refund, i).unwrap();
-14:         assert!(ivks.insert(uivk(&k, net).unwrap()), "index {i} repeats an IVK");
-15:         assert!(addrs.insert(address(&k, net).unwrap()), "index {i} repeats an address");
-16:         assert_eq!(authority(&k), authority(&acct), "index {i} must keep ak‖nk (the wallet can still spend)");
-17:     }
-18:     assert_eq!(ivks.len(), 65);
-19: }
-20:
-21: #[test]
-22: fn derivation_is_deterministic_and_purposes_are_separate() {
-23:     let acct = account(&SEED, COIN_TESTNET).unwrap();
-24:     let a = one_time(&acct, KeyPurpose::Refund, 3).unwrap();
-25:     let b = one_time(&acct, KeyPurpose::Refund, 3).unwrap();
-26:     let c = one_time(&acct, KeyPurpose::Receive, 3).unwrap();
-27:     assert_eq!(fvk_id(&a), fvk_id(&b));
-28:     assert_ne!(fvk_id(&a), fvk_id(&c));
-29: }
-30:
-31: #[test]
-32: fn testnet_and_mainnet_use_different_accounts_and_encodings() {
-33:     let t = one_time(&account(&SEED, COIN_TESTNET).unwrap(), KeyPurpose::Refund, 0).unwrap();
-34:     let m = one_time(&account(&SEED, COIN_MAINNET).unwrap(), KeyPurpose::Refund, 0).unwrap();
-35:     assert!(address(&t, network(COIN_TESTNET)).unwrap().starts_with("utest1"));
-36:     assert!(address(&m, network(COIN_MAINNET)).unwrap().starts_with("u1"));
-37:     assert!(uivk(&t, network(COIN_TESTNET)).unwrap().starts_with("uivktest1"));
-38:     assert_ne!(fvk_id(&t), fvk_id(&m));
-39: }
-40:
-41: #[test]
-42: fn another_seed_gives_unrelated_keys() {
-43:     let a = one_time(&account(&SEED, COIN_TESTNET).unwrap(), KeyPurpose::Refund, 0).unwrap();
-44: [public test seed/vector literal omitted; assertion inspected locally]
-45:     assert_ne!(authority(&a), authority(&b));
-46: [public test seed/vector literal omitted; assertion inspected locally]
-47: }
-48:
-49: #[test]
-50: fn refund_memo_round_trips_and_rejects_other_memos() {
-51:     for i in [0u64, 1, 41, u64::MAX] {
-52:         let m = refund_memo(i);
-53:         assert_eq!(&m[..7], b"\xffZSWP\x01\x00");
-54:         assert_eq!(decode_refund_memo(&m), Some(i));
-55:     }
-56: [public test seed/vector literal omitted; assertion inspected locally]
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
 
-SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f4cdd3906467c600fa7ed1d9c466a2c L1-L88
-1: //! One-time refund addresses for swaps out of a Zcash wallet.
-2: //!
-3: //! A swap provider (NEAR Intents 1Click) is told a `refundTo` address. If every swap names the same
-4: //! wallet address, anyone reading those public `refundTo` fields can link all of a user's swaps (and
-5: //! a future quantum adversary gains more from each link). Here swap `i` gets a **one-time key**
-6: //! derived with `zakura-one-time-ivk`: it keeps the account's spending authority (`ak`, `nk`) and
-7: //! gets its own `rivk`, so it has its own incoming viewing key and address. Two refund addresses
-8: //! cannot be linked to each other or to the account address from the addresses alone.
-9: //!
-10: //! `zakura-one-time-ivk` is a draft convention ("must not be used to issue live addresses before
-11: //! review"). This crate uses it on Zcash testnet only, and for mainnet `refundTo` in *dry* quotes,
-12: //! which create no deposit address and move no funds.
-13:
-14: use orchard::keys::{FullViewingKey, Scope, SpendingKey};
-15: use sha2::{Digest, Sha256};
-16: use zakura_one_time_ivk::{swap::RefundMemo, KeyId, Purpose};
-17: use zcash_address::unified::{self, Encoding};
-18: use zcash_protocol::consensus::NetworkType;
-19:
-20: /// ZIP 32 coin types.
-21: pub const COIN_TESTNET: u32 = 1;
-22: pub const COIN_MAINNET: u32 = 133;
-23:
-24: #[derive(Debug)]
-25: pub enum Error {
-26:     Seed(String),
-27:     Derivation(u64),
-28:     Encoding(String),
-29: }
-30:
-31: impl std::fmt::Display for Error {
-32:     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-33:         match self {
-34:             Error::Seed(e) => write!(f, "bad seed: {e}"),
-35:             Error::Derivation(i) => write!(f, "index {i} has no valid one-time key (negligible probability; use the next index)"),
-36:             Error::Encoding(e) => write!(f, "encoding failed: {e}"),
-37:         }
-38:     }
-39: }
-40: impl std::error::Error for Error {}
-41:
-42: /// The wallet's ZIP 32 account 0 for one network (coin type decides testnet vs mainnet keys).
-43: pub fn account(seed: &[u8], coin_type: u32) -> Result<FullViewingKey, Error> {
-44:     if seed.len() < 32 {
-45:         return Err(Error::Seed("at least 32 bytes".into()));
-46:     }
-47:     let sk = SpendingKey::from_zip32_seed(seed, coin_type, zip32::AccountId::ZERO).map_err(|e| Error::Seed(format!("{e:?}")))?;
-48:     Ok(FullViewingKey::from(&sk))
-49: }
-50:
-51: /// One-time key `index` for `purpose` (refund or receive).
-52: pub fn one_time(account: &FullViewingKey, purpose: Purpose, index: u64) -> Result<FullViewingKey, Error> {
-53:     KeyId::new(purpose, index).derive(account).map_err(|_| Error::Derivation(index))
-54: }
-55:
-56: pub fn network(coin_type: u32) -> NetworkType {
-57:     if coin_type == COIN_MAINNET {
-58:         NetworkType::Main
-59:     } else {
-60:         NetworkType::Test
-61:     }
-62: }
-63:
-64: /// Unified address with only an Orchard-family receiver (receives in Ironwood on current testnet).
-65: pub fn address(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
-66:     let raw = fvk.address_at(0u32, Scope::External).to_raw_address_bytes();
-67:     let ua = unified::Address::try_from_items(vec![unified::Receiver::Orchard(raw)]).map_err(|e| Error::Encoding(e.to_string()))?;
-68:     Ok(ua.encode(&net))
-69: }
-70:
-71: /// Unified incoming viewing key with only the Orchard-family item: sees payments to `address`.
-72: pub fn uivk(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
-73:     let ivk = fvk.to_ivk(Scope::External).to_bytes();
-74:     let u = unified::Uivk::try_from_items(vec![unified::Ivk::Orchard(ivk)]).map_err(|e| Error::Encoding(e.to_string()))?;
-75:     Ok(u.encode(&net))
-76: }
-77:
-78: /// sha256 of the raw full viewing key: an identifier for tests and logs (not a secret, not a key).
-79: pub fn fvk_id(fvk: &FullViewingKey) -> String {
-80:     hex::encode(Sha256::digest(fvk.to_bytes()))
-81: }
-82:
-83: /// The spending authority (`ak ‖ nk`, the first 64 bytes of the raw FVK).
-84: pub fn authority(fvk: &FullViewingKey) -> [u8; 64] {
-85:     fvk.to_bytes()[..64].try_into().expect("64 bytes")
-86: }
-87:
-88: /// The refund memo a wallet could put in its own internal note of the funding transaction, so a
 
-SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
-12: fn fail(msg: impl std::fmt::Display) -> ! {
-13:     eprintln!("error: {msg}");
-14:     std::process::exit(2)
-15: }
+ASSERT matching source-verified Rust test executable found PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
 
-REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
+HELPER_STDERR
 
-STDERR
-
-EXIT_CODE 0
-CLEANUP: source review created no seed, book or credentials files.
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.535
+CLEANUP isolated TMPDIR removed
