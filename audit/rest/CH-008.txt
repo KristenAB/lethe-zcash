@@ -1,0 +1,26 @@
+ID: CH-008
+Observed at: 2026-10-26T05:11:37.346Z
+Status: PASS
+Notes: Real tip reads with native scanner default and explicit ZSWAP_LWD_URL forwarded by CLI library. No transaction operation. TLS implementation not inferred as runtime proof from source.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";console.log(JSON.stringify({tip:await l.chainTipAsync()}))"]
+pid: 61744
+stdout:
+{"tip":4542918}
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 2
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";console.log(JSON.stringify({tip:await l.chainTipAsync()}))"]
+pid: 61746
+stdout:
+{"tip":4542918}
+
+stderr:
+
+exit_code: 0
+

@@ -1,0 +1,51 @@
+ROW CLI-074
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/vitest", "run", "test/decorrelate.test.ts", "-t", "recipients are compared in canonical form"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+
+ RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli
+
+ ✓ test/decorrelate.test.ts (14 tests | 13 skipped) 2ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 13 skipped (14)
+   Start at  10:05:16
+   Duration  139ms (transform 40ms, setup 0ms, collect 46ms, tests 2ms, environment 0ms, prepare 26ms)
+
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.347
+CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/decorrelate.ts SHA256 b345ee2dedaf381196064d18f94ebbcb8ec59c6d020ca8b7115ec06690ee9b69
+241:   quotes: { timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string; slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }[],
+242:   jwt = false,
+243: ): PlannedSwap[] {
+244:   return quotes.map((q) => ({ amountZat: q.quoteRequest.amount, at: q.timestamp, recipient: q.quoteRequest.recipient, destinationAsset: q.quoteRequest.destinationAsset, refundTo: q.quoteRequest.refundTo, jwt, fingerprint: requestFingerprint(q) }));
+245: }
+246:
+247: /** slippage | solver wait | deadline minus request time in whole minutes, from a quote's public request. */
+248: export function requestFingerprint(q: { timestamp: string; quoteRequest: { slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }): string | undefined {
+249:   const { slippageTolerance, quoteWaitingTimeMs, deadline } = q.quoteRequest;
+250:   if (slippageTolerance === undefined || quoteWaitingTimeMs === undefined || !deadline) return undefined;
+251:   return `${slippageTolerance}|${quoteWaitingTimeMs}|${Math.round((Date.parse(deadline) - Date.parse(q.timestamp)) / 60_000)}`;
+252: }
+253:
+254: /**
+255:  * A planned batch: optional rounding, optional split, a fresh recipient per part (or the one given),
+256:  * an optional random delay schedule, and the linkability report of the result. Nothing is sent.
+257:  */
+258: export function planBatch(input: {
+259:   amountZat: bigint;
+260:   destinationAsset: string;
+
+STDERR
+
+EXIT_CODE 0

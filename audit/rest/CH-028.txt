@@ -1,0 +1,59 @@
+ID: CH-028
+Observed at: 2026-10-26T05:31:43.460Z
+Status: UNTESTED
+Notes: Real CLI sweep warning and read-only queries observed. Token-only action requires an actually token-funded derived recipient; no funding permitted.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const b=new l.IndexBook(\"/tmp/lethe-rest-93l6lz/chain-sweep-book.json\");if(!b.exists())b.create(process.env.ZSWAP_SEED);for(let i=0;i<2;i++)b.reserve(process.env.ZSWAP_SEED,{freshRecipient:true,destinationAsset:'nep141:wrap.near'});console.log(JSON.stringify({next:b.read().next}));"]
+pid: 26670
+stdout:
+{"next":2}
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 2
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/main.js","sweep-plan","--to","0=me.near","--to","1=me.near","--lookup"]
+pid: 26721
+stdout:
+{
+  "steps": [
+    {
+      "index": 0,
+      "from": "39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae",
+      "to": "me.near",
+      "action": "send everything from 39190164ee… to me.near"
+    },
+    {
+      "index": 1,
+      "from": "f114a6111a96bc4e7500d2c178421ac992a40b8a703190248248933dd90fe97d",
+      "to": "me.near",
+      "action": "send everything from f114a6111a… to me.near"
+    }
+  ],
+  "warnings": [
+    "sweeping swaps #0, #1 into me.near re-links them on chain: anyone can see those accounts paying one account. Sweep each to a different destination, or back into a shielded Zcash address (a new 1Click swap per account, at different times and amounts)."
+  ],
+  "relinked": 2,
+  "keyExport": "zswap near-key <index> <out-file> writes that account’s near-cli credentials (0600, never printed); import it into a NEAR wallet or near-cli to sign the sweep"
+}
+
+stderr:
+privacy: a NEAR lookup sends every recipient it checks from this IP, seconds apart, to rpc.mainnet.fastnear.com (NEAR RPC) and api.fastnear.com (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.
+AUDIT_HTTP {"at":"2026-10-26T05:31:41.777Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:42.408Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiMzkxOTAxNjRlZWIwMWZlNjc0MDNhOTIxMGY2MjE3NDJjYmY5NTViNmRlZWNkOGFlNDRkZDhlOWI1OWY5NDdhZSJ9"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:42.581Z","url":"https://api.fastnear.com/v1/account/39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/39190164eeb01fe67403a9210f621742cbf955b6deecd8ae44dd8e9b59f947ae/ft","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:42.805Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"f114a6111a96bc4e7500d2c178421ac992a40b8a703190248248933dd90fe97d"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:42.992Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"wrap.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoiZjExNGE2MTExYTk2YmM0ZTc1MDBkMmMxNzg0MjFhYzk5MmE0MGI4YTcwMzE5MDI0ODI0ODkzM2RkOTBmZTk3ZCJ9"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:43.231Z","url":"https://api.fastnear.com/v1/account/f114a6111a96bc4e7500d2c178421ac992a40b8a703190248248933dd90fe97d/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/f114a6111a96bc4e7500d2c178421ac992a40b8a703190248248933dd90fe97d/ft","status":200}
+
+exit_code: 0
+

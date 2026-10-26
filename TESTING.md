@@ -9,7 +9,7 @@ decorrelation helpers and the linkability report are pure functions, tested with
 |---|---|---|---|
 | wallet-core (Rust) | local | 5 | 64 refund keys: no repeated IVK or address, same spending authority; deterministic, purposes separate; testnet/mainnet differ; another seed unrelated; refund memo round-trip |
 | wallet-core: NEAR recipients (Rust) | local | 3 | SLIP-0010 ed25519 test vector 1 (master, `m/0'`, 5-level path); 64 per-swap implicit accounts all distinct, deterministic, id = hex(public key), another seed differs; the credentials file holds the matching keypair |
-| scan (Rust) | local | 3 + doc | payment rules (from zpay-verify); the crate doc example compiles |
+| scan (Rust) | local | 4 + doc | payment rules (from zpay-verify); stalled TLS handshake obeys the connection timeout; the crate doc example compiles |
 | cli (`cli.test.ts`) | 1Click + testnet | 8 | indices give new addresses and are written first; a real dry quote echoes the one-time refundTo (`confidentiality: public`); two real quotes share no request parameters; parameters drawn per quote inside the tolerance; live swap BLOCKED; malformed refundTo refused by 1Click; compact scan finds a real payment and nothing for an unrelated key; the published refunds re-scanned, each found only by its own key |
 | cli: book race (`book-race.test.ts`) | real processes | 2 | six wallet processes reserving at the same instant get six indices; six processes meeting a stale lock left by a crashed process, 30 rounds, still get six indices (before the Oct 22 ultra round: two holders, "ENOENT unlink" on round 0) |
 | cli: book durability | local | 1 | a reservation fsyncs the book file and its folder before `reserve` returns (before: no fsync) |
@@ -23,8 +23,8 @@ decorrelation helpers and the linkability report are pure functions, tested with
 | cli: wallet binding | local | 6 | a seed without its book is refused; another seed's book is refused, an old book is bound only if its first refundTo matches; `init` creates both; default paths; `pnpm --filter` uses the repo-root wallet; relative `ZSWAP_SEED` |
 | cli: decorrelation | pure + recorded quotes | 14 | split, rounding, delay schedule over 199 seeds; the report's strong and weak fields; provider-only JWT; the published first run scores 0; opt-in plan; a random part order; the split-pattern and client-fingerprint hints; weak hints add up with the weights printed; canonical recipients; pass 2's real quotes score 32 |
 | mcp | stdio MCP client + 1Click + testnet (+ local servers for failure paths) | 14 | two safe quotes, two refundTo; a reused recipient refused; recovery scan with lookahead; range over 100,000 blocks refused; confidential without JWT; Setup required; call log 0600 with no address; a log that cannot be created stops startup; a log that stops being writable never fails a done call; fresh recipients, ETH refused, re-linking sweep flagged, both found from the seed; `plan_batch`; 1e-9 and 0 ZEC refused before reserving; `sweep_plan` not read-only, and its lookup asks only about the booked recipient; a silent lightwalletd: `recover` times out in 3 s while `plan_batch` answers |
-| dashboard | real Vite dev server + landing | 7 | serves the published run; 403 for `.demo/`; 403 for other repo files; 403 through symlinks inside `node_modules`, checked by real path; 200 only for `decorrelate.ts`, `pass2.json` and `pass3.json`; the landing's embedded data equals `deployments/`; pass 3 scored by the CLI equals the landing, with only the token hint left |
-| **Total** | | **105 + doc** | Rust 11 + doc, cli 73, mcp 14, dashboard 7; 0 skipped (run 2026-10-23, `pnpm test`, exit 0) |
+| dashboard | real Vite dev server + landing | 13 | serves the published run; 403 for `.demo/`; six absent-wallet-path cases return 403 `Restricted` before SPA fallback; 403 for other repo files; 403 through symlinks inside `node_modules`, checked by real path; 200 only for `decorrelate.ts`, `pass2.json` and `pass3.json`; the landing's embedded data equals `deployments/`; pass 3 scored by the CLI equals the landing, with only the token hint left |
+| **Total** | | **112 + doc** | Rust 12 + doc, cli 73, mcp 14, dashboard 13; 0 skipped (run 2026-10-26, `pnpm test`, exit 0) |
 
 ## Browser E2E (Playwright, Google Chrome)
 
@@ -36,11 +36,19 @@ both pages is checked against `deployments/*.json`, and both batch scores agains
 375 px fails a test. Loading, error and empty states are reached by answering the pages' own data
 requests differently (`page.route`); nothing else is stubbed, and no flow calls 1Click or NEAR.
 
-| Project | Tests | Pass |
-|---|---|---|
-| desktop | 30 | 30 |
-| mobile | 30 | 30 |
-| **Total** | **60** | **60** |
+| Project | Tests | Pass | Fail |
+|---|---|---|---|
+| desktop | 30 | 30 | 0 |
+| mobile | 30 | 30 | 0 |
+| **Total** | **60** | **60** | **0** |
+
+Oct 26, 2026 handback: `pnpm test:e2e` exited 0: **60 passed, 0 failed**
+(desktop 30/30, mobile 30/30; Playwright 2.5 min, full command 155.232 s).
+The two previously failing tests passed first on both projects: **4 passed, 0 failed**
+(5.2 s). The landing now displays 112 tests. The dashboard security test always checks
+`.demo/seed` and `.demo/index-book.json`, even when absent, plus every discovered real
+`.demo/` file and existing wallet source path; all three `/@fs` forms return 403.
+Only response statuses are checked; bodies are never read, and no wallet files are created.
 
 Oct 25, 2026: the landing became a one-screen overview (`index.html`: headline, two buttons, the pass-2
 widget alone, three steps, the latest batch's numbers, what is live) and the full page moved to
@@ -54,7 +62,8 @@ links, measured" with all three batches (first run, pass 2, pass 3, each request
 the autoplay staying silent for screen readers after a pick and Play, recovery, seed-only recovery, BLOCKED, Run it, skip link and every link; the dashboard
 (loading, every swap button and refund-address row, reduced motion and keyboard, link audit, both
 batches, pass-2 per-swap NEAR recipients, the pass-3 batch and its parts, recovery, BLOCKED, error, empty, no pass 2, every link); no
-control labelled "log" on either page; from the browser, 403 for every file under `.demo/` and for the
+control labelled "log" on either page; from the browser, 403 for `.demo/seed` and
+`.demo/index-book.json` whether present or absent, every real file found under `.demo/`, and the
 wallet source (`lib.ts`, `recipient.ts`, `main.ts`, the MCP tools, the hoisted `@zswap/cli` link), 200
 for the published run and `decorrelate.ts` (status only, bodies never read).
 
@@ -70,3 +79,38 @@ Each Oct 21 fix and each Oct 22 feature has a test that fails on the code before
 
 `fixtures/testnet.json` holds the zec-shielded-x402 demo merchant's published incoming viewing key and
 one of its payments; the scan test uses it as a known payment to find.
+
+## Audit re-verification — Oct 26, 2026
+
+`AUDIT.md` has 352 rows: **339 PASS, 0 FAIL, 13 UNTESTED**. This pass rechecked all
+28 previously open rows and the 31 browser rows whose formatter expectations were corrected.
+The 42 selected browser rows passed in Google Chrome 155.0.8059.85 through Playwright,
+including all nine live Vercel retries. No console/page errors or unexpected HTTP failures
+remain in those rows. UI-174/175 use Playwright API requests: missing wallet paths return
+403 `Restricted`; the requests add no page console entries. Vite startup debug/info is retained.
+
+The current scanner build read the 23 recorded blocks and found all four expected payments;
+a stalled real TLS connection failed after 10.009 seconds. MCP recovery passed from tip−4
+through the current tip with fresh temporary keys. No fabricated provider/scanner responses
+were used in this re-verification. CH-003’s live dry quote succeeded with HTTP 201; its
+expectation is corrected to that live 1Click success status, and the row is PASS.
+CLI-022, CLI-023, and MCP-012 need `ONECLICK_JWT`; MCP-025, MCP-027, CH-017, CH-018,
+and CH-028 need a funded or token-only derived recipient that this run must not create;
+CH-021, CH-022, CH-023, CH-029, and CH-030 need a real provider fault response that did
+not occur. These 13 rows remain UNTESTED; no partial results were marked PASS. The
+tested happy paths have no mock standing in for a live result.
+
+Handback verification on Oct 26: `pnpm test` exited 0 with **112 tests plus 1 doc test**
+(Rust 12 + doc, CLI 73, MCP 14, dashboard 13), 0 failed and 0 skipped. The follow-up
+`lethe-e2e` run fixed both browser failures and passed the focused checks and full suite
+as recorded above. UI-093 was reverified in local Google Chrome with facts 0 / 75 / 112,
+a clean console and network, and a refreshed JPEG under 200 KB. All started Chrome and
+dev-server PIDs ended and the heavy slot was released. No `.demo/` directory or seed
+was created. The live landing remains at 105; no deployment or Pages workflow was invoked.
+
+The earlier re-verification evidence is under 10 MB; every screenshot is JPEG at or
+below 200 KB. During that earlier pass, temporary wallet files were under /tmp and
+deleted, started subprocesses ended, and the heavy slot was released. No protected
+wallet, example script, transaction submission or deployment occurred in either pass.
+See `audit/reverify-summary.json` for the earlier row IDs and cleanup checks; its counts
+predate the CH-003 expectation correction.

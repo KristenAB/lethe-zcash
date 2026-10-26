@@ -1,0 +1,121 @@
+{
+  "id": "UI-123",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:56.960Z",
+  "end": "2026-10-26T05:32:58.248Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence Pass 3 parts list with parameters (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "List ul#pass3-rows is visible and displays 3 parts with request parameters: part 8 \"0.2 ZEC at +0 s → 49.5363 wNEAR · slippage 88 bps, wait 3.233 s, deadline +75 min · found from the seed alone\"; part 9 \"0.05 ZEC at +677 s → 12.3519 wNEAR · slippage 73 bps, wait 3.104 s, deadline +90 min · found from the seed alone\"; part 10 \"0.1 ZEC at +1452 s → 24.7551 wNEAR · slippage 80 bps, wait 2.657 s, deadline +87 min · not found from the seed\"; paragraph #pass3-note states \"Score 0 → 32 → 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#pass3-rows li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "#pass3-rows visible",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 output exact 49.5363",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 send exact 0.05",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 output exact 12.3519",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 send exact 0.1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 output exact 24.7551",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "score progression",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery window exact",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

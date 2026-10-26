@@ -1,0 +1,123 @@
+{
+  "id": "UI-052",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:05:26.772Z",
+  "end": "2026-10-26T04:05:28.019Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "375x812",
+  "flow": "Live evidence mobile navigation (375x812 mobile) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Header and footer link sets wrap gracefully without horizontal overflow; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "header, header nav a, footer, footer nav a within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "header, header nav a, footer, footer nav a bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "HEADER",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        },
+        {
+          "tag": "A",
+          "left": 168,
+          "right": 240,
+          "width": 72
+        },
+        {
+          "tag": "A",
+          "left": 258,
+          "right": 292,
+          "width": 34
+        },
+        {
+          "tag": "A",
+          "left": 310,
+          "right": 359,
+          "width": 49
+        },
+        {
+          "tag": "FOOTER",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        },
+        {
+          "tag": "A",
+          "left": 16,
+          "right": 85,
+          "width": 69
+        },
+        {
+          "tag": "A",
+          "left": 105,
+          "right": 150,
+          "width": 45
+        },
+        {
+          "tag": "A",
+          "left": 170,
+          "right": 216,
+          "width": 46
+        },
+        {
+          "tag": "A",
+          "left": 236,
+          "right": 295,
+          "width": 59
+        }
+      ]
+    },
+    {
+      "label": "header within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "header bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "HEADER",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

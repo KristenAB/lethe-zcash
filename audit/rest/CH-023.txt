@@ -1,0 +1,99 @@
+ID: CH-023
+Observed at: 2026-10-26T05:31:41.627Z
+Status: UNTESTED
+Notes: Runtime defaults, real stalled connection timeout, real connection refusal, live provider rejection, and bounded snippet checked.; Body-read timeout and reset subcases not induced against real providers; needs a real stalled-body/reset response. Other row subcases executed, no partial PASS.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";console.log(l.httpTimeoutMs())"]
+pid: 26617
+stdout:
+20000
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 2
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";console.log(l.httpTimeoutMs())"]
+pid: 26618
+stdout:
+20000
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 3
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";console.log(l.httpTimeoutMs())"]
+pid: 26619
+stdout:
+20000
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 4
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";console.log(l.httpTimeoutMs())"]
+pid: 26620
+stdout:
+20000
+
+stderr:
+
+exit_code: 0
+
+
+PROCESS 5
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";try{await l.httpJson('transport timeout',\"http://127.0.0.1:51172\")}catch(e){console.log(JSON.stringify({message:e.message,outcome:l.requestOutcome(e)}));process.exit(1)}"]
+pid: 26621
+stdout:
+{"message":"transport timeout did not answer in 0.25 s (http://127.0.0.1:51172)","outcome":"no-answer"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:40.722Z","url":"http://127.0.0.1:51172","method":"GET","body":null,"authorizationPresent":false}
+
+exit_code: 1
+
+
+PROCESS 6
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";try{await l.httpJson('closed port',\"http://127.0.0.1:51174\")}catch(e){console.log(JSON.stringify({message:e.message,outcome:l.requestOutcome(e)}));process.exit(1)}"]
+pid: 26622
+stdout:
+{"message":"closed port unreachable at http://127.0.0.1:51174: connect ECONNREFUSED 127.0.0.1:51174","outcome":"unsent"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:41.037Z","url":"http://127.0.0.1:51174","method":"GET","body":null,"authorizationPresent":false}
+
+exit_code: 1
+
+
+PROCESS 7
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const input={\"amountZat\":\"10000000\",\"destinationAsset\":\"nep141:wrap.near\",\"recipient\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"refundTo\":\"u1notanaddress\",\"confidentiality\":\"public\"};input.amountZat=BigInt(input.amountZat);try{const q=await l.quote(input);console.log(JSON.stringify(q))}catch(e){console.error(e.message);console.log(JSON.stringify({outcome:l.requestOutcome(e)}));process.exit(e instanceof l.SetupRequiredError?2:1)}"]
+pid: 26623
+stdout:
+{"outcome":"refused"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:41.081Z","url":"https://1click.chaindefuser.com/v0/quote","method":"POST","body":{"dry":true,"swapType":"EXACT_INPUT","slippageTolerance":89,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u1notanaddress","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T06:31:49.079Z","quoteWaitingTimeMs":3270,"confidentiality":"public"},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://1click.chaindefuser.com/v0/quote","status":400}
+1Click refused the quote: HTTP 400 {"message":"refundTo is not valid","correlationId":"5d4ec418-2f07-4927-a392-668600381305","timestamp":"2026-10-26T05:31:41.296Z","path":"/v0/quote"}
+
+exit_code: 1
+
+
+PROCESS 8
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const actual=await l.httpJson('1Click','https://1click.chaindefuser.com/v0/quote',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(l.quoteBody({...{\"amountZat\":\"10000000\",\"destinationAsset\":\"nep141:wrap.near\",\"recipient\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"refundTo\":\"u17up2yn75gvmuzxlvzvuez2xwqq52zayalknhwh8h08xpv87g926zsp6zluewtx0ecd88pgevtputa56j7pdrctv2vewnhwgahy5m2f8n\",\"confidentiality\":\"public\"},amountZat:10000000n,refundTo:'u1notanaddress'}))});const s=l.answerSnippet({body:undefined,text:(actual.text+'  \\n\\t').repeat(20)});console.log(JSON.stringify({status:actual.status,snippet:s,length:s.length,hasWhitespaceRuns:/\\s{2,}/.test(s)}));"]
+pid: 26624
+stdout:
+{"status":400,"snippet":"{\"message\":\"refundTo is not valid\",\"correlationId\":\"f598efa2-26d5-4f4f-b500-47dfc2b16bb9\",\"timestamp\":\"2026-10-26T05:31:41.602Z\",\"path\":\"/v0/quote\"} {\"message\":\"refundTo is not valid\",\"correlationId\":","length":200,"hasWhitespaceRuns":false}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:41.390Z","url":"https://1click.chaindefuser.com/v0/quote","method":"POST","body":{"dry":true,"swapType":"EXACT_INPUT","slippageTolerance":79,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u1notanaddress","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T06:42:56.389Z","quoteWaitingTimeMs":3444,"confidentiality":"public"},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://1click.chaindefuser.com/v0/quote","status":400}
+
+exit_code: 0
+

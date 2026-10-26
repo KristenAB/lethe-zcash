@@ -1,0 +1,85 @@
+{
+  "id": "UI-072",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:06:02.440Z",
+  "end": "2026-10-26T04:06:03.844Z",
+  "url": "https://lethe-dashboard.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live dashboard Not done section (1280x800 desktop) - https://lethe-dashboard.vercel.app/",
+  "expected": "Section displays tag \"BLOCKED\" on \"A real swap\" (needs mainnet ZEC and maintainer's sign-off), \"Draft key derivation\" (zakura-one-time-ivk 0.0.1-rc1: draft convention; must not be used to issue live addresses before review.), \"Spending a refund\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] h2",
+      "ok": true,
+      "actual": "Not done",
+      "expected": "Not done"
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] .tag",
+      "ok": true,
+      "actual": "BLOCKED",
+      "expected": "BLOCKED"
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:first-child contains A real swap",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:first-child contains mainnet ZEC and the maintainer's sign-off",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains Draft key derivation",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains zakura-one-time-ivk",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains 0.0.1-rc1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains draft convention; must not be used to issue live addresses before review.",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(3) contains Spending a refund",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

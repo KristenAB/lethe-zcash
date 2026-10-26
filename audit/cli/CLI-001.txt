@@ -1,0 +1,28 @@
+ROW CLI-001
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-001"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
+
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","init"]
+{"exit_code":0,"signal":null,"elapsed_ms":134,"stdout_bytes":152,"stderr_bytes":0}
+STDOUT {
+  "seedCreated": true,
+  "bookCreated": true,
+  "seed": "/tmp/lethe-rerun-q89uwN/wallet/seed",
+  "book": "/tmp/lethe-rerun-q89uwN/wallet/book.json"
+}
+ASSERT init exit 0 PASS
+ASSERT exact init fields and creation booleans PASS
+ASSERT empty account-bound book PASS
+ASSERT directory 0700 and files 0600 PASS
+ASSERT stdout excludes seed bytes PASS
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
+
+HELPER_STDERR
+
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.377
+CLEANUP isolated TMPDIR removed

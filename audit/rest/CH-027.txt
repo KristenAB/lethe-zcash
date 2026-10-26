@@ -1,0 +1,15 @@
+ID: CH-027
+Observed at: 2026-10-26T05:31:50.338Z
+Status: PASS
+Notes: Real zswap swap process refused before any HTTP or broadcast.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/main.js","swap"]
+pid: 37463
+stdout:
+
+stderr:
+BLOCKED: a real swap sends mainnet ZEC to a live 1Click deposit address. Needs Nick’s OK and funds; zakura-one-time-ivk also says not to issue live addresses before review.
+
+exit_code: 3
+

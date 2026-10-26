@@ -1,0 +1,61 @@
+{
+  "id": "UI-049",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:05:22.805Z",
+  "end": "2026-10-26T04:05:24.107Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence Run it section (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Section #try pre code displays CLI instructions including \"pnpm install && pnpm build && pnpm test\", \"pnpm --filter @zswap/cli zswap init\", \"pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near\", \"pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180\", \"ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover <from-height> --lookup\", \"pnpm --filter @zswap/dashboard dev\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#try pre code contains pnpm install && pnpm build && pnpm test",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#try pre code contains pnpm --filter @zswap/cli zswap init",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#try pre code contains pnpm --filter @zswap/cli zswap quote 0.1 nep141:wrap.near",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#try pre code contains pnpm --filter @zswap/cli zswap plan 0.35 nep141:wrap.near --split --window 180",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#try pre code contains ZSWAP_BOOK=/tmp/restored.json pnpm --filter @zswap/cli zswap recover <from-height> --lookup",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#try pre code contains pnpm --filter @zswap/dashboard dev",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

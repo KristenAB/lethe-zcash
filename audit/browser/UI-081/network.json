@@ -1,0 +1,122 @@
+[
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "document",
+    "url": "https://lethe-landing-sooty.vercel.app/app/"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "stylesheet",
+    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "script",
+    "url": "https://lethe-landing-sooty.vercel.app/app/assets/index-R0VNg0N9.js"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "stylesheet",
+    "url": "https://lethe-landing-sooty.vercel.app/app/assets/index-CkVPFEeW.css"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/assets/index-CkVPFEeW.css"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/assets/index-R0VNg0N9.js"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fragment+Mono&display=swap"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/app/testnet.json"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "font",
+    "url": "https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "font",
+    "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/testnet.json"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/app/recovery-seed-only.json"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/recovery-seed-only.json"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/app/pass2.json"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/pass2.json"
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "type": "fetch",
+    "url": "https://lethe-landing-sooty.vercel.app/app/pass3.json"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.gstatic.com/s/fragmentmono/v6/4iCr6K5wfMRRjxp0DA6-2CLnB4NHhqcL71Q.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DaRvzig.woff2"
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "expectedErrorStatus": false,
+    "url": "https://lethe-landing-sooty.vercel.app/app/pass3.json"
+  }
+]

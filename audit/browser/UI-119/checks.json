@@ -1,0 +1,141 @@
+{
+  "id": "UI-119",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:10:57.389Z",
+  "end": "2026-10-26T04:10:58.532Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence All three links measured - Pass 3 batch (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Batch card \"Pass 3\" shows when \"Oct 22, 2026\", score strong.cut \"0\", text \"shared public fields \u00b7 score 75/100\"; fields list shows token \"weak \u00b7 3/3\", all other 8 fields \"clear\"; verdict displays \"no public field links any pair; 3 pair(s) share only weak hints.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 3",
+      "expected": "Pass 3"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 22, 2026",
+      "expected": "Oct 22, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak \u00b7 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

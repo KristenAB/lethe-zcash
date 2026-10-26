@@ -60,7 +60,7 @@ Not done: no real swap (needs mainnet ZEC and sign-off, and the draft crate says
   hint left the shared destination token. Before → after on one model: 0 → 32 → 75. With no book,
   the seed re-derived #8 and #9; #10 lies past the 10-index lookahead because dry quotes leave no
   trace on either chain (the recovery window, recorded in the file).
-- **Tests:** 105 + doc unit and integration tests (11 Rust + doc, 73 cli, 14 mcp, 7 dashboard) and
+- **Tests:** 112 + doc unit and integration tests (Rust 12 + doc, cli 73, mcp 14, dashboard 13) and
   60 browser E2E tests in Google Chrome (30 desktop + 30 mobile), all passing
   (TESTING.md). Review and fixes: `docs/JUDGE-2026-10-21.md`.
 

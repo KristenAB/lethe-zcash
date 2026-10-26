@@ -1,0 +1,14 @@
+ID: MCP-012
+Observed at: 2026-10-26T05:31:22.326Z
+Status: UNTESTED
+Notes: needs ONECLICK_JWT
+
+PROCESS 1
+command: "in-process read-only check"
+pid: n/a
+stdout:
+
+stderr:
+not executed: needs ONECLICK_JWT
+exit_code: not executed
+

@@ -1,0 +1,32 @@
+ID: CH-022
+Observed at: 2026-10-26T05:31:40.540Z
+Status: UNTESTED
+Notes: Real invalid-account and missing-FT-contract queries failed explicitly; non-object HTTP 200 branch needs an actual malformed RPC response. No synthetic RPC answers used.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";try{console.log(JSON.stringify(await l.nearAccountState(\"INVALID?ACCOUNT\",[])))}catch(e){console.error(e.message);process.exit(1)}"]
+pid: 26521
+stdout:
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:39.486Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"INVALID?ACCOUNT"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":400}
+NEAR RPC https://rpc.mainnet.fastnear.com: HTTP 400 {"jsonrpc":"2.0","error":{"name":"REQUEST_VALIDATION_ERROR","cause":{"name":"PARSE_ERROR","info":{"error_message":"Failed parsing args: invalid value: \"INVALID?ACCOUNT\", the Account ID contains an i
+
+exit_code: 1
+
+
+PROCESS 2
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";try{console.log(JSON.stringify(await l.nearAccountState(\"wrap.near\",[\"lethe-nonexistent-contract-20261026.near\"])))}catch(e){console.error(e.message);process.exit(1)}"]
+pid: 26526
+stdout:
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:39.844Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"wrap.near"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:31:40.093Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"call_function","account_id":"lethe-nonexistent-contract-20261026.near","method_name":"ft_balance_of","args_base64":"eyJhY2NvdW50X2lkIjoid3JhcC5uZWFyIn0="}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+NEAR RPC ft_balance_of on lethe-nonexistent-contract-20261026.near: {"name":"HANDLER_ERROR","cause":{"info":{"block_hash":"BLabh6XxrRFbFt9L7SHj5TxahXYKrWVQwEELpBfkC6f5","block_height":221644755,"requested_account_id":"lethe-nonexistent-contract-20261026.near"},"name":
+
+exit_code: 1
+

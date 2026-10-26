@@ -1,0 +1,34 @@
+ROW CLI-068
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-068"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","report"]
+STDOUT
+{
+  "swaps": 0,
+  "pairs": 0,
+  "links": [],
+  "sharedFields": 0,
+  "strongLinkedPairs": 0,
+  "weakOnlyPairs": 0,
+  "score": 100,
+  "method": "score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.",
+  "verdict": "one swap: nothing in the batch to link it to",
+  "outside": "Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards."
+}
+STDERR
+EXIT_CODE 0
+ELAPSED_MS 117
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.268
+CLEANUP: isolated TMPDIR removed after command.

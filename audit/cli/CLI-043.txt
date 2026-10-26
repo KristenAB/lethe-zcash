@@ -1,0 +1,30 @@
+ROW CLI-043
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-043"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
+
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/vitest","run","test/book-durability.test.ts","-t","a reservation is fsynced"]
+{"exit_code":0,"signal":null,"elapsed_ms":418,"stdout_bytes":367,"stderr_bytes":0}
+STDOUT RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli
+
+ ✓ test/book-durability.test.ts (1 test) 42ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:41:09
+   Duration  184ms (transform 34ms, setup 0ms, collect 40ms, tests 42ms, environment 0ms, prepare 37ms)
+ASSERT selected existing runtime test exit 0 PASS
+ASSERT throwaway seed and book modes 0600 PASS
+ASSERT durability instrumented reservation advances once with mode 0600 PASS
+ASSERT runtime order: fsync temporary file, rename, fsync directory, return address PASS
+{"command":"IndexBook.reserve(throwawaySeed)","exit_code":0,"filesystem_trace":["fsync file","rename","fsync directory","reserve returned"]}
+ASSERTIONS PASS
+{"child_exit_codes":[0]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
+
+HELPER_STDERR
+
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.591
+CLEANUP isolated TMPDIR removed

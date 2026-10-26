@@ -1,0 +1,57 @@
+{
+  "id": "UI-083",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:06:24.853Z",
+  "end": "2026-10-26T04:06:25.955Z",
+  "url": "http://127.0.0.1:8431/",
+  "viewport": "375x812",
+  "flow": "Local landing overview hero (375x812 mobile) - http://127.0.0.1:8431/",
+  "expected": "Page renders without horizontal scroll (scrollWidth <= innerWidth, sw <= 375); CTA buttons wrap into stacked/auto-width layout; typography scales to viewport; no console errors.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".hero within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".hero bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "DIV",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

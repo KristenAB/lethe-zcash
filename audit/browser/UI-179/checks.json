@@ -1,0 +1,48 @@
+{
+  "id": "UI-179",
+  "status": "FAIL",
+  "notes": "Expected denial status codes matched, but Chrome emitted resource-load console errors; strict rule makes the item FAIL.",
+  "start": "2026-10-26T04:10:12.410Z",
+  "end": "2026-10-26T04:10:13.656Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Dev server security: deny repo root README.md - http://127.0.0.1:5182/",
+  "expected": "Browser fetch to /@fs/<repo>/README.md returns HTTP 403 Restricted.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "/@fs//Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/README.md",
+          "status": 403,
+          "statusText": "Forbidden"
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        403
+      ],
+      "expected": [
+        403
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": false,
+      "actual": [
+        "console: Failed to load resource: the server responded with a status of 403 (Forbidden) http://127.0.0.1:5182/@fs//Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t4/README.md"
+      ],
+      "expected": []
+    }
+  ]
+}

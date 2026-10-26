@@ -1,0 +1,58 @@
+ROW CLI-067
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/vitest", "run", "test/decorrelate.test.ts", "-t", "is random but never|a split is sent in a random order"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+
+ RUN  v3.2.7 /Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli
+
+ ✓ test/decorrelate.test.ts (14 tests | 12 skipped) 21ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 12 skipped (14)
+   Start at  10:05:14
+   Duration  155ms (transform 38ms, setup 0ms, collect 43ms, tests 21ms, environment 0ms, prepare 25ms)
+
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.36
+CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/decorrelate.ts SHA256 b345ee2dedaf381196064d18f94ebbcb8ec59c6d020ca8b7115ec06690ee9b69
+119: /**
+120:  * Random send offsets (seconds from now) for `n` swaps inside `windowS`, never closer than
+121:  * `minGapS` to each other: n uniform points in the window shrunk by the gaps, sorted, then spread.
+122:  */
+123: export function delaySchedule(n: number, opts: { windowS: number; minGapS?: number; rng?: Rng }): { offsetsS: number[]; tradeOff: string } {
+124:   const minGapS = opts.minGapS ?? 120;
+125:   const rng = opts.rng ?? cryptoRng;
+126:   if (!Number.isInteger(n) || n < 1) throw new Error('n must be a positive whole number');
+127:   const free = opts.windowS - (n - 1) * minGapS;
+128:   if (free < 0) throw new Error(`a ${opts.windowS} s window cannot hold ${n} swaps ${minGapS} s apart (needs at least ${(n - 1) * minGapS} s)`);
+129:   const u = Array.from({ length: n }, () => Math.floor(rng() * (free + 1))).sort((a, b) => a - b);
+130:   const offsetsS = u.map((x, i) => x + i * minGapS);
+131:   return { offsetsS, tradeOff: `the last swap leaves up to ${Math.round(opts.windowS / 60)} min later; each one is quoted at its own time, so prices move between them, and the wallet must stay online (or be re-run) to send them` };
+132: }
+133:
+134: export interface PlannedSwap {
+135:   amountZat: bigint | string;
+136:   /** when the quote request goes out (ms since epoch, or a Date / ISO string) */
+137:   at: number | string | Date;
+138:   recipient: string;
+139:   destinationAsset: string;
+140:   refundTo?: string;
+141:   /** the same ONECLICK_JWT goes with the request: 1Click can link the swaps privately */
+142:   jwt?: boolean;
+143:   /**
+144:    * the client's own request parameters that are public in every request: slippage, solver wait and the
+145:    * deadline's offset from the request time (whole minutes). Known only for real quotes.
+
+STDERR
+
+EXIT_CODE 0

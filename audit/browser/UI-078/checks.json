@@ -1,0 +1,57 @@
+{
+  "id": "UI-078",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:54.810Z",
+  "end": "2026-10-26T05:31:56.106Z",
+  "url": "https://lethe-landing-sooty.vercel.app/app/",
+  "viewport": "375x812",
+  "flow": "Live landing host /app/ mobile render (375x812 mobile) - https://lethe-landing-sooty.vercel.app/app/",
+  "expected": "Dashboard on landing host renders without horizontal overflow; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": ".hero within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".hero bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "DIV",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

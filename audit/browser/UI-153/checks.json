@@ -1,0 +1,259 @@
+{
+  "id": "UI-153",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:33:09.137Z",
+  "end": "2026-10-26T05:33:10.441Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Local dashboard Pass 2 & Pass 3 parts lists (1280x800 desktop) - http://127.0.0.1:5182/",
+  "expected": "Pass 2 parts list displays 3 parts: part 1 \"0.2 ZEC at +0 s → 50.7011 wNEAR\" (recipient 66e730c484…, refundTo u1rezfhdwv…, found from the seed alone); part 2 \"0.1 ZEC at +138 s → 25.324 wNEAR\" (recipient 3e33948911…, refundTo u1ehzec56h…, found from the seed alone); part 3 \"0.05 ZEC at +278 s → 12.6482 wNEAR\" (recipient 4afc1f2c07…, refundTo u1z4sgt6hu…, found from the seed alone); Pass 2 note contains \"3 parts of a 1-2-5 split\" and \"The parts went out largest first\". Pass 3 parts list is visible and displays 3 parts with request parameters: part 8 \"0.2 ZEC at +0 s → 49.5363 wNEAR · slippage 88 bps, wait 3.233 s, deadline +75 min · found from the seed alone\"; part 9 \"0.05 ZEC at +677 s → 12.3519 wNEAR · slippage 73 bps, wait 3.104 s, deadline +90 min · found from the seed alone\"; part 10 \"0.1 ZEC at +1452 s → 24.7551 wNEAR · slippage 80 bps, wait 2.657 s, deadline +87 min · not found from the seed\"; Pass 3 note states \"Score 0 → 32 → 75 on the same model.\" and windowNote: \"With no book and no used account on either chain (dry quotes deliver nothing and refund nothing), the lookahead stays at indices 0..9, so #10 is not found from the seed alone. A delivered swap or a refund inside the window would extend it; the book, kept, has no such limit. This is the recovery window README Honest limits describes.\". Sweeping callout contains \"Sweeping re-links. Moving several per-swap accounts into one account shows them all paying it, on chain.\" and names `zswap sweep-plan`; a token-only account needs NEAR for gas and a top-up links it to the paying account.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "ul[aria-label=\"Pass 2 swaps\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "ul[aria-label=\"Pass 2 swaps\"] visible",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 output exact 50.7011",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 0",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": "part recipient title 0",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "part 2 send exact 0.1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 output exact 25.324",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 1",
+      "ok": true,
+      "actual": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+      "expected": "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j"
+    },
+    {
+      "label": "part recipient title 1",
+      "ok": true,
+      "actual": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+      "expected": "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada"
+    },
+    {
+      "label": "part 3 send exact 0.05",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 output exact 12.6482",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part refund title 2",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": "part recipient title 2",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "1-2-5 split note",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "largest first note",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "ul[aria-label=\"Pass 3 swaps\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "ul[aria-label=\"Pass 3 swaps\"] visible",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 send exact 0.2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 output exact 49.5363",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 1 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 send exact 0.05",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 output exact 12.3519",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 2 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 send exact 0.1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 output exact 24.7551",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part 3 recovery",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "part request parameters 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "score progression",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery window exact",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#links-h + .sub ~ .callout contains Sweeping re-links. Moving several per-swap accounts into one account shows them all paying it, on chain.",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#links-h + .sub ~ .callout contains zswap sweep-plan",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#links-h + .sub ~ .callout contains A token-only account needs NEAR for gas",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#links-h + .sub ~ .callout contains a top-up from your own account links it too.",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

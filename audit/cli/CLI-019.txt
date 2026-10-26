@@ -1,0 +1,40 @@
+ROW CLI-019
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-audit-row.mts", "CLI-019"]
+MODE execution
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+
+STDOUT
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t10/packages/cli/src/main.ts","quote","0.1","not-a-listed-asset"]
+STDOUT
+STDERR
+1Click does not list not-a-listed-asset
+EXIT_CODE 1
+ELAPSED_MS 569
+{
+  "requests": []
+}
+ASSERTIONS PASS
+CLEANUP throwaway row directory removed
+
+STDERR
+
+EXIT_CODE 0
+ELAPSED_SECONDS 0.73
+CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+
+STDERR
+
+EXIT_CODE 0

@@ -1,0 +1,105 @@
+{
+  "id": "UI-124",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:08:40.139Z",
+  "end": "2026-10-26T04:08:41.379Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "375x812",
+  "flow": "Local evidence parts lists (375x812 mobile) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Pass 2 and Pass 3 part row items wrap into multiple lines without overflowing viewport; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#pass2-rows li,#pass3-rows li within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#pass2-rows li,#pass3-rows li bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        },
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        },
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        },
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        },
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        },
+        {
+          "tag": "LI",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        }
+      ]
+    },
+    {
+      "label": "#pass2-rows within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#pass2-rows bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "UL",
+          "left": 16,
+          "right": 359,
+          "width": 343
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

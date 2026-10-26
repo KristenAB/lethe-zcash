@@ -1,0 +1,21 @@
+ID: CH-016
+Observed at: 2026-10-26T05:11:56.009Z
+Status: PASS
+Notes: 
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-qdoxFH/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/cli/dist/lib.js\";const raw=await l.httpJson('NEAR RPC',l.NEAR_RPC,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'query',params:{finality:'final',request_type:'view_account',account_id:'wrap.near'}})});const state=await l.nearAccountState('wrap.near');console.log(JSON.stringify({rawStatus:raw.status,rawAmount:raw.body.result.amount,state}));"]
+pid: 72886
+stdout:
+{"rawStatus":200,"rawAmount":"34680737757668891586065540425308","state":{"account_id":"wrap.near","exists":true,"amountYocto":"34680737757668891586065540425308","ft":{},"ftIndexed":["wrap.near","kusama-airdrop.near","shit.tkn.near","usdt.tether-token.near","token.sweat","nearrewards.near","usmeme.tg","lonkrewards.near","fexu.tkn.near","angl.tkn.near","fehu.tkn.near","gp.token0.near","17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1","wnear.gra-fun.near","wrap.gra-fun.near"]}}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:11:55.363Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"wrap.near"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:11:55.621Z","url":"https://rpc.mainnet.fastnear.com","method":"POST","body":{"jsonrpc":"2.0","id":1,"method":"query","params":{"finality":"final","request_type":"view_account","account_id":"wrap.near"}},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://rpc.mainnet.fastnear.com","status":200}
+AUDIT_HTTP {"at":"2026-10-26T05:11:55.793Z","url":"https://api.fastnear.com/v1/account/wrap.near/ft","method":"GET","body":null,"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://api.fastnear.com/v1/account/wrap.near/ft","status":200}
+
+exit_code: 0
+

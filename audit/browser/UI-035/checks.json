@@ -1,0 +1,141 @@
+{
+  "id": "UI-035",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:31.544Z",
+  "end": "2026-10-26T05:31:32.767Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence All three links measured - First run batch (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Batch card \"First run\" shows when \"Oct 20, 2026\", score strong.links \"2\", text \"shared public fields · score 0/100\"; fields list shows recipient \"strong · 3/3\", same minute \"strong · 3/3\", client fingerprint \"weak · 3/3\", token \"weak · 1/3\", other 5 fields \"clear\"; verdict displays \"3 of 3 pairs linked by recipient, same minute.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "First run",
+      "expected": "First run"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 20, 2026",
+      "expected": "Oct 20, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "2",
+      "expected": "2"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "links",
+      "expected": "links"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong · 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong · 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong · 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong · 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "3 of 3 pairs linked by recipient, same minute.",
+      "expected": "3 of 3 pairs linked by recipient, same minute."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

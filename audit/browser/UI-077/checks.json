@@ -1,0 +1,843 @@
+{
+  "id": "UI-077",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:31:52.503Z",
+  "end": "2026-10-26T05:31:54.803Z",
+  "url": "https://lethe-landing-sooty.vercel.app/app/",
+  "viewport": "1280x800",
+  "flow": "Live landing host /app/ desktop render (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/app/",
+  "expected": "GET /app/ and relative testnet.json, pass2.json, pass3.json and recovery-seed-only.json return HTTP 200. Eyebrow displays \"pass 2 · Oct 21, 2026\"; h1 displays \"Every swap its own refund address and recipient.\"; hero renders widget showing swap 1 (0.2 ZEC, 50.7011 wNEAR, key #5 u1rezfhdwv…, account #5 66e730c4…); facts dl shows \"Sent at: +0 s\", \"Recipient from the seed alone: found again, no index book\" (cut), \"Recipient on NEAR: not created (dry quote)\", \"Request: public\", \"Signature: ed25519:4NAEr3…STw5\"; ol.river has 3 button rows; note displays \"Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.\". Sections show \"Before: the first run\", \"All three links, measured\" with First run 0/100, Pass 2 32/100 and Pass 3 75/100, four recovery payments of 30,000/31,000/32,000/25,000 zat, and \"BLOCKED\" on \"A real swap\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".eyebrow",
+      "ok": true,
+      "actual": "pass 2 · Oct 21, 2026",
+      "expected": "pass 2 · Oct 21, 2026"
+    },
+    {
+      "label": "h1",
+      "ok": true,
+      "actual": "Every swap its own refund address and recipient.",
+      "expected": "Every swap its own refund address and recipient."
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": "sent at",
+      "ok": true,
+      "actual": "+0 s",
+      "expected": "+0 s"
+    },
+    {
+      "label": "facts values",
+      "ok": true,
+      "actual": [
+        "+0 s",
+        "found again, no index book",
+        "not created (dry quote)",
+        "public",
+        "ed25519:4NAEr3…STw5"
+      ],
+      "expected": [
+        "+0 s",
+        "found again, no index book",
+        "not created (dry quote)",
+        "public",
+        "ed25519:4NAEr3…STw5"
+      ]
+    },
+    {
+      "label": "facts labels",
+      "ok": true,
+      "actual": [
+        "Sent at",
+        "Recipient from the seed alone",
+        "Recipient on NEAR",
+        "Request",
+        "Signature"
+      ],
+      "expected": [
+        "Sent at",
+        "Recipient from the seed alone",
+        "Recipient on NEAR",
+        "Request",
+        "Signature"
+      ]
+    },
+    {
+      "label": ".facts dd.cut @class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": ".river button count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": ".note",
+      "ok": true,
+      "actual": "Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved.",
+      "expected": "Pass 2: real 1Click dry quotes, each part with its own refund address and its own NEAR recipient. No deposit address was created and no funds moved."
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "https://lethe-landing-sooty.vercel.app/app/testnet.json",
+          "status": 200,
+          "statusText": ""
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "https://lethe-landing-sooty.vercel.app/app/pass2.json",
+          "status": 200,
+          "statusText": ""
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "https://lethe-landing-sooty.vercel.app/app/pass3.json",
+          "status": 200,
+          "statusText": ""
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "browser status-only fetches",
+      "ok": true,
+      "actual": [
+        {
+          "path": "https://lethe-landing-sooty.vercel.app/app/recovery-seed-only.json",
+          "status": 200,
+          "statusText": ""
+        }
+      ]
+    },
+    {
+      "label": "fetch status codes",
+      "ok": true,
+      "actual": [
+        200
+      ],
+      "expected": [
+        200
+      ]
+    },
+    {
+      "label": "body contains Before: the first run",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "First run",
+      "expected": "First run"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 20, 2026",
+      "expected": "Oct 20, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "2",
+      "expected": "2"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "links",
+      "expected": "links"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong · 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong · 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "strong · 3/3"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "strong · 3/3"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 1/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "3 of 3 pairs linked by recipient, same minute.",
+      "expected": "3 of 3 pairs linked by recipient, same minute."
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 2",
+      "expected": "Pass 2"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 21, 2026",
+      "expected": "Oct 21, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "weak · 3/3"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "weak · 3/3"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "weak · 3/3"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "weak · 3/3"
+        ],
+        [
+          "client fingerprint",
+          "weak · 3/3"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
+    },
+    {
+      "label": "batch title",
+      "ok": true,
+      "actual": "Pass 3",
+      "expected": "Pass 3"
+    },
+    {
+      "label": "batch when",
+      "ok": true,
+      "actual": "Oct 22, 2026",
+      "expected": "Oct 22, 2026"
+    },
+    {
+      "label": "batch shared",
+      "ok": true,
+      "actual": "0",
+      "expected": "0"
+    },
+    {
+      "label": "score class",
+      "ok": true,
+      "actual": "cut",
+      "expected": "cut"
+    },
+    {
+      "label": "score text",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "all nine fields",
+      "ok": true,
+      "actual": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ],
+      "expected": [
+        [
+          "refundTo",
+          "clear"
+        ],
+        [
+          "recipient",
+          "clear"
+        ],
+        [
+          "amount",
+          "clear"
+        ],
+        [
+          "same minute",
+          "clear"
+        ],
+        [
+          "within 10 min",
+          "clear"
+        ],
+        [
+          "token",
+          "weak · 3/3"
+        ],
+        [
+          "split pattern",
+          "clear"
+        ],
+        [
+          "client fingerprint",
+          "clear"
+        ],
+        [
+          "partner token",
+          "clear"
+        ]
+      ]
+    },
+    {
+      "label": "verdict",
+      "ok": true,
+      "actual": "no public field links any pair; 3 pair(s) share only weak hints.",
+      "expected": "no public field links any pair; 3 pair(s) share only weak hints."
+    },
+    {
+      "label": "section[aria-labelledby=\"rec-h\"] .sub contains from block 4,522,708 (20 blocks)",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "four recovery rows",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "recovery label 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 0",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 0",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b",
+      "expected": "https://testnet.zecblock.com/tx/e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b"
+    },
+    {
+      "label": "explorer target 0",
+      "ok": true,
+      "actual": "_blank",
+      "expected": "_blank"
+    },
+    {
+      "label": "explorer rel 0",
+      "ok": true,
+      "actual": "noreferrer",
+      "expected": "noreferrer"
+    },
+    {
+      "label": "recovery label 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 1",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100",
+      "expected": "https://testnet.zecblock.com/tx/9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100"
+    },
+    {
+      "label": "explorer target 1",
+      "ok": true,
+      "actual": "_blank",
+      "expected": "_blank"
+    },
+    {
+      "label": "explorer rel 1",
+      "ok": true,
+      "actual": "noreferrer",
+      "expected": "noreferrer"
+    },
+    {
+      "label": "recovery label 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 2",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 2",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899",
+      "expected": "https://testnet.zecblock.com/tx/4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899"
+    },
+    {
+      "label": "explorer target 2",
+      "ok": true,
+      "actual": "_blank",
+      "expected": "_blank"
+    },
+    {
+      "label": "explorer rel 2",
+      "ok": true,
+      "actual": "noreferrer",
+      "expected": "noreferrer"
+    },
+    {
+      "label": "recovery label 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "recovery value 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "found by 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "height 3",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "explorer href 3",
+      "ok": true,
+      "actual": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c",
+      "expected": "https://testnet.zecblock.com/tx/bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"
+    },
+    {
+      "label": "explorer target 3",
+      "ok": true,
+      "actual": "_blank",
+      "expected": "_blank"
+    },
+    {
+      "label": "explorer rel 3",
+      "ok": true,
+      "actual": "noreferrer",
+      "expected": "noreferrer"
+    },
+    {
+      "label": "section[aria-labelledby=\"rec-h\"] .callout",
+      "ok": true,
+      "actual": "From the seed alone. The same range scanned with no index book, as a restored wallet would (Oct 21, 2026): 13 refund keys (lookahead 10), 23 blocks, 4 of 4 payments found, each by its own key.",
+      "expected": "From the seed alone. The same range scanned with no index book, as a restored wallet would (Oct 21, 2026): 13 refund keys (lookahead 10), 23 blocks, 4 of 4 payments found, each by its own key."
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] h2",
+      "ok": true,
+      "actual": "Not done",
+      "expected": "Not done"
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] .tag",
+      "ok": true,
+      "actual": "BLOCKED",
+      "expected": "BLOCKED"
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:first-child contains A real swap",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:first-child contains mainnet ZEC and the maintainer's sign-off",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains Draft key derivation",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains zakura-one-time-ivk",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains 0.0.1-rc1",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(2) contains draft convention; must not be used to issue live addresses before review.",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "section[aria-labelledby=\"nd-h\"] li:nth-child(3) contains Spending a refund",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+ID: CH-024
+Observed at: 2026-10-26T05:12:33.425Z
+Status: PASS
+Notes: Read-only recorded run; packages/examples never executed.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--input-type=module","-e","import fs from 'node:fs';import assert from 'node:assert/strict';const d=JSON.parse(fs.readFileSync(\"deployments/testnet.json\",'utf8'));assert.equal(d.quotes.length,3);assert.equal(new Set(d.quotes.map(q=>q.refundTo)).size,3);assert.equal(d.refundToDistinct,true);assert.ok(d.quotes.every(q=>q.quoteRequest.dry===true&&q.confidentiality==='public'));assert.equal(d.txs.fund,'c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54');for(const[label,txid,value]of [[\"refund-0\",\"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b\",30000],[\"refund-1\",\"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100\",31000],[\"refund-2\",\"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899\",32000],[\"account\",\"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c\",25000]]){assert.equal(d.txs[label],txid);const e=d.recovery.expect.find(x=>x.label===label);assert.equal(e.txid,txid);assert.equal(e.value,value);assert.equal(e.ok,true)}console.log(JSON.stringify({publicDryQuotes:d.quotes.map(q=>({index:q.index,dry:q.quoteRequest.dry,confidentiality:q.confidentiality,refundTo:q.refundTo})),refundToDistinct:d.refundToDistinct,txs:d.txs,expect:d.recovery.expect}));"]
+pid: 84276
+stdout:
+{"publicDryQuotes":[{"index":0,"dry":true,"confidentiality":"public","refundTo":"u1hvfvml947k7gp276heccu656jyj3ylu7e33838pycwjpyd67t3zhdacwkjsers5ng3dt5xyt8z3606ysqdraa9vpyfyu7yuptcpljanr"},{"index":1,"dry":true,"confidentiality":"public","refundTo":"u1rfk04g66dtagn8n5634xmdamt9hlfyyj94ws2rgdhdvfhlezuwad0qu40lcztklza4xkmkuz6ngdhhd0eqxnn4pkx5kphuamc5498p4q"},{"index":2,"dry":true,"confidentiality":"public","refundTo":"u1mg67mpgl2ptyermrvg4cp0jhhhvkp8g43hxjr6g720kzn2mhckcdm5jj8833ex05ht5eyc5n60ya7vsu04j2cereshz3krkgnvn0dmhx"}],"refundToDistinct":true,"txs":{"fund":"c1bbb26774444809fdd8857cda9fd70114ed7f7d4bb55cb7bd12218190398f54","refund-0":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","refund-1":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","refund-2":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","account":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c"},"expect":[{"label":"refund-0","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","foundBy":["refund-0"],"value":30000,"height":4522718,"ok":true},{"label":"refund-1","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","foundBy":["refund-1"],"value":31000,"height":4522723,"ok":true},{"label":"refund-2","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","foundBy":["refund-2"],"value":32000,"height":4522723,"ok":true},{"label":"account","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","foundBy":["account"],"value":25000,"height":4522726,"ok":true}]}
+
+stderr:
+
+exit_code: 0
+

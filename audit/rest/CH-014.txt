@@ -1,0 +1,15 @@
+ID: CH-014
+Observed at: 2026-10-26T05:11:54.016Z
+Status: PASS
+Notes: Authorized read-only deployment-record exception; no seed was loaded or regenerated.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--input-type=module","-e","import fs from 'node:fs';import assert from 'node:assert/strict';const d=JSON.parse(fs.readFileSync(\"deployments/recovery-seed-only.json\",'utf8'));assert.equal(d.from,4522708);assert.equal(d.to,4522730);assert.deepEqual(d.keysScanned,['account',...Array.from({length:13},(_,i)=>'refund-'+i)]);const expected=[[\"refund-0\",\"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b\",30000],[\"refund-1\",\"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100\",31000],[\"refund-2\",\"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899\",32000],[\"account\",\"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c\",25000]];for(const[label,txid,value]of expected){const h=d.hits.filter(x=>x.txid===txid);assert.equal(h.length,1);assert.equal(h[0].key,label);assert.equal(h[0].value,value)}console.log(JSON.stringify({from:d.from,to:d.to,blocks:d.blocks,gap:d.gap,keysScanned:d.keysScanned,hits:d.hits,note:d.note}));"]
+pid: 72883
+stdout:
+{"from":4522708,"to":4522730,"blocks":23,"gap":10,"keysScanned":["account","refund-0","refund-1","refund-2","refund-3","refund-4","refund-5","refund-6","refund-7","refund-8","refund-9","refund-10","refund-11","refund-12"],"hits":[{"height":4522718,"key":"refund-0","pool":"Ironwood","txid":"e08cfef22bb60461ac9e01c5e199db5319a9c7782f7e62d235bb1c1fc55cce2b","value":30000},{"height":4522723,"key":"refund-1","pool":"Ironwood","txid":"9404c711fc333f495035f6cedcf7680f4ef55602277115bb0593a0d962706100","value":31000},{"height":4522723,"key":"refund-2","pool":"Ironwood","txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","value":32000},{"height":4522726,"key":"account","pool":"Ironwood","txid":"bb82609ad603233c6bc1ee65f3cb5e25f122f42d7512e84f0227f6ae6fc7636c","value":25000}],"note":"zswap recover with the demo seed and NO index book (a wallet restored from its seed): gap-limit lookahead of 10 past the highest hit. Same demo seed as testnet.json; never printed."}
+
+stderr:
+
+exit_code: 0
+

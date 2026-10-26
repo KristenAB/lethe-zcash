@@ -1,0 +1,21 @@
+ROW CLI-003
+MODE runtime execution (key-bearing stdout redacted in helper before evidence)
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx", "/tmp/lethe-rerun.mts", "CLI-003"]
+RUST_BINARIES {"/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/wallet-core/target/release/zswap-keys": "e165b2517ae93bad49ee7c03ac443ca652990b16d1783a1297881df195de5050", "/Volumes/Extreme SSD/Projects/grokbot/projects/zec-unlinkable-swaps/packages/scan/target/release/zpay-verify": "5563ca744006691f61c469205e54fa263f6b575fcb20f4b1172604696d59238d"}
+SOURCE_PROVENANCE source, manifests, locks and Rust integration test source match build checkout byte-for-byte
+
+COMMAND ["/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/node_modules/.bin/tsx","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t17/packages/cli/src/main.ts","init"]
+{"exit_code":2,"signal":null,"elapsed_ms":108,"stdout_bytes":0,"stderr_bytes":254}
+STDERR Setup required: index book for the existing seed /tmp/lethe-rerun-ZzTRUa/seed (expected at /tmp/lethe-rerun-ZzTRUa/book.json. Run `zswap recover <birthday-height>` to rebuild it from the chain, or `zswap init --new` if this seed has never quoted a swap)
+ASSERT exit code 2 PASS
+ASSERT stderr prefix Setup required: index book for the existing seed PASS
+ASSERT recovery instruction and no replacement book PASS
+ASSERTIONS PASS
+{"child_exit_codes":[2]}
+CLEANUP throwaway row directory, seed, book, raw captures and credentials removed
+
+HELPER_STDERR
+
+HELPER_EXIT_CODE 0
+ELAPSED_SECONDS 0.242
+CLEANUP isolated TMPDIR removed

@@ -1,0 +1,49 @@
+{
+  "id": "UI-024",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:04:09.138Z",
+  "end": "2026-10-26T04:04:10.411Z",
+  "url": "https://lethe-landing-sooty.vercel.app/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Live evidence credit block (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/evidence.html",
+  "expected": "Paragraph #credit links to \"https://zakura.com/engineering/quantum-unlinkability\" with text \"Zakura's quantum-unlinkability proposal\", names crate \"zakura-one-time-ivk\", states \"Lethe adds a NEAR recipient per swap from the same seed, recovery from the seed alone on both chains, a locked index book that refuses a reused recipient, opt-in amount and timing decorrelation with a linkability report, and MCP tools.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#credit a @href",
+      "ok": true,
+      "actual": "https://zakura.com/engineering/quantum-unlinkability",
+      "expected": "https://zakura.com/engineering/quantum-unlinkability"
+    },
+    {
+      "label": "#credit a",
+      "ok": true,
+      "actual": "Zakura's quantum-unlinkability proposal",
+      "expected": "Zakura's quantum-unlinkability proposal"
+    },
+    {
+      "label": "#credit contains zakura-one-time-ivk",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#credit contains Lethe adds a NEAR recipient per swap from the same seed, recovery from the seed alone on both chains, a locked index book that refuses a reused recipient, opt-in amount and timing decorrelation with a linkability report, and MCP tools.",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

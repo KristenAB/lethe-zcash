@@ -1,0 +1,173 @@
+{
+  "id": "UI-104",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:34.859Z",
+  "end": "2026-10-26T05:32:36.128Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence hero & pass-2 widget with river (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Document title is \"Lethe evidence: a new refund address and recipient for every swap\"; h1 displays \"A new refund address and recipient for every swap.\"; hero widget shows pass 2 swap 1 (send 0.2 ZEC, quoted 50.7011 wNEAR, key #5 u1rezfhdwv…, account #5 66e730c4…); ol.river is present with 3 list items showing addresses for keys #5, #6, #7; paragraph .note shows \"A replay of pass 2: 0.35 ZEC split into 3 parts, 3 real 1Click dry quotes, each with its own one-time refund address and its own NEAR implicit recipient. No deposit address was created and no funds moved.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "title",
+      "ok": true,
+      "actual": "Lethe evidence: a new refund address and recipient for every swap",
+      "expected": "Lethe evidence: a new refund address and recipient for every swap"
+    },
+    {
+      "label": "h1",
+      "ok": true,
+      "actual": "A new refund address and recipient for every swap.",
+      "expected": "A new refund address and recipient for every swap."
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +0 s · request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "river classes",
+      "ok": true,
+      "actual": [
+        "now",
+        "ahead",
+        "ahead"
+      ],
+      "expected": [
+        "now",
+        "ahead",
+        "ahead"
+      ]
+    },
+    {
+      "label": "river state",
+      "ok": true,
+      "actual": [
+        "in use",
+        "",
+        ""
+      ],
+      "expected": [
+        "in use",
+        "",
+        ""
+      ]
+    },
+    {
+      "label": ".river li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "river refund addresses",
+      "ok": true,
+      "actual": [
+        "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+        "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+        "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+      ],
+      "expected": [
+        "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+        "u1ehzec56hd3jk437ef3yshamujsxjv64llv9uxpkgtwxn9geldcp5379y0phmj4pzexz6mjel6a6qflhuzytd7860lxj2r64dqupft83j",
+        "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+      ]
+    },
+    {
+      "label": "river recipients",
+      "ok": true,
+      "actual": [
+        "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+        "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+        "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+      ],
+      "expected": [
+        "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+        "3e339489115101ecea8e60e0e4396e8b915c68344beed76f77db4e0c8d332ada",
+        "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+      ]
+    },
+    {
+      "label": ".note",
+      "ok": true,
+      "actual": "A replay of pass 2: 0.35 ZEC split into 3 parts, 3 real 1Click dry quotes, each with its own one-time refund address and its own NEAR implicit recipient. No deposit address was created and no funds moved.",
+      "expected": "A replay of pass 2: 0.35 ZEC split into 3 parts, 3 real 1Click dry quotes, each with its own one-time refund address and its own NEAR implicit recipient. No deposit address was created and no funds moved."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

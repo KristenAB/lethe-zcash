@@ -1,0 +1,1 @@
+{"txid":"4a7dd0ece207533d9ce63bb1c654ce34106b178bc97924ee827994f77076d899","ok":true,"paid_zat":32000,"exit_code":0}

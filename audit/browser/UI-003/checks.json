@@ -1,0 +1,123 @@
+{
+  "id": "UI-003",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:30:35.834Z",
+  "end": "2026-10-26T05:30:38.252Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing pass-2 hero widget default state (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "Widget role=\"region\" aria-label=\"Swap widget: pass 2 dry quotes\" is visible; header shows \"Pass 2 · Oct 21, 2026\"; steps group has 3 buttons with button 1 aria-pressed=\"true\"; send amount shows \"0.2\" ZEC; quoted out amount shows \"50.7011\" wNEAR; refundTo label shows \"key #5\" with address \"u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur\"; recipient label shows \"account #5\" with address \"66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a\"; footer shows \"sent at +0 s · request: public\" and signature short \"ed25519:4NAEr3sD…STw5\"; note below widget shows \"A replay of 3 real 1Click dry quotes. No deposit address was created and no funds moved.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "widget visible",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".w-head > span",
+      "ok": true,
+      "actual": "Pass 2 · Oct 21, 2026",
+      "expected": "Pass 2 · Oct 21, 2026"
+    },
+    {
+      "label": ".steps button count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": "account label",
+      "ok": true,
+      "actual": "account #5",
+      "expected": "account #5"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur",
+      "expected": "u1rezfhdwv2jrzmtxuc486v29ulusyyc09kwrpl88swm0mxl92f7xs54cj5ztlhwp09sevchv8efqegn0r0wz3ahhrk5j3qprv2gvgkgur"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a",
+      "expected": "66e730c48474137916df9a8d0ccaae9714103dbe06f6f2c0cbd2c03bcba74e1a"
+    },
+    {
+      "label": "send amount exact",
+      "ok": true,
+      "actual": "0.2",
+      "expected": "0.2"
+    },
+    {
+      "label": "output amount exact",
+      "ok": true,
+      "actual": "50.7011",
+      "expected": "50.7011"
+    },
+    {
+      "label": "asset labels",
+      "ok": true,
+      "actual": [
+        "ZEC",
+        "wNEAR"
+      ],
+      "expected": [
+        "ZEC",
+        "wNEAR"
+      ]
+    },
+    {
+      "label": "only active step pressed",
+      "ok": true,
+      "actual": [
+        "true",
+        "false",
+        "false"
+      ],
+      "expected": [
+        "true",
+        "false",
+        "false"
+      ]
+    },
+    {
+      "label": ".w-foot contains sent at +0 s · request: public",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".w-foot .mono",
+      "ok": true,
+      "actual": "ed25519:4NAEr3sD…STw5",
+      "expected": "ed25519:4NAEr3sD…STw5"
+    },
+    {
+      "label": ".note",
+      "ok": true,
+      "actual": "A replay of 3 real 1Click dry quotes. No deposit address was created and no funds moved.",
+      "expected": "A replay of 3 real 1Click dry quotes. No deposit address was created and no funds moved."
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

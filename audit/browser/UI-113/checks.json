@@ -1,0 +1,59 @@
+{
+  "id": "UI-113",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:53.286Z",
+  "end": "2026-10-26T05:32:54.523Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "1280x800",
+  "flow": "Local evidence two wallets section (1280x800 desktop) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Section #forgets displays 2 columns: \"A wallet that reuses its address\" ol#reused lists mainnet address \"u1ces8sa6vedcm…9qrg7fkm\" 3 times; \"Lethe\" ol#onetime lists 3 distinct one-time refund addresses (\"u1hvfvml947k7g…tcpljanr\", \"u1rfk04g66dtag…c5498p4q\", \"u1mg67mpgl2pty…nvn0dmhx\").",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "reused addresses",
+      "ok": true,
+      "actual": [
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm"
+      ],
+      "expected": [
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm",
+        "u1ces8sa6vedcm…9qrg7fkm"
+      ]
+    },
+    {
+      "label": "one time addresses",
+      "ok": true,
+      "actual": [
+        "u1hvfvml947k7g…tcpljanr",
+        "u1rfk04g66dtag…c5498p4q",
+        "u1mg67mpgl2pty…nvn0dmhx"
+      ],
+      "expected": [
+        "u1hvfvml947k7g…tcpljanr",
+        "u1rfk04g66dtag…c5498p4q",
+        "u1mg67mpgl2pty…nvn0dmhx"
+      ]
+    },
+    {
+      "label": "wallets two columns",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

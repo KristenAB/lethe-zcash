@@ -1,0 +1,67 @@
+{
+  "id": "UI-010",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:03:40.133Z",
+  "end": "2026-10-26T04:03:46.427Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing pass-2 widget reduced motion (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "In prefers-reduced-motion: reduce mode, autoplay timer does not start, Play replay button is visible, clicking step button 3 updates address text immediately without \"leave\" or \"arrive\" animation classes (animation-name: none).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": ".refund-label b",
+      "ok": true,
+      "actual": "key #5",
+      "expected": "key #5"
+    },
+    {
+      "label": ".play",
+      "ok": true,
+      "actual": "Play",
+      "expected": "Play"
+    },
+    {
+      "label": ".play @aria-label",
+      "ok": true,
+      "actual": "Play replay",
+      "expected": "Play replay"
+    },
+    {
+      "label": ".addr:not(.rcpt)",
+      "ok": true,
+      "actual": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr",
+      "expected": "u1z4sgt6hugnshll95gxz8z6h2fjk4y9g096kdytmy2h89832jrx4j79rzy39pw695a0n5l2hlyxqsymds5vum46xf2vf6w9jeyufug4dr"
+    },
+    {
+      "label": ".addr.rcpt",
+      "ok": true,
+      "actual": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d",
+      "expected": "4afc1f2c07db05bcccbc3c1c7ba1dc8253da6f2baee60647b774a7bbcab5517d"
+    },
+    {
+      "label": "no animation classes",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": ".addr animationName",
+      "ok": true,
+      "actual": "none",
+      "expected": "none"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

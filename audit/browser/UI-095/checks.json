@@ -1,0 +1,55 @@
+{
+  "id": "UI-095",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:07:24.185Z",
+  "end": "2026-10-26T04:07:25.415Z",
+  "url": "http://127.0.0.1:8431/",
+  "viewport": "1280x800",
+  "flow": "Local landing what is live today strip (1280x800 desktop) - http://127.0.0.1:8431/",
+  "expected": "Section with h2 \"What's live today\" displays strip with 2 cards: \"Live: Real 1Click dry quotes and testnet recoveries, replayed in the dashboard.\" and \"Setup required: A real swap is BLOCKED on mainnet ZEC and sign-off. The key crate is a draft.\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#live-h",
+      "ok": true,
+      "actual": "What's live today",
+      "expected": "What's live today"
+    },
+    {
+      "label": "strip headings",
+      "ok": true,
+      "actual": [
+        "Live",
+        "Setup required"
+      ],
+      "expected": [
+        "Live",
+        "Setup required"
+      ]
+    },
+    {
+      "label": "strip descriptions",
+      "ok": true,
+      "actual": [
+        "Real 1Click dry quotes and testnet recoveries, replayed in the dashboard.",
+        "A real swap is BLOCKED on mainnet ZEC and sign-off. The key crate is a draft."
+      ],
+      "expected": [
+        "Real 1Click dry quotes and testnet recoveries, replayed in the dashboard.",
+        "A real swap is BLOCKED on mainnet ZEC and sign-off. The key crate is a draft."
+      ]
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

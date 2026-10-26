@@ -1,0 +1,69 @@
+{
+  "id": "UI-116",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests. Actual viewport 375\u00d7812; no horizontal scroll.",
+  "start": "2026-10-26T04:08:30.430Z",
+  "end": "2026-10-26T04:08:31.649Z",
+  "url": "http://127.0.0.1:8431/evidence.html",
+  "viewport": "375x812",
+  "flow": "Local evidence before: the first run section (375x812 mobile) - http://127.0.0.1:8431/evidence.html",
+  "expected": "Audit rows render in stacked layout (.rows li grid-template-columns: 1fr); text aligns left without overflow; scrollWidth <= innerWidth (<= 375).",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "#audit-rows li one computed column",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#audit-rows .v textAlign",
+      "ok": true,
+      "actual": "left",
+      "expected": "left"
+    },
+    {
+      "label": "#audit within viewport",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "#audit bounds",
+      "ok": true,
+      "actual": [
+        {
+          "tag": "SECTION",
+          "left": 0,
+          "right": 375,
+          "width": 375
+        }
+      ]
+    },
+    {
+      "label": "375px viewport and no horizontal scroll",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "document width",
+      "ok": true,
+      "actual": {
+        "sw": 375,
+        "iw": 375
+      }
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

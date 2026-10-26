@@ -1,0 +1,121 @@
+{
+  "id": "UI-147",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:33:07.806Z",
+  "end": "2026-10-26T05:33:09.126Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Local dashboard before: the first run section (1280x800 desktop) - http://127.0.0.1:5182/",
+  "expected": "Section with h2 \"Before: the first run\" shows sub text beginning \"The first run (Oct 20, 2026): 3 real dry quotes\"; ul lists 3 quotes with shared recipient code.links \"798a2c5e…d87c72\"; Link audit list shows refundTo \"does not link\" (cut, 3 different across 3, none is the account address), recipient \"links 3 swaps\" (links), quote time \"a timing cluster\", amount \"public in every request\" (exact: 0.1, 0.05, 0.2 ZEC); paragraph explains review recorded it as defect.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] h2",
+      "ok": true,
+      "actual": "Before: the first run",
+      "expected": "Before: the first run"
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] .sub contains The first run (Oct 20, 2026): 3 real dry quotes",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "ul[aria-label=\"First run swaps\"] li count",
+      "ok": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "label": "first quote values",
+      "ok": true,
+      "actual": [
+        "24.4211",
+        "60.452",
+        "48.8776"
+      ],
+      "expected": [
+        "24.4211",
+        "60.452",
+        "48.8776"
+      ]
+    },
+    {
+      "label": "shared recipient text",
+      "ok": true,
+      "actual": [
+        "798a2c5e…d87c72",
+        "798a2c5e…d87c72",
+        "798a2c5e…d87c72"
+      ],
+      "expected": [
+        "798a2c5e…d87c72",
+        "798a2c5e…d87c72",
+        "798a2c5e…d87c72"
+      ]
+    },
+    {
+      "label": "ul[aria-label=\"Link audit\"] li count",
+      "ok": true,
+      "actual": 4,
+      "expected": 4
+    },
+    {
+      "label": "audit verdicts",
+      "ok": true,
+      "actual": [
+        "does not link",
+        "links 3 swaps",
+        "a timing cluster",
+        "public in every request"
+      ],
+      "expected": [
+        "does not link",
+        "links 3 swaps",
+        "a timing cluster",
+        "public in every request"
+      ]
+    },
+    {
+      "label": "ul[aria-label=\"Link audit\"] li:first-child .v @class",
+      "ok": true,
+      "actual": "v cut",
+      "expected": "v cut"
+    },
+    {
+      "label": "audit details",
+      "ok": true,
+      "actual": [
+        "3 different across 3, none is the account address",
+        "1 across 3",
+        "all 3 within 6.6 s",
+        "exact: 0.1, 0.05, 0.2 ZEC"
+      ],
+      "expected": [
+        "3 different across 3, none is the account address",
+        "1 across 3",
+        "all 3 within 6.6 s",
+        "exact: 0.1, 0.05, 0.2 ZEC"
+      ]
+    },
+    {
+      "label": "section[aria-labelledby=\"audit-h\"] .sub.small contains The review recorded that as a defect",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

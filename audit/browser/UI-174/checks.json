@@ -1,0 +1,49 @@
+{
+  "id": "UI-174",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:33:48.248Z",
+  "end": "2026-10-26T05:33:49.439Z",
+  "url": "http://127.0.0.1:5182/",
+  "viewport": "1280x800",
+  "flow": "Dev server security: deny wallet seed - http://127.0.0.1:5182/",
+  "expected": "Browser fetch to /@fs/<repo>/.demo/seed returns HTTP 403 Restricted.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "Playwright API request missing wallet path status",
+      "ok": true,
+      "actual": 403,
+      "expected": 403
+    },
+    {
+      "label": "Playwright API request body",
+      "ok": true,
+      "actual": "Restricted",
+      "expected": "Restricted"
+    },
+    {
+      "label": "API request adds no page console entries",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    },
+    {
+      "label": "JPEG screenshot at or under 200KB",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

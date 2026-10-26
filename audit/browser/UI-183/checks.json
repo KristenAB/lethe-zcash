@@ -1,0 +1,79 @@
+{
+  "id": "UI-183",
+  "status": "PASS",
+  "notes": "Read-only source contract passed. No build execution within this row; screenshot shows source.",
+  "start": "2026-10-26T04:10:17.267Z",
+  "end": "2026-10-26T04:10:17.580Z",
+  "url": null,
+  "viewport": "1280x800",
+  "flow": "Static build script verification: wallet file filter check",
+  "expected": "Source contract for `scripts/build-site.mjs` (no build execution): the published file list is rejected if any path matches `(^\\|\\/)\\.demo(\\/\\|$)\\|(^\\|\\/)(seed\\|index-book\\.json\\|.*-state\\.json\\|near-recipient\\.json)$\\|\\.(env\\|pem\\|key\\|dat)$`; the rejection text starts `refusing to publish wallet files:` and names the forbidden path. Required published files are `index.html`, `evidence.html`, `app/index.html`, `app/testnet.json`, `app/pass2.json`, `app/pass3.json`, `app/recovery-seed-only.json`; a missing one throws `site/<path> is missing`.",
+  "checks": [
+    {
+      "label": "exact filter literal",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "rejects bad list",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file index.html",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file evidence.html",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file app/index.html",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file app/testnet.json",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file app/pass2.json",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file app/pass3.json",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "required file app/recovery-seed-only.json",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "missing file diagnostic",
+      "ok": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

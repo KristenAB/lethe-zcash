@@ -1,0 +1,73 @@
+{
+  "id": "UI-001",
+  "status": "PASS",
+  "notes": "Expected flow passed; no console, page, or failed network requests.",
+  "start": "2026-10-26T04:02:53.965Z",
+  "end": "2026-10-26T04:02:55.598Z",
+  "url": "https://lethe-landing-sooty.vercel.app/",
+  "viewport": "1280x800",
+  "flow": "Live landing overview hero (1280x800 desktop) - https://lethe-landing-sooty.vercel.app/",
+  "expected": "Document title is \"Lethe \u00b7 a new refund address for every swap\"; eyebrow displays \"Zcash \u2192 NEAR Intents 1Click \u00b7 wallet-side\"; h1 displays \"A new refund address and recipient for every swap.\"; lede displays \"Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed.\"; primary button displays \"Open the dashboard\" with href=\"app/\"; secondary button displays \"See the evidence\" with href=\"evidence.html\"; no console errors or failed same-origin requests.",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "title",
+      "ok": true,
+      "actual": "Lethe \u00b7 a new refund address for every swap",
+      "expected": "Lethe \u00b7 a new refund address for every swap"
+    },
+    {
+      "label": ".eyebrow",
+      "ok": true,
+      "actual": "Zcash \u2192 NEAR Intents 1Click \u00b7 wallet-side",
+      "expected": "Zcash \u2192 NEAR Intents 1Click \u00b7 wallet-side"
+    },
+    {
+      "label": "h1",
+      "ok": true,
+      "actual": "A new refund address and recipient for every swap.",
+      "expected": "A new refund address and recipient for every swap."
+    },
+    {
+      "label": ".lede",
+      "ok": true,
+      "actual": "Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed.",
+      "expected": "Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed."
+    },
+    {
+      "label": ".ctas a[href=\"evidence.html\"] @href",
+      "ok": true,
+      "actual": "evidence.html",
+      "expected": "evidence.html"
+    },
+    {
+      "label": ".ctas a[href=\"evidence.html\"]",
+      "ok": true,
+      "actual": "See the evidence",
+      "expected": "See the evidence"
+    },
+    {
+      "label": ".ctas a[href=\"app/\"] count",
+      "ok": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "label": ".ctas a[href=\"app/\"]",
+      "ok": true,
+      "actual": "Open the dashboard",
+      "expected": "Open the dashboard"
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

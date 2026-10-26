@@ -290,9 +290,7 @@ test.describe('dashboard', () => {
     await page.goto(`${DASH}/`);
     await expectSwap(page, 0);
     const demo = demoFiles();
-    expect(demo.length, 'the .demo/ wallet folder exists in this checkout').toBeGreaterThan(0);
-    const denied = [
-      ...demo,
+    const sources = [
       `${ROOT}packages/cli/src/lib.ts`,
       `${ROOT}packages/cli/src/recipient.ts`,
       `${ROOT}packages/cli/src/main.ts`,
@@ -308,6 +306,8 @@ test.describe('dashboard', () => {
         return false;
       }
     });
+    // These wallet paths must be denied even in a fresh checkout with no .demo/ directory.
+    const denied = [...new Set([`${ROOT}.demo/seed`, `${ROOT}.demo/index-book.json`, ...demo, ...sources])];
     guard.allow(403, /^\/@fs\//);
     const urls = denied.flatMap((p) => [`/@fs${encodeURI(p)}`, `/@fs${encodeURI(p)}?raw`, `/@fs${encodeURI(p)}?import`]);
     // status only: the body is never read

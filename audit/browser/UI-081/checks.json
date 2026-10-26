@@ -1,0 +1,31 @@
+{
+  "id": "UI-081",
+  "status": "PASS",
+  "notes": "Exact flow assertions passed; no console/page/network errors.",
+  "start": "2026-10-26T05:32:02.178Z",
+  "end": "2026-10-26T05:32:03.541Z",
+  "url": "https://lethe-landing-sooty.vercel.app/app/",
+  "viewport": "1280x800",
+  "flow": "Live landing host /app/ no control labelled \"log\" - https://lethe-landing-sooty.vercel.app/app/",
+  "expected": "Querying all controls on /app/ yields 0 matches for \"log\".",
+  "checks": [
+    {
+      "label": "initial document HTTP",
+      "ok": true,
+      "actual": 200,
+      "expected": 200
+    },
+    {
+      "label": "log controls",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    },
+    {
+      "label": "console/page/network errors (all origins, no exemptions for console errors)",
+      "ok": true,
+      "actual": [],
+      "expected": []
+    }
+  ]
+}

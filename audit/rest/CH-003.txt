@@ -1,0 +1,17 @@
+ID: CH-003
+Observed at: 2026-10-26T05:31:36.116Z
+Status: FAIL
+Notes: Actual provider HTTP 201; exact expected status is HTTP 200. Valid dry quote object was returned.
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","--import","/tmp/lethe-rest-93l6lz/observe.mjs","--input-type=module","-e","import * as l from \"file:///Volumes/Extreme%20SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t20/packages/cli/dist/lib.js\";const input={\"amountZat\":\"10000000\",\"destinationAsset\":\"nep141:wrap.near\",\"recipient\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"refundTo\":\"u17up2yn75gvmuzxlvzvuez2xwqq52zayalknhwh8h08xpv87g926zsp6zluewtx0ecd88pgevtputa56j7pdrctv2vewnhwgahy5m2f8n\",\"confidentiality\":\"public\"};input.amountZat=BigInt(input.amountZat);try{const q=await l.quote(input);console.log(JSON.stringify(q))}catch(e){console.error(e.message);console.log(JSON.stringify({outcome:l.requestOutcome(e)}));process.exit(e instanceof l.SetupRequiredError?2:1)}"]
+pid: 23776
+stdout:
+{"quote":{"amountIn":"10000000","amountInFormatted":"0.1","amountInUsd":"120.709000000000","minAmountIn":"10000000","amountOut":"26629390438196970853188269","amountOutFormatted":"26.629390438196970853188269","amountOutUsd":"120.364844780650","minAmountOut":"26381737107121739024253618","timeEstimate":455,"refundFee":"32000","withdrawFee":"0"},"quoteRequest":{"dry":true,"depositMode":"SIMPLE","swapType":"EXACT_INPUT","slippageTolerance":93,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u17up2yn75gvmuzxlvzvuez2xwqq52zayalknhwh8h08xpv87g926zsp6zluewtx0ecd88pgevtputa56j7pdrctv2vewnhwgahy5m2f8n","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T07:12:41.758Z","confidentiality":"public","quoteWaitingTimeMs":3567,"insured":false,"appFees":[{"recipient":"5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd","fee":20}]},"signature":"[PRIVATE_KEY_REDACTED]","timestamp":"2026-10-26T05:31:32.403Z","correlationId":"0a7924e3-ebec-4976-9305-9235eacafa26"}
+
+stderr:
+AUDIT_HTTP {"at":"2026-10-26T05:31:31.759Z","url":"https://1click.chaindefuser.com/v0/quote","method":"POST","body":{"dry":true,"swapType":"EXACT_INPUT","slippageTolerance":93,"originAsset":"nep141:zec.omft.near","depositType":"ORIGIN_CHAIN","destinationAsset":"nep141:wrap.near","amount":"10000000","refundTo":"u17up2yn75gvmuzxlvzvuez2xwqq52zayalknhwh8h08xpv87g926zsp6zluewtx0ecd88pgevtputa56j7pdrctv2vewnhwgahy5m2f8n","refundType":"ORIGIN_CHAIN","recipient":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","recipientType":"DESTINATION_CHAIN","deadline":"2026-10-26T07:12:41.758Z","quoteWaitingTimeMs":3567,"confidentiality":"public"},"authorizationPresent":false}
+AUDIT_HTTP_RESPONSE {"url":"https://1click.chaindefuser.com/v0/quote","status":201}
+
+exit_code: 0
+
