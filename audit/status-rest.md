@@ -2,7 +2,7 @@
 | --- | --- | --- | --- |
 | CH-001 | PASS | [CH-001](rest/CH-001.txt) | Authorized repository search; matches are read methods and BLOCKED refusals, no contract deployment/call execution flow. |
 | CH-002 | PASS | [CH-002](rest/CH-002.txt) |  |
-| CH-003 | FAIL | [CH-003](rest/CH-003.txt) | HTTP 200 |
+| CH-003 | FAIL | [CH-003](rest/CH-003.txt) | Actual provider HTTP 201; exact expected status is HTTP 200. Valid dry quote object was returned. |
 | CH-004 | PASS | [CH-004](rest/CH-004.txt) |  |
 | CH-005 | PASS | [CH-005](rest/CH-005.txt) | Real public echo and real invalid-JWT confidential request; request observer records authorization presence only. Both recipient and refund fields reach provider. |
 | CH-006 | PASS | [CH-006](rest/CH-006.txt) |  |
@@ -33,7 +33,7 @@
 | MCP-001 | PASS | [MCP-001](rest/MCP-001.txt) | Real stdio initialization and discovery; every stdout line parsed as JSON-RPC. |
 | MCP-002 | PASS | [MCP-002](rest/MCP-002.txt) |  |
 | MCP-003 | PASS | [MCP-003](rest/MCP-003.txt) | Unset log startup and existing 0666 file tightened to 0600. |
-| MCP-004 | PASS | [MCP-004](rest/MCP-004.txt) | Runtime log keys checked; successful indexed result also checked in MCP-006. |
+| MCP-004 | PASS | [MCP-004](rest/MCP-004.txt) | This row independently observed successful indexed quote, successful unindexed plan, and error; log contains exactly the four permitted fields. |
 | MCP-005 | PASS | [MCP-005](rest/MCP-005.txt) |  |
 | MCP-006 | PASS | [MCP-006](rest/MCP-006.txt) |  |
 | MCP-007 | PASS | [MCP-007](rest/MCP-007.txt) |  |
