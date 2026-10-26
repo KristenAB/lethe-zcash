@@ -29,6 +29,7 @@ for (const name of ['index.html', 'evidence.html']) {
   if (name === 'index.html' && !page.includes(cta)) throw new Error(`packages/landing/index.html has no ${cta} marker`);
   writeFileSync(resolve(site, name), page.replace(marker, '<a href="app/">Dashboard</a>').replace(cta, '<a class="btn btn-river" href="app/">Open the dashboard</a>'));
 }
+cpSync(resolve(root, 'packages/landing/assets'), resolve(site, 'assets'), { recursive: true });
 writeFileSync(resolve(site, '.nojekyll'), '');
 
 const files = (d) => readdirSync(d).flatMap((n) => (statSync(join(d, n)).isDirectory() ? files(join(d, n)) : [join(d, n)]));

@@ -150,6 +150,19 @@
         .rows .v { text-align: left; }
         footer { padding: 88px 16px 40px; }
       }
+
+      /* the river band: generated art of coins dissolving into a dark current (assets/hero.webp) */
+      .river { position: relative; isolation: isolate; overflow: hidden; background: var(--river); color: var(--mist); margin: 40px 0 0 calc(50% - 50vw); width: 100vw; max-width: none; padding: 0; }
+      .river .art { position: absolute; inset: 0 0 0 30%; z-index: -1; }
+      .river .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; }
+      .river .art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #0b3440 0%, rgba(11, 52, 64, 0.5) 22%, rgba(11, 52, 64, 0) 48%); }
+      .river .art::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(105deg, transparent 38%, rgba(94, 224, 214, 0.18) 50%, transparent 62%) no-repeat; background-size: 260% 100%; background-position: 150% 0; }
+      .river .in { max-width: 1120px; margin: 0 auto; padding: 0 24px; min-height: clamp(400px, 44vw, 620px); display: flex; flex-direction: column; justify-content: center; }
+      .river h2 { margin: 0; font: 600 clamp(38px, 5.2vw, 72px)/1 var(--sans); letter-spacing: -0.045em; max-width: 7.6em; color: #fff; }
+      .river h2 em { font-style: normal; color: var(--aqua); }
+      .river p { margin: 20px 0 0; max-width: 25em; font-size: 19px; color: rgba(226, 244, 246, 0.78); }
+      @media (prefers-reduced-motion: no-preference) { .river .art { animation: le-drift 24s ease-in-out infinite alternate; } .river .art::before { animation: le-sweep 9s cubic-bezier(0.45, 0, 0.25, 1) 2.6s infinite; } @keyframes le-drift { from { transform: scale(1); } to { transform: scale(1.05) translate3d(-1.2%, -0.8%, 0); } } @keyframes le-sweep { 0% { background-position: 150% 0; } 55%, 100% { background-position: -50% 0; } } }
+      @media (max-width: 760px) { main section.river { padding: 0; } .river .art { left: 0; bottom: auto; height: 62vw; } .river .art::after { background: linear-gradient(0deg, #0b3440 0%, rgba(11, 52, 64, 0.2) 60%, rgba(11, 52, 64, 0) 100%); } .river .in { min-height: 0; padding-top: 58vw; padding-bottom: 56px; } .river p { font-size: 17px; } }
       @media (prefers-reduced-motion: reduce) {
         .addr.leave, .addr.arrive { animation: none; }
         .river li { transition: none; }
@@ -225,6 +238,14 @@
           <div class="widget" aria-busy="true"><div class="leg"><span class="leg-label">Loading pass 2…</span></div></div>
         </div>
       </div>
+
+      <section class="river" aria-labelledby="river-h">
+        <div class="art" aria-hidden="true"><img src="assets/hero.webp" alt="" width="1600" height="900" loading="lazy" decoding="async" /></div>
+        <div class="in">
+          <h2 id="river-h">Every swap <em>forgets</em> the last.</h2>
+          <p>A one-time refund address and its own NEAR account per swap, all from one seed. Nothing ties one swap to the next.</p>
+        </div>
+      </section>
 
       <section class="band" aria-labelledby="how-h">
         <h2 id="how-h">One seed. Nothing shared.</h2>
