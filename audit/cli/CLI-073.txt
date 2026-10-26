@@ -20,3 +20,109 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.342
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/decorrelate.ts SHA256 b345ee2dedaf381196064d18f94ebbcb8ec59c6d020ca8b7115ec06690ee9b69
+155:   why: string;
+156: }
+157:
+158: /** How the score is computed. The weights are Lethe's own, not a standard; they are printed with the score. */
+159: export const SCORE_METHOD =
+160:   'score = 100 × (1 − average pair cost). A pair linked by a strong field costs 1. Each weak hint a pair shares is taken to link it one time in four, independently, so k weak hints cost 1 − 0.75^k. Provider-only links cost 0. The weights are Lethe’s own, not a standard.';
+161:
+162: /**
+163:  * What still links the swaps of a batch to each other, pair by pair. `strong` means the public
+164:  * request alone links the pair; `weak` narrows it down (shared with many other users); `provider`
+165:  * means only 1Click can link it. score: see SCORE_METHOD (100 = no pair linked at all).
+166:  */
+167: export function linkabilityReport(swaps: PlannedSwap[]) {
+168:   const n = swaps.length;
+169:   const t = swaps.map((s) => new Date(s.at).getTime());
+170:   const amt = swaps.map((s) => BigInt(s.amountZat));
+171:   // a 1-2-5 split shows in the amounts themselves: parts sent largest first (the order a greedy split
+172:   // produces), or parts that add up to a 1-2-5 total
+173:   const byTime = amt.map((a, i) => [a, t[i]] as const).sort((x, y) => x[1] - y[1]).map(([a]) => a);
+174:   const allCommon = n >= 2 && amt.every((a) => isCommonAmount(a));
+175:   const greedy = allCommon && byTime.every((a, k) => k === 0 || a <= byTime[k - 1]) && byTime.some((a, k) => k > 0 && a < byTime[k - 1]);
+176:   const total = amt.reduce((x, y) => x + y, 0n);
+177:   const split = !allCommon
+178:     ? ''
+179:     : greedy
+180:       ? 'common denominations sent largest first, the order a greedy 1-2-5 split produces'
+181:       : isRound125(total)
+182:         ? 'the parts add up to a 1-2-5 total, as the parts of one split would'
+183:         : '';
+184:   const links = new Map<Link['field'], Link>();
+185:   const add = (field: Link['field'], strength: Strength, why: string, p: [number, number]) => {
+186:     const l = links.get(field) ?? links.set(field, { field, strength, pairs: [], why }).get(field)!;
+187:     if (strength === 'strong' && l.strength !== 'strong') Object.assign(l, { strength, why });
+188:     l.pairs.push(p);
+189:   };
+190:   for (let i = 0; i < n; i++)
+191:     for (let j = i + 1; j < n; j++) {
+192:       const p: [number, number] = [i, j];
+193:       const a = swaps[i];
+194:       const b = swaps[j];
+195:       if (a.refundTo && canonicalRecipient(a.refundTo) === canonicalRecipient(b.refundTo ?? '')) add('refundTo', 'strong', 'the same refund address is in both public requests', p);
+196:       if (canonicalRecipient(a.recipient) === canonicalRecipient(b.recipient)) add('recipient', 'strong', 'the same recipient is in both public requests and receives both on chain', p);
+197:       if (amt[i] === amt[j])
+198:         isCommonAmount(amt[i])
+199:           ? add('amount', 'weak', 'the same common amount; other users swap it too, so it narrows rather than links', p)
+200:           : add('amount', 'strong', 'the same unusual amount in both requests', p);
+201:       const dt = Math.abs(t[i] - t[j]);
+202:       if (dt < 60_000) add('same minute', 'strong', 'both requests went out within a minute of each other', p);
+203:       else if (dt < 600_000) add('within 10 min', 'weak', 'both requests went out within ten minutes', p);
+204:       if (a.destinationAsset === b.destinationAsset) add('token', 'weak', 'the same destination token', p);
+205:       if (split) add('split pattern', 'weak', split, p);
+206:       if (a.fingerprint && a.fingerprint === b.fingerprint) add('client fingerprint', 'weak', 'the same request parameters (slippage, solver wait, deadline offset): narrows both requests to one client', p);
+207:       if (a.jwt && b.jwt) add('partner token', 'provider', 'the same ONECLICK_JWT: 1Click (not the public) can link them', p);
+208:     }
+209:   const pairs = (n * (n - 1)) / 2;
+210:   const key = (p: [number, number]) => `${p[0]}-${p[1]}`;
+211:   const strongPairs = new Set([...links.values()].filter((l) => l.strength === 'strong').flatMap((l) => l.pairs.map(key)));
+212:   const hints = new Map<string, number>();
+213:   for (const l of links.values()) if (l.strength === 'weak') for (const p of l.pairs) if (!strongPairs.has(key(p))) hints.set(key(p), (hints.get(key(p)) ?? 0) + 1);
+214:   const weakPairs = new Set(hints.keys());
+215:   const cost = strongPairs.size + [...hints.values()].reduce((c, k) => c + (1 - 0.75 ** k), 0);
+216:   const score = pairs === 0 ? 100 : Math.round(100 * (1 - cost / pairs));
+217:   const all = [...links.values()];
+218:   const strongFields = all.filter((l) => l.strength === 'strong').map((l) => l.field);
+219:   return {
+220:     swaps: n,
+221:     pairs,
+222:     links: all,
+223:     /** fields that link at least one pair from the public requests alone */
+224:     sharedFields: strongFields.length,
+225:     strongLinkedPairs: strongPairs.size,
+226:     weakOnlyPairs: weakPairs.size,
+227:     score,
+228:     method: SCORE_METHOD,
+229:     verdict:
+230:       pairs === 0
+231:         ? 'one swap: nothing in the batch to link it to'
+232:         : strongFields.length === 0
+233:           ? `no public field links any pair${weakPairs.size ? `; ${weakPairs.size} pair(s) share only weak hints` : ''}`
+234:           : `${strongPairs.size} of ${pairs} pairs linked by ${strongFields.join(', ')}`,
+235:     outside: 'Not measured here: your IP address, the Zcash deposit transactions themselves, and anything you do with the funds afterwards.',
+236:   };
+237: }
+238:
+239: /** The report's input from real 1Click quote responses (their public request and timestamp). */
+240: export function swapsFromQuotes(
+241:   quotes: { timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string; slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }[],
+242:   jwt = false,
+243: ): PlannedSwap[] {
+244:   return quotes.map((q) => ({ amountZat: q.quoteRequest.amount, at: q.timestamp, recipient: q.quoteRequest.recipient, destinationAsset: q.quoteRequest.destinationAsset, refundTo: q.quoteRequest.refundTo, jwt, fingerprint: requestFingerprint(q) }));
+245: }
+246:
+247: /** slippage | solver wait | deadline minus request time in whole minutes, from a quote's public request. */
+248: export function requestFingerprint(q: { timestamp: string; quoteRequest: { slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }): string | undefined {
+249:   const { slippageTolerance, quoteWaitingTimeMs, deadline } = q.quoteRequest;
+250:   if (slippageTolerance === undefined || quoteWaitingTimeMs === undefined || !deadline) return undefined;
+251:   return `${slippageTolerance}|${quoteWaitingTimeMs}|${Math.round((Date.parse(deadline) - Date.parse(q.timestamp)) / 60_000)}`;
+
+STDERR
+
+EXIT_CODE 0

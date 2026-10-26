@@ -20,3 +20,29 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.416
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+372:       const given = opts.recipient?.trim();
+373:       const canon = given === undefined ? undefined : canonicalRecipient(given);
+374:       const sameRecipient = (x: Reservation) => canon !== undefined && !x.freshRecipient && canonicalRecipient(recipientOf(x) ?? '') === canon;
+375:       // the guard counts every request 1Click could have seen (quoted, refused, unanswered), in canonical form
+376:       const earlier = canon === undefined ? undefined : b.reservations.find((x) => !neverSent(x) && canonicalRecipient(recipientOf(x) ?? '') === canon);
+377:       if (earlier && !opts.allowLinkedRecipient) throw new LinkedRecipientError(given!, earlier.index, earlier.quote ? undefined : earlier.quoteError?.outcome);
+378:       // a retry of a request that provably never left takes over its reservation: same index, same
+379:       // refundTo, no index burned and no false "already used"
+380:       const retry = b.reservations.find((x) => neverSent(x) && (opts.freshRecipient ? x.freshRecipient === true : sameRecipient(x)));
+381:       if (retry) {
+382:         delete retry.quoteError;
+383:         retry.retries = (retry.retries ?? 0) + 1;
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
+STDERR
+
+EXIT_CODE 0

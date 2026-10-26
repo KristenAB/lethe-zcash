@@ -9,9 +9,9 @@ MODE: independent source/test-contract review; no wallet command, seed derivatio
 SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda561146d425404786e41847e7a35bf363c3a81 L1-L56
 1: use std::collections::HashSet;
 2: use zswap_core::*;
-3: 
+3:
 4: [public test seed/vector literal omitted; assertion inspected locally]
-5: 
+5:
 6: #[test]
 7: fn refund_keys_never_share_an_ivk_or_address_and_keep_the_spending_authority() {
 8:     let acct = account(&SEED, COIN_TESTNET).unwrap();
@@ -26,7 +26,7 @@ SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda
 17:     }
 18:     assert_eq!(ivks.len(), 65);
 19: }
-20: 
+20:
 21: #[test]
 22: fn derivation_is_deterministic_and_purposes_are_separate() {
 23:     let acct = account(&SEED, COIN_TESTNET).unwrap();
@@ -36,7 +36,7 @@ SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda
 27:     assert_eq!(fvk_id(&a), fvk_id(&b));
 28:     assert_ne!(fvk_id(&a), fvk_id(&c));
 29: }
-30: 
+30:
 31: #[test]
 32: fn testnet_and_mainnet_use_different_accounts_and_encodings() {
 33:     let t = one_time(&account(&SEED, COIN_TESTNET).unwrap(), KeyPurpose::Refund, 0).unwrap();
@@ -46,7 +46,7 @@ SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda
 37:     assert!(uivk(&t, network(COIN_TESTNET)).unwrap().starts_with("uivktest1"));
 38:     assert_ne!(fvk_id(&t), fvk_id(&m));
 39: }
-40: 
+40:
 41: #[test]
 42: fn another_seed_gives_unrelated_keys() {
 43:     let a = one_time(&account(&SEED, COIN_TESTNET).unwrap(), KeyPurpose::Refund, 0).unwrap();
@@ -54,7 +54,7 @@ SOURCE packages/wallet-core/tests/one_time.rs SHA256 d4727ec3973b95a5a028684dfda
 45:     assert_ne!(authority(&a), authority(&b));
 46: [public test seed/vector literal omitted; assertion inspected locally]
 47: }
-48: 
+48:
 49: #[test]
 50: fn refund_memo_round_trips_and_rejects_other_memos() {
 51:     for i in [0u64, 1, 41, u64::MAX] {
@@ -77,24 +77,24 @@ SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f
 10: //! `zakura-one-time-ivk` is a draft convention ("must not be used to issue live addresses before
 11: //! review"). This crate uses it on Zcash testnet only, and for mainnet `refundTo` in *dry* quotes,
 12: //! which create no deposit address and move no funds.
-13: 
+13:
 14: use orchard::keys::{FullViewingKey, Scope, SpendingKey};
 15: use sha2::{Digest, Sha256};
 16: use zakura_one_time_ivk::{swap::RefundMemo, KeyId, Purpose};
 17: use zcash_address::unified::{self, Encoding};
 18: use zcash_protocol::consensus::NetworkType;
-19: 
+19:
 20: /// ZIP 32 coin types.
 21: pub const COIN_TESTNET: u32 = 1;
 22: pub const COIN_MAINNET: u32 = 133;
-23: 
+23:
 24: #[derive(Debug)]
 25: pub enum Error {
 26:     Seed(String),
 27:     Derivation(u64),
 28:     Encoding(String),
 29: }
-30: 
+30:
 31: impl std::fmt::Display for Error {
 32:     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 33:         match self {
@@ -105,7 +105,7 @@ SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f
 38:     }
 39: }
 40: impl std::error::Error for Error {}
-41: 
+41:
 42: /// The wallet's ZIP 32 account 0 for one network (coin type decides testnet vs mainnet keys).
 43: pub fn account(seed: &[u8], coin_type: u32) -> Result<FullViewingKey, Error> {
 44:     if seed.len() < 32 {
@@ -114,12 +114,12 @@ SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f
 47:     let sk = SpendingKey::from_zip32_seed(seed, coin_type, zip32::AccountId::ZERO).map_err(|e| Error::Seed(format!("{e:?}")))?;
 48:     Ok(FullViewingKey::from(&sk))
 49: }
-50: 
+50:
 51: /// One-time key `index` for `purpose` (refund or receive).
 52: pub fn one_time(account: &FullViewingKey, purpose: Purpose, index: u64) -> Result<FullViewingKey, Error> {
 53:     KeyId::new(purpose, index).derive(account).map_err(|_| Error::Derivation(index))
 54: }
-55: 
+55:
 56: pub fn network(coin_type: u32) -> NetworkType {
 57:     if coin_type == COIN_MAINNET {
 58:         NetworkType::Main
@@ -127,31 +127,31 @@ SOURCE packages/wallet-core/src/lib.rs SHA256 bf309db788ec3528af77fdd62bd16e3c3f
 60:         NetworkType::Test
 61:     }
 62: }
-63: 
+63:
 64: /// Unified address with only an Orchard-family receiver (receives in Ironwood on current testnet).
 65: pub fn address(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
 66:     let raw = fvk.address_at(0u32, Scope::External).to_raw_address_bytes();
 67:     let ua = unified::Address::try_from_items(vec![unified::Receiver::Orchard(raw)]).map_err(|e| Error::Encoding(e.to_string()))?;
 68:     Ok(ua.encode(&net))
 69: }
-70: 
+70:
 71: /// Unified incoming viewing key with only the Orchard-family item: sees payments to `address`.
 72: pub fn uivk(fvk: &FullViewingKey, net: NetworkType) -> Result<String, Error> {
 73:     let ivk = fvk.to_ivk(Scope::External).to_bytes();
 74:     let u = unified::Uivk::try_from_items(vec![unified::Ivk::Orchard(ivk)]).map_err(|e| Error::Encoding(e.to_string()))?;
 75:     Ok(u.encode(&net))
 76: }
-77: 
+77:
 78: /// sha256 of the raw full viewing key: an identifier for tests and logs (not a secret, not a key).
 79: pub fn fvk_id(fvk: &FullViewingKey) -> String {
 80:     hex::encode(Sha256::digest(fvk.to_bytes()))
 81: }
-82: 
+82:
 83: /// The spending authority (`ak ‖ nk`, the first 64 bytes of the raw FVK).
 84: pub fn authority(fvk: &FullViewingKey) -> [u8; 64] {
 85:     fvk.to_bytes()[..64].try_into().expect("64 bytes")
 86: }
-87: 
+87:
 88: /// The refund memo a wallet could put in its own internal note of the funding transaction, so a
 
 SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
@@ -165,5 +165,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

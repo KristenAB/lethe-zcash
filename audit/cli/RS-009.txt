@@ -42,5 +42,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

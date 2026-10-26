@@ -3,6 +3,7 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-001"]
 MODE source review
 
 STDOUT
+| CLI-001 | `init`: new wallet, source contract only; no seed access in this run | Exit 0; JSON contains `seedCreated: true`, `bookCreated: true` and paths only; book starts with `next: 0`, empty reservations and account `fvk_id`; creation modes are directory 0700 and files 0600; stdout contains no seed bytes. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L138-L161
@@ -11,7 +12,7 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 140:   mkdirSync(dirname(seedFile), { recursive: true, mode: 0o700 });
 141:   return JSON.parse(execFileSync(keysBin(), ['init', seedFile]).toString()).created;
 142: }
-143: 
+143:
 144: /**
 145:  * A new wallet: the seed and its empty index book, bound to each other. For a seed that already exists
 146:  * without a book, the book is created only with `assertNew` (the caller says this seed never quoted a
@@ -106,9 +107,15 @@ SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d3
 41:             println!("{{\"created\":true}}");
 42:         }
 
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

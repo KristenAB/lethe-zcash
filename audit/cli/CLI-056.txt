@@ -20,3 +20,42 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.366
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb
+196:  * How to move funds out of the per-swap recipients without undoing the point of them. Pure: it does
+197:  * not sign or send anything. `destinations` maps a recipient index to where it should go; one
+198:  * destination shared by several recipients is reported as a re-link.
+199:  */
+200: export function sweepPlan(recipients: { index: number; account_id: string; state?: NearAccountState }[], destinations: Record<number, string> = {}) {
+201:   const steps: SweepStep[] = [];
+202:   const warnings: string[] = [];
+203:   for (const r of recipients) {
+204:     const to = destinations[r.index] ?? null;
+205:     const tokenOnly = r.state && !r.state.exists && Object.values(r.state.ft).some((b) => BigInt(b) > 0n);
+206:     let action = to ? `send everything from ${r.account_id.slice(0, 10)}… to ${to}` : 'leave it here and spend from this account directly (no sweep, no new link)';
+207:     if (tokenOnly) action += '. It holds tokens but no native NEAR, so it cannot pay gas yet: a NEAR top-up from one of your accounts links it to that account; top it up from a source that is not tied to your other accounts, or accept that link knowingly';
+208:     steps.push({ index: r.index, from: r.account_id, to, action });
+209:   }
+210:   const byDest = new Map<string, number[]>();
+211:   for (const s of steps) if (s.to) byDest.set(s.to, [...(byDest.get(s.to) ?? []), s.index]);
+212:   let relinked = 0;
+213:   for (const [to, idx] of byDest) {
+214:     if (idx.length < 2) continue;
+215:     relinked += idx.length;
+216:     warnings.push(`sweeping swaps ${idx.map((i) => `#${i}`).join(', ')} into ${to} re-links them on chain: anyone can see those accounts paying one account. Sweep each to a different destination, or back into a shielded Zcash address (a new 1Click swap per account, at different times and amounts).`);
+217:   }
+218:   for (const s of steps) if (s.to && recipients.some((r) => r.account_id === s.to)) warnings.push(`swap #${s.index} sweeps into another per-swap recipient (${s.to.slice(0, 10)}…): that links the two swaps.`);
+219:   return {
+220:     steps,
+221:     warnings,
+222:     relinked,
+223:     keyExport: 'zswap near-key <index> <out-file> writes that account’s near-cli credentials (0600, never printed); import it into a NEAR wallet or near-cli to sign the sweep',
+224:   };
+225: }
+
+STDERR
+
+EXIT_CODE 0

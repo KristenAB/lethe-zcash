@@ -11,7 +11,7 @@ SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d3
 13:     eprintln!("error: {msg}");
 14:     std::process::exit(2)
 15: }
-16: 
+16:
 17: fn seed(path: &str) -> Vec<u8> {
 18:     let s = fs::read(path).unwrap_or_else(|_| fail(format!("Setup required: seed file {path} (zswap-keys init {path})")));
 19:     if s.len() != 32 {
@@ -31,5 +31,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

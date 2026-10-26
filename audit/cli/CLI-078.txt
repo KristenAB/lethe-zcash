@@ -17,7 +17,7 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L581-L625
 581: export const RECOVERY_GAP = 10;
-582: 
+582:
 583: /**
 584:  * Recovery: the account key plus one-time keys 0..n, scanned over a range. n covers every reserved
 585:  * index plus `gap` more, so a wallet restored from its seed alone (no index book) still finds refunds
@@ -73,5 +73,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

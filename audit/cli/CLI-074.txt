@@ -20,3 +20,32 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.347
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/decorrelate.ts SHA256 b345ee2dedaf381196064d18f94ebbcb8ec59c6d020ca8b7115ec06690ee9b69
+241:   quotes: { timestamp: string; quoteRequest: { amount: string; recipient: string; destinationAsset: string; refundTo: string; slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }[],
+242:   jwt = false,
+243: ): PlannedSwap[] {
+244:   return quotes.map((q) => ({ amountZat: q.quoteRequest.amount, at: q.timestamp, recipient: q.quoteRequest.recipient, destinationAsset: q.quoteRequest.destinationAsset, refundTo: q.quoteRequest.refundTo, jwt, fingerprint: requestFingerprint(q) }));
+245: }
+246:
+247: /** slippage | solver wait | deadline minus request time in whole minutes, from a quote's public request. */
+248: export function requestFingerprint(q: { timestamp: string; quoteRequest: { slippageTolerance?: number; quoteWaitingTimeMs?: number; deadline?: string } }): string | undefined {
+249:   const { slippageTolerance, quoteWaitingTimeMs, deadline } = q.quoteRequest;
+250:   if (slippageTolerance === undefined || quoteWaitingTimeMs === undefined || !deadline) return undefined;
+251:   return `${slippageTolerance}|${quoteWaitingTimeMs}|${Math.round((Date.parse(deadline) - Date.parse(q.timestamp)) / 60_000)}`;
+252: }
+253:
+254: /**
+255:  * A planned batch: optional rounding, optional split, a fresh recipient per part (or the one given),
+256:  * an optional random delay schedule, and the linkability report of the result. Nothing is sent.
+257:  */
+258: export function planBatch(input: {
+259:   amountZat: bigint;
+260:   destinationAsset: string;
+
+STDERR
+
+EXIT_CODE 0

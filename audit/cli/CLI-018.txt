@@ -21,3 +21,20 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.823
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+
+STDERR
+
+EXIT_CODE 0

@@ -28,3 +28,28 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.287
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb
+41: export async function assetChain(destinationAsset: string): Promise<{ blockchain: string; symbol: string; contract?: string }> {
+42:   tokenList ??= httpJson('1Click token list', `${ONECLICK}/v0/tokens`).then((r) => {
+43:     if (!r.ok) throw new Error(`HTTP ${r.status} ${answerSnippet(r)}`);
+44:     if (!Array.isArray(r.body)) throw new Error(`HTTP ${r.status}, not a JSON list: ${answerSnippet(r)}`);
+45:     return r.body;
+46:   });
+47:   let list;
+48:   try {
+49:     list = await tokenList;
+50:   } catch (e) {
+51:     tokenList = undefined;
+52:     throw new Error(`1Click token list unavailable at ${ONECLICK}: ${(e as Error).message}`);
+53:   }
+54:   const t = list.find((x) => x.assetId === destinationAsset);
+55:   if (!t) throw new Error(`1Click does not list ${destinationAsset}`);
+56:   return { blockchain: t.blockchain, symbol: t.symbol, contract: t.contractAddress };
+
+STDERR
+
+EXIT_CODE 0

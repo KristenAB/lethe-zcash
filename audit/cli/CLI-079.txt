@@ -30,7 +30,7 @@ SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5a
 150:   return `privacy: a NEAR lookup sends every recipient it checks${ahead} from this IP, seconds apart, to ${host(NEAR_RPC)} (NEAR RPC) and ${host(NEAR_FT_INDEXER)} (FT indexer). That operator can cluster them as one wallet's. Point ZSWAP_NEAR_RPC and ZSWAP_NEAR_FT_INDEXER at your own node, or reach them through a proxy or Tor.`;
 151: }
 152: const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-153: 
+153:
 154: /**
 155:  * Finds the per-swap NEAR recipients from the seed: indices 0..(last reserved + gap), derived locally.
 156:  * With `lookup`, the swaps in the book are checked on NEAR mainnet (read-only: exists, any token the FT
@@ -67,7 +67,7 @@ SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5a
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L627-L646
 627: /** The end of a recovery's window: every known index, the highest one any signal found, plus the gap. */
 628: export const lookaheadEnd = (next: number, found: number[], gap: number) => Math.max(next, Math.max(-1, ...found) + 1) + gap;
-629: 
+629:
 630: /**
 631:  * Recovery from every signal at once. A swap leaves a trace on one side only: a failed swap is refunded
 632:  * to its one-time Zcash address, a successful one delivers to its NEAR recipient. So the refund scan and
@@ -97,5 +97,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.021
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

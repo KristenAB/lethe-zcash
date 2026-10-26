@@ -3,6 +3,7 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-043"]
 MODE source review
 
 STDOUT
+| CLI-043 | Book durability before exposing reserved address, source review | Reservation write fsyncs the temporary file before rename and the containing directory after rename, before returning or posting; persisted book mode is 0600 and `next` advances exactly once. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L280-L299
@@ -75,15 +76,15 @@ SOURCE packages/cli/test/book-durability.test.ts SHA256 bfed1a8621b62cebb79cad9f
 6: import { tmpdir } from 'node:os';
 7: import { join } from 'node:path';
 8: import { afterEach, describe, expect, it, vi } from 'vitest';
-9: 
+9:
 10: vi.mock('node:fs', async (importOriginal) => {
 11:   const real = await importOriginal<typeof import('node:fs')>();
 12:   return { ...real, fsyncSync: vi.fn(real.fsyncSync) };
 13: });
 14: const { IndexBook, initSeed } = await import('../src/lib.js');
-15: 
+15:
 16: afterEach(() => vi.mocked(fs.fsyncSync).mockClear());
-17: 
+17:
 18: describe('index book durability', () => {
 19:   it('a reservation is fsynced (the book file and its folder) before reserve returns', () => {
 20:     const dir = mkdtempSync(join(tmpdir(), 'zswap-fsync-'));
@@ -102,9 +103,15 @@ SOURCE packages/cli/test/book-durability.test.ts SHA256 bfed1a8621b62cebb79cad9f
 33:   });
 34: });
 
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

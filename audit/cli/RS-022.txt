@@ -50,7 +50,7 @@ SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5
 73:     /// Mined only on a fork that is not the main chain.
 74:     Orphaned,
 75: }
-76: 
+76:
 77: impl TxLocation {
 78:     pub fn from_raw_height(h: u64) -> Self {
 79:         match h {
@@ -63,12 +63,12 @@ SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5
 86:         }
 87:     }
 88: }
-89: 
+89:
 90: pub enum FetchedTx {
 91:     Found { data: Vec<u8>, location: TxLocation },
 92:     NotFound,
 93: }
-94: 
+94:
 95: /// `GetTransaction` by txid. lightwalletd and Zaino both report an unknown txid as an RPC
 96: /// error rather than an empty result, so map the known "not found" shapes to `NotFound`.
 97: pub async fn get_transaction(client: &mut Client, txid: &TxId) -> Result<FetchedTx, LwdError> {
@@ -85,7 +85,7 @@ SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5
 108:         Err(s) => Err(LwdError::Rpc(s)),
 109:     }
 110: }
-111: 
+111:
 112: fn is_not_found(s: &tonic::Status) -> bool {
 113:     if s.code() == tonic::Code::NotFound {
 114:         return true;
@@ -93,7 +93,7 @@ SOURCE packages/scan/src/lwd.rs SHA256 fef4ed667ab1e92a54c3452c9c16f2378de3ebab5
 116:     let m = s.message().to_ascii_lowercase();
 117:     m.contains("no such mempool or blockchain transaction") || m.contains("not found") || m.contains("no such transaction")
 118: }
-119: 
+119:
 120: /// Parse a display-order (block-explorer) txid.
 121: pub fn parse_txid(s: &str) -> Option<TxId> {
 122:     TxId::from_hex(s.trim())
@@ -110,5 +110,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.029
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

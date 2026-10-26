@@ -20,3 +20,32 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.361
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb
+196:  * How to move funds out of the per-swap recipients without undoing the point of them. Pure: it does
+197:  * not sign or send anything. `destinations` maps a recipient index to where it should go; one
+198:  * destination shared by several recipients is reported as a re-link.
+199:  */
+200: export function sweepPlan(recipients: { index: number; account_id: string; state?: NearAccountState }[], destinations: Record<number, string> = {}) {
+201:   const steps: SweepStep[] = [];
+202:   const warnings: string[] = [];
+203:   for (const r of recipients) {
+204:     const to = destinations[r.index] ?? null;
+205:     const tokenOnly = r.state && !r.state.exists && Object.values(r.state.ft).some((b) => BigInt(b) > 0n);
+206:     let action = to ? `send everything from ${r.account_id.slice(0, 10)}… to ${to}` : 'leave it here and spend from this account directly (no sweep, no new link)';
+207:     if (tokenOnly) action += '. It holds tokens but no native NEAR, so it cannot pay gas yet: a NEAR top-up from one of your accounts links it to that account; top it up from a source that is not tied to your other accounts, or accept that link knowingly';
+208:     steps.push({ index: r.index, from: r.account_id, to, action });
+209:   }
+210:   const byDest = new Map<string, number[]>();
+211:   for (const s of steps) if (s.to) byDest.set(s.to, [...(byDest.get(s.to) ?? []), s.index]);
+212:   let relinked = 0;
+213:   for (const [to, idx] of byDest) {
+214:     if (idx.length < 2) continue;
+215:     relinked += idx.length;
+
+STDERR
+
+EXIT_CODE 0

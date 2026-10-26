@@ -3,17 +3,17 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-060"]
 MODE source review
 
 STDOUT
+| CLI-060 | `near-key <index> <out-file>`, source contract only; no export in this run | Exit 0 stdout contains only `index`, `account_id`, `written`; output file creation uses mode 0600 and exclusive creation; private key material never reaches stdout/stderr or audit evidence. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
-SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L101-L105
-101:     out(linkabilityReport(swapsFromQuotes(quoted.map((r) => r.quote))));
-102:   } else if (cmd === 'book')
-103:     out(book.readFor(seed).reservations.map((r) => ({ index: r.index, refundTo: r.refundTo, recipient: r.recipient ?? null, ...(r.freshRecipient ? { freshRecipient: true } : {}), ...(r.destinationAsset ? { destinationAsset: r.destinationAsset } : {}), quoted: !!r.quote, ...(r.quoteError ? { quoteError: r.quoteError.outcome } : {}), reservedAt: r.reservedAt })));
-104:   else throw new Error('usage: zswap init [--new] | where | quote <zec> <destAsset> [recipient] [--allow-linked-recipient] [--confidentiality public|basic|advanced] | recipients [--gap N] [--lookup [--probe-ahead]] | sweep-plan [--to i=account]... [--lookup] | near-key <i> <file> | plan <zec> <destAsset> [recipient] [--round down|nearest] [--split] [--window MIN] [--min-gap S] | report | swap | recover <from> [to] [--gap N] [--lookup] | book');
-105: } catch (e) {
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L86-L89
+86:   } else if (cmd === 'near-key') {
+87:     const [i, file] = a;
+88:     if (!i || !file) throw new Error('usage: zswap near-key <index> <out-file>');
+89:     out(writeNearCredentials(seed, Number(i), resolve(process.env.INIT_CWD ?? process.cwd(), file)));
 
 SOURCE packages/cli/src/recipient.ts SHA256 ab86e45814460dd54c5ef17456b4ab209f5ac930c269c5b4c86915d606705ccb L29-L34
-29: 
+29:
 30: /** Writes recipient `index`'s near-cli credentials file (0600, new file only). The key is not printed. */
 31: export function writeNearCredentials(seedFile: string, index: number, outFile: string): { index: number; account_id: string; written: string } {
 32:   if (!existsSync(seedFile)) throw new SetupRequiredError(seedFile, 'run `zswap init`');
@@ -34,9 +34,15 @@ SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d3
 87:             println!("{}", serde_json::json!({ "index": i, "account_id": near_recipient(&s, i).0, "written": a[3] }));
 88:         }
 
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

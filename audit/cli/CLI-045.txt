@@ -3,6 +3,7 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-045"]
 MODE source review
 
 STDOUT
+| CLI-045 | Interruption between reservation and quote attachment, source review | Durable reservation survives without an attached quote; its index is not handed out as new; an uncertain request remains protected by the recipient guard rather than being classified `unsent`. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L163-L200
@@ -106,7 +107,7 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 420:     });
 421:   }
 422: }
-423: 
+423:
 424: /**
 425:  * One swap quote the safe way, as the CLI, the MCP server and the examples do it: a fresh NEAR recipient
 426:  * is checked against 1Click's token list before any index is reserved; the index is written down before
@@ -136,9 +137,15 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 450:   book.attach(r.index, q);
 451:   return { r, q };
 
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
+
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

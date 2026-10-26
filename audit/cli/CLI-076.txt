@@ -8,7 +8,7 @@ MODE: independent source/test-contract review; no wallet command, seed derivatio
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L581-L625
 581: export const RECOVERY_GAP = 10;
-582: 
+582:
 583: /**
 584:  * Recovery: the account key plus one-time keys 0..n, scanned over a range. n covers every reserved
 585:  * index plus `gap` more, so a wallet restored from its seed alone (no index book) still finds refunds
@@ -61,14 +61,14 @@ SOURCE packages/cli/test/recover-gap.test.ts SHA256 51ccbb5bc0644f5caebdd38f0457
 5: import { join } from 'node:path';
 6: import { describe, expect, it } from 'vitest';
 7: import { chainTip, IndexBook, initSeed, recover } from '../src/lib.js';
-8: 
+8:
 9: const labels = (n: number, from = 0) => Array.from({ length: n }, (_, i) => `refund-${from + i}`);
-10: 
+10:
 11: describe('recovery without the index book', () => {
 12:   const dir = mkdtempSync(join(tmpdir(), 'zswap-gap-'));
 13:   const seed = join(dir, 'seed');
 14:   initSeed(seed);
-15: 
+15:
 16:   it('a restored wallet (seed only, no book) scans the first 10 refund keys', () => {
 17:     const tip = chainTip();
 18:     const restored = new IndexBook(join(dir, 'missing-book.json'));
@@ -91,5 +91,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.028
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

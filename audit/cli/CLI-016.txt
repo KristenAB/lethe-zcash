@@ -45,3 +45,69 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 2.825
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+389:       const recipient = opts.freshRecipient ? deriveNearRecipient(seedFile, index).account_id : given;
+390:       const key = deriveRefund(seedFile, index);
+391:       const r: Reservation = { index, purpose: 'refund', reservedAt: new Date().toISOString(), refundTo: key.mainnet.address, testnetAddress: key.testnet.address };
+392:       if (recipient !== undefined) r.recipient = recipient;
+393:       if (opts.freshRecipient) r.freshRecipient = true;
+394:       if (opts.destinationAsset) r.destinationAsset = opts.destinationAsset;
+395:       if (earlier) r.linkedRecipient = true;
+396:       b.next = index + 1;
+397:       b.reservations.push(r);
+398:       this.write(b);
+399:       return { r, key };
+400:     });
+401:   }
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+430: export async function safeQuote(seedFile: string, book: IndexBook, input: { amountZat: bigint; destinationAsset: string; recipient?: string; allowLinkedRecipient?: boolean; confidentiality?: Confidentiality }) {
+431:   // checked before anything: a request that cannot be a swap would still burn an index and publish a refundTo/recipient pair
+432:   if (typeof input.amountZat !== 'bigint' || input.amountZat <= 0n) throw new Error(`amount must be more than 0 zat (got ${String(input.amountZat)}); nothing was reserved or sent`);
+433:   // checked before an index is reserved: 1Click answers these modes only for an authenticated partner
+434:   if (input.confidentiality && input.confidentiality !== 'public' && !process.env.ONECLICK_JWT)
+435:     throw new SetupRequiredError('ONECLICK_JWT', `1Click answers ${input.confidentiality} (Confidential Intents) quotes only for an authenticated partner; nothing was reserved or sent`);
+436:   if (input.recipient === undefined) await requireNearDelivered(input.destinationAsset);
+437:   const { r } = book.reserve(
+438:     seedFile,
+439:     input.recipient === undefined
+440:       ? { freshRecipient: true, destinationAsset: input.destinationAsset }
+441:       : { recipient: input.recipient, allowLinkedRecipient: input.allowLinkedRecipient, destinationAsset: input.destinationAsset },
+442:   );
+443:   let q: Record<string, unknown>;
+444:   try {
+445:     q = await quote({ amountZat: input.amountZat, destinationAsset: input.destinationAsset, recipient: r.recipient!, refundTo: r.refundTo, confidentiality: input.confidentiality });
+446:   } catch (e) {
+447:     book.failed(r.index, e);
+448:     throw e;
+449:   }
+450:   book.attach(r.index, q);
+451:   return { r, q };
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+486: export function quoteBody(q: QuoteInput, now = Date.now(), rng: Rng = cryptoRng) {
+487:   const tolerance = q.slippageBps ?? 100;
+488:   if (!Number.isInteger(tolerance) || tolerance < 1) throw new Error('slippage tolerance must be a whole number of basis points');
+489:   return {
+490:     dry: true,
+491:     swapType: 'EXACT_INPUT',
+492:     slippageTolerance: between(Math.ceil(tolerance * 0.6), tolerance, rng),
+493:     originAsset: ZEC_ASSET,
+494:     depositType: 'ORIGIN_CHAIN',
+495:     destinationAsset: q.destinationAsset,
+496:     amount: q.amountZat.toString(),
+497:     refundTo: q.refundTo,
+498:     refundType: 'ORIGIN_CHAIN',
+499:     recipient: q.recipient,
+500:     recipientType: 'DESTINATION_CHAIN',
+501:     deadline: new Date(now + between(...DEADLINE_RANGE_S, rng) * 1000).toISOString(),
+502:     quoteWaitingTimeMs: between(...WAIT_RANGE_MS, rng),
+503:     ...(q.confidentiality ? { confidentiality: q.confidentiality } : {}),
+504:   };
+505: }
+
+STDERR
+
+EXIT_CODE 0

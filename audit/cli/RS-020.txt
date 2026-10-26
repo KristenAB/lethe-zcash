@@ -30,7 +30,7 @@ SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3
 227:     }
 228:     Verdict { ok: reasons.is_empty(), paid_zat, reasons }
 229: }
-230: 
+230:
 231: /// Connect, fetch, decrypt, check.
 232: pub async fn verify(lwd_url: &str, uivk: &str, txid: &str, e: &Expect) -> Result<Verification, VerifyError> {
 233:     let key = parse_uivk(uivk)?;
@@ -40,11 +40,11 @@ SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3
 237:     let verdict = check(&report, e);
 238:     Ok(Verification { report, verdict, lightwalletd: lwd_url.to_string() })
 239: }
-240: 
+240:
 241: #[cfg(test)]
 242: mod tests {
 243:     use super::*;
-244: 
+244:
 245:     fn report(outputs: Vec<(u64, Option<&str>)>, conf: u32, transparent: bool) -> TxReport {
 246:         TxReport {
 247:             txid: "00".repeat(32),
@@ -57,7 +57,7 @@ SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3
 254:         }
 255:     }
 256:     const E: fn(u64, Option<&str>) -> Expect = |amount_zat, memo| Expect { amount_zat, memo: memo.map(String::from), min_conf: 1, shielded_only: true };
-257: 
+257:
 258:     #[test]
 259:     fn exact_payment_passes_and_counts_only_matching_memos() {
 260:         let r = report(vec![(60, Some("inv-1")), (40, Some("inv-1")), (500, Some("other"))], 3, false);
@@ -65,7 +65,7 @@ SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3
 262:         assert_eq!(check(&r, &E(101, Some("inv-1"))).reasons, vec!["AMOUNT_TOO_LOW"]);
 263:         assert_eq!(check(&r, &E(600, None)).paid_zat, 600);
 264:     }
-265: 
+265:
 266:     #[test]
 267:     fn each_failure_has_its_reason() {
 268:         assert_eq!(check(&report(vec![], 3, false), &E(1, None)).reasons, vec!["NO_OUTPUT_TO_KEY"]);
@@ -76,7 +76,7 @@ SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3
 273:         gone.found = false;
 274:         assert_eq!(check(&gone, &E(1, None)).reasons, vec!["TX_NOT_FOUND"]);
 275:     }
-276: 
+276:
 277:     #[test]
 278:     fn transparent_allowed_when_asked() {
 279:         let e = Expect { shielded_only: false, ..E(100, None) };
@@ -122,5 +122,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.025
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.

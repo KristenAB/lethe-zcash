@@ -1,5 +1,7 @@
 # CLI and Rust audit status
 
+Results: **107 PASS, 0 FAIL, 2 UNTESTED** (CLI-022 and CLI-023: needs ONECLICK_JWT).
+
 All 109 CLI-/RS- rows from AUDIT.md. Each row has its own execution or explicitly requested source-contract review. No protected wallet, repo .demo, environment file, transaction send, Chrome, Vite, full test suite, workspace release build, or heavy-slot used. Runtime wallet files are isolated under /tmp with umask 077 and removed after each row. Existing Rust binaries were reused after byte-for-byte comparison of package source, Cargo.toml and Cargo.lock with their build checkout. Auth credentials were excluded from the runner environment.
 
 Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cleanup information. An exit code of 0 for a source-review log means the review command completed; it does not claim the wallet command was run. Public provider success checks use real dry requests; local HTTP servers are used only for failure and read-only lookup contracts.
@@ -111,3 +113,7 @@ Evidence includes stdout, stderr, exit code, command, assertions, and timeout/cl
 | RS-021 | PASS | [RS-021.txt](cli/RS-021.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
 | RS-022 | PASS | [RS-022.txt](cli/RS-022.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
 | RS-023 | PASS | [RS-023.txt](cli/RS-023.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-024 | PASS | [RS-024.txt](cli/RS-024.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. Read-only recorded testnet payment check; published viewing keys loaded internally, never passed as arguments. |
+| RS-025 | PASS | [RS-025.txt](cli/RS-025.txt) | Individual command(s), exact output/state assertions, isolated throwaway wallet and cleanup. |
+| RS-026 | PASS | [RS-026.txt](cli/RS-026.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |
+| RS-027 | PASS | [RS-027.txt](cli/RS-027.txt) | Independent source/test-contract review only, as specified; no seed access or execution of the reviewed wallet flow. |

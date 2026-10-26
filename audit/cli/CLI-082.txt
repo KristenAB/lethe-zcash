@@ -20,3 +20,30 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.344
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d
+508: export async function quote(q: QuoteInput): Promise<Record<string, unknown>> {
+509:   if (q.dry === false) throw new BlockedError('BLOCKED: a live (dry=false) quote creates a mainnet deposit address; it needs mainnet ZEC and Nick’s OK, and zakura-one-time-ivk is not yet reviewed for live addresses');
+510:   const body = quoteBody(q);
+511:   const headers: Record<string, string> = { 'content-type': 'application/json' };
+512:   if (process.env.ONECLICK_JWT) headers.authorization = `Bearer ${process.env.ONECLICK_JWT}`;
+513:   const r = await httpJson('1Click', `${ONECLICK}/v0/quote`, { method: 'POST', headers, body: JSON.stringify(body) });
+514:   if (r.status === 401) {
+515:     const said = (r.body as { message?: string } | undefined)?.message ?? answerSnippet(r);
+516:     throw new SetupRequiredError(
+517:       'ONECLICK_JWT',
+518:       process.env.ONECLICK_JWT ? `1Click rejected the partner JWT: ${said} (HTTP 401)` : `1Click: ${said} (HTTP 401); ${q.confidentiality ?? 'this'} quotes need a 1Click partner JWT`,
+519:       'refused',
+520:     );
+521:   }
+522:   if (!r.ok) throw new HttpError(`1Click refused the quote: HTTP ${r.status} ${answerSnippet(r)}`, 'refused', r.status);
+523:   if (r.body === null || typeof r.body !== 'object') throw new HttpError(`1Click answered HTTP ${r.status} with a body that is not a JSON object: ${answerSnippet(r)}`, 'refused', r.status);
+524:   return r.body as Record<string, unknown>;
+525: }
+
+STDERR
+
+EXIT_CODE 0

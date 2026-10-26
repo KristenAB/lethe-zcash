@@ -19,3 +19,26 @@ STDERR
 EXIT_CODE 0
 ELAPSED_SECONDS 0.146
 CLEANUP: isolated TMPDIR removed after command.
+
+SUPPLEMENT: independent source-contract inspection for this row
+COMMAND python3 -c [extract the source ranges printed below]
+STDOUT
+SOURCE packages/scan/src/main.rs SHA256 b5cfb648626de44345787f837b2d96441296456dd817c2c96a79ef0290708766
+89:         Some("tip") => {
+90:             let mut c = lwd::connect(&lwd_url()).await.unwrap_or_else(|err| fail(2, err));
+91:             println!("{}", u32::from(lwd::chain_tip(&mut c).await.unwrap_or_else(|err| fail(2, err))));
+92:         }
+93:         Some("derive") => println!("{}", uivk_from_ufvk(&env("ZPV_UFVK")).unwrap_or_else(|err| fail(2, err))),
+94:         _ => fail(2, USAGE),
+95:     }
+96: }
+SOURCE packages/scan/src/lib.rs SHA256 788f74f55418f1781a187ffa0f18cd8ad43e13fa3d42cec9dd6e26867d4ee391
+126: /// UFVK → UIVK, so a receiver can share a key that sees incoming payments only.
+127: pub fn uivk_from_ufvk(ufvk: &str) -> Result<String, VerifyError> {
+128:     let k = UnifiedFullViewingKey::decode(&NETWORK, ufvk.trim()).map_err(|e| VerifyError::BadKey(e.to_string()))?;
+129:     k.to_unified_incoming_viewing_key().encode(&NETWORK).map_err(|e| VerifyError::BadKey(format!("{e:?}")))
+130: }
+
+STDERR
+
+EXIT_CODE 0

@@ -3,6 +3,7 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-005"]
 MODE source review
 
 STDOUT
+| CLI-005 | `where`: path resolution, source review only for protected default paths | Exit 0; JSON has exactly `seed`, `book`, `seedExists`, `bookExists`; defaults resolve to repo-root wallet paths even under `pnpm --filter`; no file contents appear. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L99-L118
@@ -15,7 +16,7 @@ SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e
 105:   const book = env.ZSWAP_BOOK ? resolve(base, env.ZSWAP_BOOK) : join(dirname(seed), 'index-book.json');
 106:   return { seed, book };
 107: }
-108: 
+108:
 109: function bin(envName: string, rel: string, name: string): string {
 110:   const v = process.env[envName];
 111:   if (v) {
@@ -37,7 +38,7 @@ SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c41
 45: const gap = opts['--gap'] ? Number(opts['--gap'][0]) : undefined;
 46: const [cmd, ...a] = positional;
 47: const out = (x: unknown) => console.log(JSON.stringify(x, (_k, v) => (typeof v === 'bigint' ? v.toString() : v), 2));
-48: 
+48:
 49: try {
 50:   if (cmd === 'init') out(initWallet(seed, book, { assertNew: flags.has('--new') }));
 51:   else if (cmd === 'where') out({ seed, book: book.path, seedExists: existsSync(seed), bookExists: book.exists() });
@@ -63,7 +64,7 @@ SOURCE packages/cli/test/wallet-binding.test.ts SHA256 13b3fcf8458626f77bf425473
 60:     expect(walletPaths({ ZSWAP_SEED: '/w/seed' })).toEqual({ seed: '/w/seed', book: '/w/index-book.json' });
 61:     expect(walletPaths({ ZSWAP_SEED: 'x/seed', ZSWAP_BOOK: 'x/b.json', INIT_CWD: '/home/me' })).toEqual({ seed: '/home/me/x/seed', book: '/home/me/x/b.json' });
 62:   });
-63: 
+63:
 64:   it('pnpm --filter @zswap/cli zswap (run in packages/cli) uses the repo-root wallet, as the examples do', () => {
 65:     const env = { ...process.env };
 66:     delete env.ZSWAP_SEED;
@@ -77,11 +78,17 @@ SOURCE packages/cli/test/wallet-binding.test.ts SHA256 13b3fcf8458626f77bf425473
 74:       expect(src).not.toMatch(/'\.demo'|'seed'|'index-book\.json'/);
 75:     }
 76:   });
-77: 
+77:
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

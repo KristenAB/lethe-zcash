@@ -3,6 +3,7 @@ COMMAND ["python3", "/tmp/lethe-audit-review.py", "CLI-041"]
 MODE source review
 
 STDOUT
+| CLI-041 | Book race: six concurrent reservations, source/test-contract review only | Six distinct indices 0–5 and six distinct refund addresses persist; `next: 6`; no process reports a lock/unlink error. No processes or tests are started in this run. | PLANNED |  |  |
 MODE: independent source/test-contract review; no wallet command, seed derivation, credentials export, or network operation executed.
 
 SOURCE packages/cli/src/lib.ts SHA256 741238df9c3088427b4c29b3f65c240f3908b78d3e1b7cdcf0854236a599856d L328-L401
@@ -91,11 +92,11 @@ SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275d
 7: import { promisify } from 'node:util';
 8: import { describe, expect, it } from 'vitest';
 9: import { IndexBook, initSeed } from '../src/lib.js';
-10: 
+10:
 11: const run = promisify(execFile);
 12: const TSX = resolve(__dirname, '../node_modules/.bin/tsx');
 13: const WORKER = resolve(__dirname, 'reserve-worker.ts');
-14: 
+14:
 15: describe('index book under concurrent wallet processes', () => {
 16:   it('six processes reserving at once get six different indices and six different refundTo', async () => {
 17:     const dir = mkdtempSync(join(tmpdir(), 'zswap-race-'));
@@ -114,14 +115,20 @@ SOURCE packages/cli/test/book-race.test.ts SHA256 b034730400cfa33d5d90bdbd16275d
 30:     expect(b.next).toBe(6);
 31:     expect(b.reservations.map((r: { index: number }) => r.index).sort()).toEqual([0, 1, 2, 3, 4, 5]);
 32:   });
-33: 
+33:
 34:   // A crashed process leaves book.json.lock behind. Every waiter then judges it stale at the same moment;
 35:   // breaking it must let exactly one of them in (before: B unlinked the stale lock and created its own,
 36:   // then C's unlink deleted B's live lock and C entered too, so two processes reserved the same index).
+
+SOURCE packages/cli/src/main.ts SHA256 c2b61bf1eff9de4c8ec4bc500df7e719562da8c412cb819812a852209f1057da L105-L108
+105: } catch (e) {
+106:   console.error((e as Error).message);
+107:   process.exit(e instanceof SetupRequiredError ? 2 : e instanceof BlockedError ? 3 : e instanceof LinkedRecipientError ? 4 : 1);
+108: }
 
 REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. Source/test contract only; runtime behavior is not claimed for this row.
 
 STDERR
 
 EXIT_CODE 0
-Evidence excerpts checked against current line numbers.
+CLEANUP: source review created no seed, book or credentials files.

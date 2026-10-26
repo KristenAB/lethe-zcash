@@ -18,7 +18,7 @@ SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd76
 18: const HARDENED: u32 = 0x8000_0000;
 19: /// `m/44'/397'/1'`: BIP 44, NEAR, the account set aside for per-swap recipients.
 20: pub const NEAR_RECIPIENT_BRANCH: [u32; 3] = [44, 397, 1];
-21: 
+21:
 22: /// SLIP-0010 ed25519 derivation (hardened only). Returns the 32-byte private key.
 23: pub fn slip10_ed25519(seed: &[u8], path: &[u32]) -> [u8; 32] {
 24:     let mut mac = Hmac::<Sha512>::new_from_slice(b"ed25519 seed").expect("any key length");
@@ -34,13 +34,13 @@ SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd76
 34:     }
 35:     i[..32].try_into().expect("32 bytes")
 36: }
-37: 
+37:
 38: /// The path string of recipient `index`, e.g. `m/44'/397'/1'/3'`.
 39: pub fn near_path(index: u32) -> String {
 40:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
 41:     format!("m/{a}'/{b}'/{c}'/{index}'")
 42: }
-43: 
+43:
 44: /// The signing key of per-swap NEAR recipient `index`.
 45: pub fn near_signing_key(seed: &[u8], index: u32) -> SigningKey {
 46:     if index >= HARDENED {
@@ -49,13 +49,13 @@ SOURCE packages/wallet-core/src/near.rs SHA256 2147929de9402f36e911591b19dbbfd76
 49:     let [a, b, c] = NEAR_RECIPIENT_BRANCH;
 50:     SigningKey::from_bytes(&slip10_ed25519(seed, &[a, b, c, index]))
 51: }
-52: 
+52:
 53: /// The NEAR implicit account id (64 lowercase hex characters) and public key (`ed25519:<base58>`).
 54: pub fn near_recipient(seed: &[u8], index: u32) -> (String, String) {
 55:     let pk = near_signing_key(seed, index).verifying_key().to_bytes();
 56:     (hex::encode(pk), format!("ed25519:{}", bs58::encode(pk).into_string()))
 57: }
-58: 
+58:
 
 SOURCE packages/wallet-core/src/main.rs SHA256 c0f2260e6faba5a9052ef56db0b2de1d32fda835780aeba694c06761ce8dc971 L12-L15
 12: fn fail(msg: impl std::fmt::Display) -> ! {
@@ -68,5 +68,4 @@ REVIEW COMPLETE: compared this row independently with AUDIT.md expected result. 
 STDERR
 
 EXIT_CODE 0
-ELAPSED_SECONDS 0.022
-CLEANUP: isolated TMPDIR removed after command.
+CLEANUP: source review created no seed, book or credentials files.
