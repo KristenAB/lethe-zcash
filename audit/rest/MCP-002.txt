@@ -1,0 +1,15 @@
+ID: MCP-002
+Observed at: 2026-10-26T05:08:21.462Z
+Status: PASS
+Notes: 
+
+PROCESS 1
+command: ["/opt/homebrew/Cellar/node/26.5.0/bin/node","/Volumes/Extreme SSD/Projects/grokbot/projects/.loom-worktrees/zec-unlinkable-swaps-d81f3156a9f4/omvopjluv/t16/packages/mcp/dist/main.js"]
+pid: 88450
+stdout:
+
+stderr:
+Setup required: ZSWAP_MCP_LOG directory does not exist or is not writable (/tmp/lethe-rest-qdoxFH/missing-parent/log.jsonl: ENOENT)
+
+exit_code: 2
+
