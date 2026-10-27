@@ -3,4 +3,5 @@ packages:
   - "packages/mcp"
   - "packages/examples"
   - "packages/dashboard"
+  - "packages/desk"
   - "e2e"
