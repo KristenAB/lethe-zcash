@@ -142,6 +142,15 @@ delivered swap or a refund inside the window would extend it.
 
 ## Run it
 
+### Lethe desk (local, live)
+
+After `pnpm install` and building the CLI and Rust wallet tools, run
+`pnpm --filter @zswap/desk dev` and open http://127.0.0.1:5190. The desk reads the current wallet's
+index book, requests real 1Click dry quotes, and builds linkability plans and reports with the CLI
+library. Each quote reserves the next index. It binds to 127.0.0.1 only because it uses the local
+wallet seed and index book. `ZSWAP_SEED` and `ZSWAP_BOOK` select the same wallet as `zswap`;
+by default it uses `.demo/`.
+
 Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
