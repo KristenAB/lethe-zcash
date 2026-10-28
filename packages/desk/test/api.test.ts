@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { IndexBook, initWallet } from '@zswap/cli';
+import { deriveRefund, IndexBook, initWallet } from '@zswap/cli';
 import { handleApi, type WalletConfig } from '../src/api.js';
 import { hostAllowed } from '../src/server.js';
 
@@ -33,11 +33,45 @@ describe('local live API', () => {
   it('reports the actual initialized wallet, empty book, and report', async () => {
     const status = await request('status');
     expect(status.status).toBe(200);
-    expect(status.body).toMatchObject({ seedPath: wallet.seed, bookPath: wallet.book, seedExists: true, bookExists: true, next: 0, reserved: 0 });
+    expect(status.body).toMatchObject({ version: '2.0.0', seedPath: wallet.seed, bookPath: wallet.book, seedExists: true, bookExists: true, next: 0, reserved: 0 });
     expect(status.body).not.toHaveProperty('seed');
     expect((await request('book')).body).toEqual([]);
     expect((await request('report')).body).toMatchObject({ swaps: 0, score: 100 });
   });
+
+  it('reads real 1Click token prices and derives live ratios', async () => {
+    const response = await request('markets');
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(response.body.tokens.map((t: { symbol: string }) => t.symbol)).toEqual(['ZEC', 'wNEAR', 'USDC']);
+    for (const token of response.body.tokens) {
+      expect(Number(token.price)).toBeGreaterThan(0);
+      expect(Number.isFinite(Date.parse(token.priceUpdatedAt))).toBe(true);
+    }
+    expect(response.body.rates.zecToWnear).toBeCloseTo(Number(response.body.tokens[0].price) / Number(response.body.tokens[1].price), 8);
+    expect(response.body.rates.zecToUsdc).toBeCloseTo(Number(response.body.tokens[0].price) / Number(response.body.tokens[2].price), 8);
+  }, 30_000);
+
+  it('returns only the testnet refund address and viewing key for a temp seed', async () => {
+    const response = await request('refund-address?index=2');
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(response.body).toEqual({ index: 2, address: deriveRefund(wallet.seed, 2).testnet.address, uivk: deriveRefund(wallet.seed, 2).testnet.uivk });
+    expect(response.body).not.toHaveProperty('seed');
+    expect(response.body).not.toHaveProperty('spendingKey');
+  });
+
+  it('scans 20 real testnet blocks with the refund and account viewing keys', async () => {
+    const response = await request('scan', { index: 2, blocks: 20 });
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(response.body.to).toBeGreaterThanOrEqual(response.body.from);
+    expect(response.body.blocks).toBeGreaterThan(0);
+    expect(Array.isArray(response.body.hits)).toBe(true);
+    for (const hit of response.body.hits) {
+      expect(['refund-2', 'account']).toContain(hit.key);
+      expect(hit.txid).toMatch(/^[0-9a-f]{64}$/i);
+      expect(hit.height).toBeGreaterThanOrEqual(response.body.from);
+      expect(Number(hit.value)).toBeGreaterThan(0);
+    }
+  }, 180_000);
 
   it('plans with the CLI model and serializes every bigint', async () => {
     const p = await request('plan', { zec: '0.35', destinationAsset: 'nep141:wrap.near', split: true, windowMin: 30 });
@@ -60,6 +94,7 @@ describe('local live API', () => {
     }
     expect(q.status).toBe(200);
     expect(q.body).toMatchObject({ index: 0, recipient, confidentiality: 'public' });
+    expect(q.body.request).toMatchObject({ recipient, refundTo: q.body.refundTo, amount: '10000000' });
     expect(q.body.refundTo).toMatch(/^u1/);
     expect(Number(q.body.amountOut)).toBeGreaterThan(0);
     expect((await request('book')).body).toMatchObject([{ index: 0, recipient, quoted: true }]);
