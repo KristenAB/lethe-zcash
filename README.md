@@ -151,6 +151,10 @@ library. Each quote reserves the next index. It binds to 127.0.0.1 only because 
 wallet seed and index book. `ZSWAP_SEED` and `ZSWAP_BOOK` select the same wallet as `zswap`;
 by default it uses `.demo/`.
 
+Desk v2 shows live 1Click prices and a four-step dry swap flow, including the exact public quote request.
+Its deposit step explains the mainnet block; it creates no live deposit address or fund transfer.
+Testnet refund recovery scans the chain with a one-time viewing key and links found transactions to an explorer.
+
 Needs Node 22+, pnpm 10, Rust 1.99 (wallet-core) and 1.89 (scan), both pinned.
 
 ```sh
