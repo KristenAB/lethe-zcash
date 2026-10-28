@@ -47,6 +47,7 @@
       /* hero: a quiet line of type and one centred widget, surrounded by air */
       .hero { max-width: 1120px; margin: 0 auto; padding: 88px 32px 40px; text-align: center; }
       .eyebrow { font-family: var(--mono); font-size: 13px; color: var(--soft); letter-spacing: 0; }
+      .v2-chip { display: inline-block; margin-left: 7px; padding: 1px 7px; border: 1px solid var(--aqua-ink); border-radius: 999px; color: var(--aqua-ink); font-size: 11px; }
       h1 { font-weight: 500; font-size: clamp(36px, 5.2vw, 60px); line-height: 1.04; letter-spacing: -0.035em; margin: 20px auto 0; max-width: 15ch; }
       .lede { color: var(--soft); max-width: 34rem; margin: 24px auto 0; font-size: 18px; }
 
@@ -226,7 +227,7 @@
 
     <main id="main">
       <div class="hero">
-        <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side</p>
+        <p class="eyebrow">Zcash → NEAR Intents 1Click · wallet-side <span class="v2-chip">v2</span></p>
         <h1>A new refund address and recipient for every swap.</h1>
         <p class="lede">Each swap from Zcash through 1Click gets a one-time refund address and its own NEAR account, from one seed.</p>
         <div class="ctas">
@@ -272,6 +273,10 @@
           <div><h3>Live</h3><p>Real 1Click dry quotes and testnet recoveries, replayed in the dashboard.</p></div>
           <div class="setup"><h3>Setup required</h3><p>A real swap is BLOCKED on mainnet ZEC and sign-off. The key crate is a draft.</p></div>
         </div>
+      </section>
+      <section class="band" aria-labelledby="desk-h">
+        <h2 id="desk-h">Lethe desk v2 (runs locally)</h2>
+        <p class="sub">The local desk shows live 1Click prices and dry quotes, then explains each public request field. It also derives a one-time Zcash testnet refund address and scans the test chain for recovery, with explorer links for found transactions.</p>
       </section>
     </main>
 
